@@ -1,4 +1,4 @@
-## Descirption 
+# Description 
 
 Currently, machine learning is applied in various disciplines of science. For example, in chemistry, the application
 of machine learning is used to predict molecular properties, generate synthesis routes and explore the chemical space
