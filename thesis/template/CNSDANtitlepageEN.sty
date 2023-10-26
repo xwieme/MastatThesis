@@ -1,0 +1,218 @@
+% STYLE file for wetitlepage
+% This should be used in combination with bwthesis class. It provides
+% the color specifications for the thesis as well
+% author: Joris Meys
+% 2018/03/09
+\ProvidesPackage{CNSDANtitlepageEN}[2018/10/16 titlepages for science faculty Ghent University]
+\RequirePackage{graphicx}
+\RequirePackage{geometry}
+
+% --- get the underline of the titles correct
+\RequirePackage[normalem]{ulem}
+\renewcommand{\ULthickness}{1pt}
+\RequirePackage{setspace}
+
+% --- Define the colors
+%
+\RequirePackage{xcolor}
+
+% Colors for the new UGent housestyle
+\definecolor{UGBlue}{RGB}{30, 100, 200}
+\definecolor{UGYellow}{RGB}{255, 210, 0}
+\definecolor{BWgreen}{RGB}{39, 171, 173}
+
+% To use the titlepage without the bwthesis class
+\providecommand{\coltitlepage}{\color{UGBlue}}
+
+% ---- Define macros and commands 
+
+%title
+\renewcommand{\title}[1]{
+  \def\inserttitle{#1}
+}
+
+% subtitle
+\def\@subtitle{}
+\newcommand{\subtitle}[1]{
+  \def\@subtitle{#1}
+  \ifx\@subtitle\@empty
+    \def\insertsubtitle{}
+  \else
+    \def\insertsubtitle{#1}
+  \fi
+}
+\subtitle{}
+
+% wordcount
+\def\@wordcount{}
+\newcommand{\wordcount}[1]{
+  \def\@wordcount{#1}
+  \ifx\@wordcount\@empty
+    \def\insertwordcount{}
+  \else
+    \def\insertwordcount{word count: #1}
+  \fi
+}
+\wordcount{}
+
+% studentnr
+\def\@studentnr{}
+\newcommand{\studentnr}[1]{
+  \def\@studentnr{#1}
+  \ifx\@studentnr\@empty
+    \def\insertstudentnr{}
+  \else
+    \def\insertstudentnr{Student ID: #1}
+  \fi
+}
+\studentnr{}
+
+% promotor
+\def\@promotor{}
+\newcommand{\promotor}[1]{
+    \def\insertpromotor{#1}
+}
+
+
+% copromotor
+\newcommand{\copromotor}[1]{
+    \def\insertcopromotor{#1}
+}
+
+% tutor
+\newcommand{\tutor}[1]{
+    \def\inserttutor{#1}
+}
+
+% author
+\newcommand{\insertauthor}{\@author}
+
+
+% degree
+\def\@degree{}
+\newcommand{\degree}[1]{
+    \def\@degree{#1}
+    \def\insertdegree{#1}
+}
+
+% proef : Is filled in automatically, depending on the values
+% defined here
+\def\@proef{}
+\def\master{master}
+\def\bachelor{bachelor}
+
+% orientation
+\def\@orientation{}
+\newcommand{\orientation}[1]{
+  \def\@orientation{#1}
+  \ifx\@orientation\@empty
+    \def\insertorientation{}
+  \else
+    \def\insertorientation{#1}
+  \fi
+}
+\orientation{}
+
+% academicyear
+\newcommand{\academicyear}[1]{
+    \def\insertacademicyear{#1}
+}
+
+
+% ---- Building the title page
+
+\renewcommand{\maketitle}{
+  \newgeometry{margin = 0cm, nohead}
+  \setlength{\unitlength}{10.6mm}
+  \begin{titlepage}
+  
+  \noindent
+  \topskip = 0pt
+  \begin{picture}(0,0)(0,0)
+ %\multiput(0,0)(0,-1){28}{\line(1,0){20}} % Used as reference!
+  
+	% NO faculty icon
+  %\put(1,-3){\includegraphics[height = 3.18cm]{icon_UGent_WE_EN_RGB_2400_color.png}}
+  \put(2,-3.1){
+
+    \begin{minipage}[t][22.05cm][c]{16.7cm}
+    \raggedright
+    \begin{spacing}{2.5}
+    {\fontsize{25}{30} \selectfont \coltitlepage  \bf \MakeUppercase{\uline{\inserttitle}} }
+    \end{spacing}
+    
+    \vskip 1em
+    
+    {\fontsize{15}{18} \selectfont \coltitlepage \MakeUppercase{\insertsubtitle} }
+    
+    
+    
+    \vskip 1em
+    
+    \insertwordcount
+    
+    \vskip 10em
+    
+    {\fontsize{15}{18} \selectfont \@author}
+    
+    \insertstudentnr
+    
+    \vskip 1em
+    
+    % Check whether promotor is specified
+    \@ifundefined{insertpromotor}{
+      \ClassError {bwthesis}{You have to specify your promotor}{Seriously, you have a promotor.}
+    }{
+      {\fontsize{12}{15} \selectfont Promotor: \insertpromotor}
+    }
+    
+    % Check whether copromotor is specified
+    \@ifundefined{insertcopromotor}{
+      % do nothing
+    }{
+      {\fontsize{12}{15} \selectfont Copromotor: \insertcopromotor}
+    }
+    
+    % Only insert if tutor is specified
+    \@ifundefined{inserttutor}{}{
+      {\fontsize{12}{15} \selectfont Tutor(s): \inserttutor}
+    }
+    
+    % Check for the correct degree
+    \ifx\@degree\@empty
+      \def\@proef{Master thesis}
+			\def\@degree{Master of Science}
+    \fi
+    
+    \ifx\@degree\master
+      \def\@proef{Master thesis}
+    \fi
+    
+    \ifx\@degree\bachelor
+      \def\@proef{Bachelor thesis}
+    \fi
+    
+    \vskip 1em
+    
+   A dissertation submitted to Ghent University in partial fulfilment of the requirements for the degree of  \@degree~in \@orientation .
+    
+   % Only insert if academic year is specified
+    \@ifundefined{insertacademicyear}{
+      \ClassError{bwthesis}{academicyear should be specified}
+    }{\vskip 1em
+      Academic year: \insertacademicyear
+    }
+    
+    \end{minipage}%
+  } % END put
+
+
+    \put(1,-28){\includegraphics[height = 4.24cm]{logo_UGent_EN_RGB_2400_color.png} }
+    \end{picture}
+
+
+
+  \end{titlepage}
+  \restoregeometry
+
+}

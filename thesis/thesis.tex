@@ -1,0 +1,113 @@
+\documentclass[a4paper, twoside, openright, usecolor]{CNSDANthesisEN}
+% The usecolor option sets the titles in blue, as requested by
+% the Ghent University housestyle. Remove this to get a black
+% and white version of things.
+\usepackage[english]{babel} %Use dutch headings and titles
+
+%-------------------------------------------------------------------------------
+% FILL IN YOUR DETAILS
+%
+% Keep in mind that UGent doesn't use copromotors any longer. However,
+% if it is required to add, please uncomment the line starting with
+% \copromotor below and fill in the correct details.
+%
+\title{My Incredibly Long But Very Interesting Thesis Title Which Doesn't
+fit on a single line}
+\subtitle{Discovering the subtitle}
+\author{FirstName LastName}
+
+\studentnr{123456} % Fill in your student number
+
+\promotor{Prof. Dr. FirstName LastName}
+%\copromotor{Dr. FirstName LastName}
+\tutor{Ms. Jeanne DeGrote, Mr. Jean DeKleine}
+
+\orientation{Statistical Data Analysis}
+
+\academicyear{2017 - 2018}
+
+%-------------------------------------------------------------------------------
+% The preamble. Note that the following packages are already loaded by
+% the class bwthesis: geometry, amsmath, amsfonts, amssymb, graphicx,
+% xcolor, ulem, setspace
+
+% This package provides the lstlisting environment for formatting your code.
+% To set the parameters like language or layout, look at the help for the
+% listings package and adapt the file listingfile.tex accordingly.
+% 
+\usepackage{listings}
+\input{template/listingfile} % contains settings for the package listings
+% this package provides an environment for algorithms (cfr. Pseudocode)
+\usepackage[ruled]{algorithm2e} 
+% This package provides extra possibilities for tables
+\usepackage{booktabs}
+% this package is used to produce both author-date and standard numerical citations for BibTeX bibliographies
+\usepackage[round]{natbib}
+% This packages adds the Appendix name in the toc. See below
+\usepackage[titletoc]{appendix}
+
+% ---- ADDITIONAL SETTINGS
+\graphicspath{{Fig/}} % path to the figure directory
+
+
+%-------------------------------------------------------------------------------
+% The actual document
+%
+\begin{document}
+
+\include{copyright-thesis}
+\clearpage{\pagestyle{empty}\cleardoublepage}
+
+%------------------------------------------------------------------------
+\frontmatter
+\pagestyle{frontmatter} %sets headers and footers correctly
+
+% ------------ thanks -----------
+\include{acknowledgements}
+
+% ------------ table of contents ---------
+{
+	\singlespacing % to keep the TOC within boundaris
+	\tableofcontents
+}
+
+\addcontentsline{toc}{chapter}{Contents} %add TOC to the TOC
+
+
+% ------------ summary ----------
+\include{content/abstract/abstract_english}
+
+% The following can be commented out to remove the list of figures
+% and the list of tables, as specified by the guidelines of BW
+% \listoffigures
+% \listoftables
+
+%-----------------------------------------------------------------------
+\mainmatter
+\pagestyle{mainmatter} % sets headers and footers correctly
+
+% Here you can add more chapters in case it is needed
+\include{content/chapters/chapt1}
+\include{content/chapters/chapt2}
+\include{content/chapters/chapt3}
+\include{content/chapters/chapt4}
+
+% ------------ REFERENCES ------------
+% Here you have your bibliography created
+
+
+\addcontentsline{toc}{chapter}{References} %show bibliografie in TOC
+\bibliographystyle{apalike}  %apalike,phdbib.bst
+\bibliography{Thesis_bib}
+
+% Here you insert your appendices
+\appendix
+
+\begin{appendices}
+
+\include{app1}
+
+\end{appendices}
+
+\end{document}
+
