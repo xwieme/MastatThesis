@@ -30,6 +30,7 @@ RUN conda create -n lab python=3.10 -y &&\
         pyg=2.4.0 \
         wandb=0.15.12 \
         jupyterlab=4.0.8 \
+        ipython=8.16.1 \
         pandas \
         rdkit \
         -c pytorch \
