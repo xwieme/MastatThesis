@@ -30,3 +30,6 @@ build/
 # Ipython notebooks
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
+
+# Ignore pytorch saved files 
+*.pt
