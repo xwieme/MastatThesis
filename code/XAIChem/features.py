@@ -2,7 +2,7 @@ import numpy as np
 from rdkit import Chem
 
 
-ATOMS = ["B", "C", "N", "O", "F", "Si", "P", "S", "As", "Se", "Br", "Te", "I", "At"]
+ATOMS = ["B", "C", "N", "O", "F", "Si", "P", "S", "Cl", "As", "Se", "Br", "Te", "I", "At", "other"]
 
 HYBRIDIZATIONS = [
     Chem.HybridizationType.SP,
@@ -10,7 +10,7 @@ HYBRIDIZATIONS = [
     Chem.HybridizationType.SP3,
     Chem.HybridizationType.SP3D,
     Chem.HybridizationType.SP3D2,
-    Chem.HybridizationType.OTHER,
+    "other",
 ]
 
 CHIRALITY_TYPES = [
@@ -53,6 +53,10 @@ def oneHotEncoding(x, values: list | None = None, length: int | None = None):
         return out
 
     else:
+        # Use the last element of values if x is not present in the list
+        if x not in values:
+            x = values[-1]
+        
         return [int(x == value) for value in values]
 
 
@@ -62,6 +66,7 @@ def getAtomFeatureVector(atom):
         *oneHotEncoding(atom.GetDegree(), length=6),
         atom.GetFormalCharge(),
         *oneHotEncoding(atom.GetHybridization(), values=HYBRIDIZATIONS),
+        int(atom.GetIsAromatic()),
         *oneHotEncoding(atom.GetTotalNumHs(), length=5),
         int(atom.GetChiralTag() != Chem.ChiralType.CHI_UNSPECIFIED),
         *oneHotEncoding(atom.GetChiralTag(), values=CHIRALITY_TYPES),
@@ -77,7 +82,12 @@ def getBondFeatureVector(bond):
     ]
 
 
+def getNumAtomFeatures():
+    return len(getAtomFeatureVector(Chem.MolFromSmiles("C").GetAtoms()[0]))
 
+
+def getNumBondFeatures():
+    return len(getBondFeatureVector(Chem.MolFromSmiles("CC").GetBonds()[0]))
 
 
 

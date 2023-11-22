@@ -1,3 +1,5 @@
+import random
+import numpy as np
 import torch
 
 
@@ -26,3 +28,17 @@ def getEdgeTypes(edge_attr: torch.tensor):
         edge_attr[:, 5:6].view(1, -1) * 8 +\
         torch.where(edge_attr[:, 6:] == 1)[1]
     )
+
+
+def set_seed(seed):
+    """
+    Sets the seed of python, numpy and pytorch
+    """
+
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)

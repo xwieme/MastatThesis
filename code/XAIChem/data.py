@@ -34,7 +34,7 @@ def createDataObjectFromSmiles(smiles: str, y: any):
         edge_types += [bond_type, bond_type]
 
     edge_index = torch.tensor(edge_indices, dtype=torch.long).t().contiguous()
-    edge_attr = torch.tensor(edge_attrs, dtype=torch.long).view(-1, 10)
+    edge_attr = torch.tensor(edge_attrs, dtype=torch.long).view(-1, features.getNumBondFeatures())
     edge_type = torch.tensor(edge_types, dtype=torch.long).view(-1, 1)
 
     return Data(

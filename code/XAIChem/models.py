@@ -9,17 +9,21 @@ from torch_geometric.nn import RGCNConv, MLP
 
 class WeightedSum(torch.nn.Module):
 
-    def __init__(self, input_units):
+    def __init__(self, input_units: int):
         super(WeightedSum, self).__init__()
 
         self.lin1 = Linear(input_units, 1)
 
-    def forward(self, x, batch):
+    def forward(self, x: torch.Tensor, batch: torch.Tensor, mask: torch.Tensor = None) -> torch.Tensor:
 
         weights = F.sigmoid(self.lin1(x))
-        
-        # Sum all weighted nodes per graph 
-        return scatter(weights * x, batch, dim=0, reduce="sum")
+
+        if mask is None:
+            # Sum all weighted nodes per graph 
+            return scatter(weights * x, batch, dim=0, reduce="sum")
+        else:
+            # Sum all weighted nodes present in the maske per graph
+            return scatter(weights * x * mask, batch, dim=0, reduce="sum")
 
 
 class RGCN(torch.nn.Module):
@@ -38,12 +42,13 @@ class RGCN(torch.nn.Module):
         num_rgcn_hidden_units: int = 256,
         num_mlp_hidden_units: int = 64,
         activation_function: Optional[Callable] = F.relu,
-        dropout_rate: float = 0.5
+        rgcn_dropout_rate: float = 0.5,
+        mlp_dropout_rate: float | list = 0.1,
     ):
         super(RGCN, self).__init__()
 
         self.activation_function = activation_function
-        self.dropout_rate = dropout_rate
+        self.dropout_rate = rgcn_dropout_rate
 
         self.rgcn1 = RGCNConv(
             num_node_features,
@@ -51,35 +56,45 @@ class RGCN(torch.nn.Module):
             num_relations=65
         )
 
-        self.rgcn_layers = []
-        for _ in range(num_rgcn_layers):
-            self.rgcn_layers.append(
-                RGCNConv(
-                    num_rgcn_hidden_units,
-                    num_rgcn_hidden_units,
-                    num_relations=65
-                )
-            )
+        self.rgcn2 = RGCNConv(
+            num_rgcn_hidden_units,
+            num_rgcn_hidden_units,
+            num_relations=65
+        )
+        # self.rgcn_layers = []
+        # for _ in range(num_rgcn_layers):
+        #     self.rgcn_layers.append(
+        #         RGCNConv(
+        #             num_rgcn_hidden_units,
+        #             num_rgcn_hidden_units,
+        #             num_relations=65
+        #         )
+        #     )
 
         self.weighted_sum = WeightedSum(num_rgcn_hidden_units)
         self.mlp = MLP(
             in_channels=num_rgcn_hidden_units,
             hidden_channels=num_mlp_hidden_units,
             out_channels=1,
-            num_layers=3
+            num_layers=3,
+            dropout=mlp_dropout_rate,
         )
 
-    def forward(self, x, edge_index, edge_type, batch):
+    def forward(self, x, edge_index, edge_type, batch, mask=None):
 
         h = self.rgcn1(x, edge_index, edge_type.view(-1))
         h = self.activation_function(h)
-        h = F.dropout(h, self.dropout_rate)
+        h = F.dropout(h, self.dropout_rate, training=self.training)
 
-        for rgcn in self.rgcn_layers:
-            h = rgcn(h, edge_index, edge_type.view(-1))
-            h = self.activation_function(h)
-            h = F.dropout(h, self.dropout_rate)
+        h = self.rgcn2(h, edge_index, edge_type.view(-1))
+        h = self.activation_function(h)
+        h = F.dropout(h, self.dropout_rate, training=self.training)
 
-        molecular_embedding = self.weighted_sum(h, batch)
+        # for rgcn in self.rgcn_layers:
+        #     h = rgcn(h, edge_index, edge_type.view(-1))
+        #     h = self.activation_function(h)
+        #     h = F.dropout(h, self.dropout_rate)
+
+        molecular_embedding = self.weighted_sum(h, batch, mask)
         
         return self.mlp(molecular_embedding)

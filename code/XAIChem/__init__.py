@@ -1,4 +1,4 @@
 from .data import Dataset, createDataObjectFromSmiles
-from .features import getAtomFeatureVector, getBondFeatureVector
+from .features import getAtomFeatureVector, getBondFeatureVector, getNumAtomFeatures, getNumBondFeatures
 from .models import RGCN
-from .utils import getEdgeTypes
+from .utils import getEdgeTypes, set_seed
