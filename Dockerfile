@@ -23,7 +23,7 @@ RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -
 
 # Create conda environment and setup bashrc to
 # load the conda environment lab as default
-RUN conda create -n lab python=3.10 -y &&\
+RUN conda create -n lab python=3.11 -y &&\
     conda install -y -n lab \
         pytorch=2.1.1 \
         pytorch-cuda=11.8 \
@@ -31,11 +31,14 @@ RUN conda create -n lab python=3.10 -y &&\
         wandb=0.15.12 \
         jupyterlab=4.0.8 \
         ipython=8.16.1 \
-        pandas \
-        rdkit \
+        pandas=2.1.1 \
+        rdkit=2023.09.2 \
+        plotly=5.18.0 \
         -c pytorch \
         -c pyg \
         -c nvidia \
+        -c plotly \
+        -c anaconda \
         -c conda-forge &&\
     mkdir -p /opt/etc &&\
     echo "#!/bin/bash\n\n# Script to activate conda environment" > ~/.bashrc &&\

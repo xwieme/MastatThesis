@@ -14,7 +14,12 @@ class WeightedSum(torch.nn.Module):
 
         self.lin1 = Linear(input_units, 1)
 
-    def forward(self, x: torch.Tensor, batch: torch.Tensor, mask: torch.Tensor = None) -> torch.Tensor:
+    def forward(
+        self, 
+        x: torch.Tensor, 
+        batch: torch.Tensor, 
+        mask: torch.Tensor = None
+    ) -> torch.Tensor:
 
         weights = F.sigmoid(self.lin1(x))
 

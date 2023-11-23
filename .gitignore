@@ -27,6 +27,9 @@ build/
 # Mac tmp files
 .DS_Store
 
+# Python
+*/__pycache__/*
+
 # Ipython notebooks
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
