@@ -26,9 +26,16 @@ def getRGBA(
     :param alpha: transparancy degree, zero is completely transparant, one
         means not transparancy
     """
+    if not isinstance(values, list):
+        values = list(values)
+
+    # The plotly color scales are defined between 0 and 1, but the values range 
+    # from -1 to 1.
+    values = [value / 2 + 0.5 for value in values]
+    
     return [
         tuple([int(value)/255 for value in re.findall('\d+', color)] + [alpha])
-        for color in sample_colorscale("rdbu", values)
+        for color in sample_colorscale(colorscale, values)
     ]
 
 
@@ -38,12 +45,13 @@ def showMolecule(
     atoms_highlight_values: dict = {},
     show_atom_indices: bool = False,
     show_bond_indices: bool = False,
+    colorscale: str = "rdbu"
 ) -> PIL.PngImagePlugin.PngImageFile:
     
     drawer = Draw.MolDraw2DCairo(350, 300)
     options = drawer.drawOptions()
     options.useBWAtomPalette()
-    options.annotationFontScale = 0.6
+    options.annotationFontScale = 0.8
     options.dummiesAreAttachments = True
     options.addAtomIndices = show_atom_indices
     options.addBondIndices = show_bond_indices
@@ -52,7 +60,7 @@ def showMolecule(
     rdDepictor.StraightenDepiction(molecule)
 
     # Convert given values to a rgba color scale using plotly
-    colors = getRGBA(atoms_highlight_values.values())
+    colors = getRGBA(atoms_highlight_values.values(), colorscale)
     
     highlight_atoms = defaultdict(list)
     highlight_bonds = defaultdict(list)
