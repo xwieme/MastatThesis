@@ -10,17 +10,15 @@ from torch_geometric.data import Data, InMemoryDataset
 from. import features, utils
 
 
-def createDataObjectFromSmiles(smiles: str, y: any):
-
-    rd_mol = Chem.MolFromSmiles(smiles)
+def createDataObjectFromRdMol(molecule: Chem.rdchem.Mol, y: any):
 
     x = torch.tensor([
             features.getAtomFeatureVector(atom)
-            for atom in rd_mol.GetAtoms()
+            for atom in molecule.GetAtoms()
         ], dtype=torch.float)
 
     edge_indices, edge_attrs, edge_types = [], [], []
-    for bond in rd_mol.GetBonds():
+    for bond in molecule.GetBonds():
 
         i = bond.GetBeginAtomIdx()
         j = bond.GetEndAtomIdx()
@@ -43,8 +41,14 @@ def createDataObjectFromSmiles(smiles: str, y: any):
         edge_index=edge_index, 
         edge_attr=edge_attr, 
         edge_type=edge_type, 
-        smiles=smiles
+        smiles=Chem.MolToSmiles(molecule)
     )
+
+
+def createDataObjectFromSmiles(smiles: str, y: any):
+
+    molecule = Chem.MolFromSmiles(smiles)
+    return createDataObjectFromRdMol(molecule, y)
 
 
 class Dataset(InMemoryDataset):

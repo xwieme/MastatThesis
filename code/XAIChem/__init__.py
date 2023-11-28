@@ -1,4 +1,4 @@
-from .data import Dataset, createDataObjectFromSmiles
+from .data import Dataset, createDataObjectFromSmiles, createDataObjectFromRdMol
 from .features import (
     getAtomFeatureVector, 
     getBondFeatureVector, 
