@@ -3,8 +3,7 @@ from io import BytesIO
 from collections import defaultdict
 from typing import List, Set, Tuple
 
-import PIL
-from PIL import Image
+from PIL import Image, PngImagePlugin
 from rdkit import Chem
 from rdkit.Chem import Draw
 from rdkit.Chem import rdDepictor
@@ -46,7 +45,7 @@ def showMolecule(
     show_atom_indices: bool = False,
     show_bond_indices: bool = False,
     colorscale: str = "rdbu"
-) -> PIL.PngImagePlugin.PngImageFile:
+) -> PngImagePlugin.PngImageFile:
     
     drawer = Draw.MolDraw2DCairo(350, 300)
     options = drawer.drawOptions()

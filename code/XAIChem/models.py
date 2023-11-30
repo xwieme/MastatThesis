@@ -46,6 +46,7 @@ class RGCN(torch.nn.Module):
         num_mlp_layers: int = 3,
         num_rgcn_hidden_units: int = 256,
         num_mlp_hidden_units: int = 64,
+        num_mlp_output_units: int = 1,
         activation_function: Optional[Callable] = F.relu,
         rgcn_dropout_rate: float = 0.5,
         mlp_dropout_rate: float | list = 0.1,
@@ -61,27 +62,17 @@ class RGCN(torch.nn.Module):
             num_relations=65
         )
 
-        self.rgcn2 = RGCNConv(
-            num_rgcn_hidden_units,
-            num_rgcn_hidden_units,
-            num_relations=65
-        )
-        # self.rgcn_layers = []
-        # for _ in range(num_rgcn_layers):
-        #     self.rgcn_layers.append(
-        #         RGCNConv(
-        #             num_rgcn_hidden_units,
-        #             num_rgcn_hidden_units,
-        #             num_relations=65
-        #         )
-        #     )
+        self.rgcn_layers = torch.nn.ModuleList([
+            RGCNConv(num_rgcn_hidden_units, num_rgcn_hidden_units, num_relations=65)
+            for _ in range(1, num_rgcn_layers)
+        ])
 
         self.weighted_sum = WeightedSum(num_rgcn_hidden_units)
         self.mlp = MLP(
             in_channels=num_rgcn_hidden_units,
             hidden_channels=num_mlp_hidden_units,
-            out_channels=1,
-            num_layers=3,
+            out_channels=num_mlp_output_units,
+            num_layers=num_mlp_layers,
             dropout=mlp_dropout_rate,
         )
 
@@ -91,14 +82,14 @@ class RGCN(torch.nn.Module):
         h = self.activation_function(h)
         h = F.dropout(h, self.dropout_rate, training=self.training)
 
-        h = self.rgcn2(h, edge_index, edge_type.view(-1))
-        h = self.activation_function(h)
-        h = F.dropout(h, self.dropout_rate, training=self.training)
+        # h = self.rgcn2(h, edge_index, edge_type.view(-1))
+        # h = self.activation_function(h)
+        # h = F.dropout(h, self.dropout_rate, training=self.training)
 
-        # for rgcn in self.rgcn_layers:
-        #     h = rgcn(h, edge_index, edge_type.view(-1))
-        #     h = self.activation_function(h)
-        #     h = F.dropout(h, self.dropout_rate)
+        for rgcn in self.rgcn_layers:
+            h = rgcn(h, edge_index, edge_type.view(-1))
+            h = self.activation_function(h)
+            h = F.dropout(h, self.dropout_rate, training=self.training)
 
         molecular_embedding = self.weighted_sum(h, batch, mask)
         
