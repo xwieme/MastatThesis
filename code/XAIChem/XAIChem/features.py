@@ -1,8 +1,26 @@
 import numpy as np
+import torch
 from rdkit import Chem
 
 
-ATOMS = ["B", "C", "N", "O", "F", "Si", "P", "S", "Cl", "As", "Se", "Br", "Te", "I", "At", "other"]
+ATOMS = [
+    "B",
+    "C",
+    "N",
+    "O",
+    "F",
+    "Si",
+    "P",
+    "S",
+    "Cl",
+    "As",
+    "Se",
+    "Br",
+    "Te",
+    "I",
+    "At",
+    "other",
+]
 
 HYBRIDIZATIONS = [
     Chem.HybridizationType.SP,
@@ -35,7 +53,7 @@ STEREO_TYPES = [
 
 def oneHotEncoding(x, values: list | None = None, length: int | None = None):
     """
-    Creates a one-hot encoding of x, either by a given list of possible values 
+    Creates a one-hot encoding of x, either by a given list of possible values
     that x can take or given the length of the resulting vector if x is an integer.
 
     :param x: value to encode, must be int if length is not None
@@ -47,7 +65,7 @@ def oneHotEncoding(x, values: list | None = None, length: int | None = None):
         assert length is not None, "Either a list of values or a length must be given."
         assert isinstance(x, int), "x must be of type int if a length is given."
 
-        out = np.zeros(length)
+        out = torch.zeros(length)
         out[x] = 1
 
         return out
@@ -56,8 +74,8 @@ def oneHotEncoding(x, values: list | None = None, length: int | None = None):
         # Use the last element of values if x is not present in the list
         if x not in values:
             x = values[-1]
-        
-        return [int(x == value) for value in values]
+
+        return torch.tensor([int(x == value) for value in values])
 
 
 def getAtomFeatureVector(atom):
@@ -88,21 +106,3 @@ def getNumAtomFeatures():
 
 def getNumBondFeatures():
     return len(getBondFeatureVector(Chem.MolFromSmiles("CC").GetBonds()[0]))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

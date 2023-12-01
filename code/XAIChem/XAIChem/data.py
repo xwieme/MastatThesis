@@ -7,19 +7,19 @@ import pandas as pd
 import torch
 from torch_geometric.data import Data, InMemoryDataset
 
-from. import features, utils
+from . import features, utils
 
 
-def createDataObjectFromRdMol(molecule: Chem.rdchem.Mol, y: any):
-
-    x = torch.tensor([
-            features.getAtomFeatureVector(atom)
-            for atom in molecule.GetAtoms()
-        ], dtype=torch.float)
+def createDataObjectFromRdMol(
+    molecule: Chem.rdchem.Mol, y: any, num_classes: int | None = None
+):
+    x = torch.tensor(
+        [features.getAtomFeatureVector(atom) for atom in molecule.GetAtoms()],
+        dtype=torch.float,
+    )
 
     edge_indices, edge_attrs, edge_types = [], [], []
     for bond in molecule.GetBonds():
-
         i = bond.GetBeginAtomIdx()
         j = bond.GetEndAtomIdx()
 
@@ -32,23 +32,26 @@ def createDataObjectFromRdMol(molecule: Chem.rdchem.Mol, y: any):
         edge_types += [bond_type, bond_type]
 
     edge_index = torch.tensor(edge_indices, dtype=torch.long).t().contiguous()
-    edge_attr = torch.tensor(edge_attrs, dtype=torch.long).view(-1, features.getNumBondFeatures())
+    edge_attr = torch.tensor(edge_attrs, dtype=torch.long).view(
+        -1, features.getNumBondFeatures()
+    )
     edge_type = torch.tensor(edge_types, dtype=torch.long).view(-1, 1)
 
     return Data(
-        x=x, 
-        y=y, 
-        edge_index=edge_index, 
-        edge_attr=edge_attr, 
-        edge_type=edge_type, 
-        smiles=Chem.MolToSmiles(molecule)
+        x=x,
+        y=y
+        if num_classes is None
+        else features.oneHotEncoding(y, length=num_classes).view(1, num_classes),
+        edge_index=edge_index,
+        edge_attr=edge_attr,
+        edge_type=edge_type,
+        smiles=Chem.MolToSmiles(molecule),
     )
 
 
-def createDataObjectFromSmiles(smiles: str, y: any):
-
+def createDataObjectFromSmiles(smiles: str, y: any, num_classes: int | None = None):
     molecule = Chem.MolFromSmiles(smiles)
-    return createDataObjectFromRdMol(molecule, y)
+    return createDataObjectFromRdMol(molecule, y, num_classes)
 
 
 class Dataset(InMemoryDataset):
@@ -57,8 +60,8 @@ class Dataset(InMemoryDataset):
 
     :param root: directory containing data folders
     :param name: folder name of dataset
-    :param tag: indicate type of data, is equal to train,
-        test or val
+    :param tag: indicate type of data, is equal to train, test or val
+    :param num_classes: if specified, encode target as a one hot vector
     """
 
     def __init__(
@@ -66,12 +69,14 @@ class Dataset(InMemoryDataset):
         root: str,
         name: str,
         tag: str,
+        num_classes: int | None = None,
         transform: Optional[Callable] = None,
         pre_transform: Optional[Callable] = None,
         pre_filter: Optional[Callable] = None,
     ):
         self.name = name
-        self.tag = tag 
+        self.tag = tag
+        self.nclasses = num_classes
 
         super(Dataset, self).__init__(root, transform, pre_transform, pre_filter)
         self.data, self.slices = torch.load(self.processed_paths[0])
@@ -93,43 +98,17 @@ class Dataset(InMemoryDataset):
         return f"{self.name}_{self.tag}.pt"
 
     def process(self):
-
         df = pd.read_csv(self.raw_paths[0])
-        data_list = df[["smiles", self.name]].apply(
-            lambda row: createDataObjectFromSmiles(*row),
-            axis=1
-        ).tolist()
+        data_list = (
+            df[["smiles", self.name]]
+            .apply(
+                lambda row: createDataObjectFromSmiles(*row, num_classes=self.nclasses),
+                axis=1,
+            )
+            .tolist()
+        )
 
         data, slices = self.collate(data_list)
-        torch.save((data, slices), osp.join(self.processed_dir, self.processed_file_names))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        torch.save(
+            (data, slices), osp.join(self.processed_dir, self.processed_file_names)
+        )

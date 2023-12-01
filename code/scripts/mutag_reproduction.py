@@ -1,9 +1,14 @@
 import os
 import argparse
+import pathlib
 
+from tqdm import tqdm
 import pandas as pd
+import numpy as np
 import torch
+import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
+from sklearn import metrics
 import wandb
 
 import XAIChem
@@ -16,7 +21,7 @@ def train(dataloader, model, criterion, optimizer, device):
         data.to(device)
 
         optimizer.zero_grad()
-        out = model(data.x, data.edge_index, data.edge_type, data.batch)
+        out = F.sigmoid(model(data.x, data.edge_index, data.edge_type, data.batch))
         loss = criterion(out, data.y)
         loss.backward()
         optimizer.step()
@@ -27,17 +32,18 @@ def evaluate(dataloader, model, criterion, device):
 
     # Disable gradients computation to save GPU memory
     with torch.no_grad():
-        correct = 0
+        predictions = list()
+        labels = list()
         losses = 0
         for data in dataloader:
             data.to(device)
 
-            out = model(data.x, data.edge_index, data.edge_type, data.batch)
+            out = F.sigmoid(model(data.x, data.edge_index, data.edge_type, data.batch))
             losses += criterion(out, data.y)
-            pred = out.argmax(dim=1)
-            correct = int((pred == data.y).sum())
+            predictions.extend(out.to("cpu").numpy())
+            labels.extend(data.y.to("cpu").numpy())
 
-    return correct / len(dataloader.dataset), losses / len(dataloader)
+    return metrics.roc_auc_score(labels, predictions), losses / len(dataloader)
 
 
 if __name__ == "__main__":
@@ -50,32 +56,37 @@ if __name__ == "__main__":
 
     data = pd.read_csv(os.path.join(args.data_dir, "Mutagenicity/Mutagenicity.csv"))
 
-    data.query("group == 'training'").to_csv(
-        os.path.join(args.data_dir, "Mutagenicity/Mutagenicity_train.csv")
-    )
-    data.query("group == 'test'").to_csv(
-        os.path.join(args.data_dir, "Mutagenicity/Mutagenicity_test.csv")
-    )
-    data.query("group == 'valid'").to_csv(
-        os.path.join(args.data_dir, "Mutagenicity/Mutagenicity_val.csv")
-    )
+    for tag in ["training", "test", "valid"]:
+        df = data.query(f"group == '{tag}'").to_csv(
+            os.path.join(args.data_dir, f"Mutagenicity/Mutagenicity_{tag}.csv")
+        )
 
     # Create pytorch geometric data objects
-    train_data = XAIChem.Dataset(root=args.data_dir, name="Mutagenicity", tag="train")
-    test_data = XAIChem.Dataset(root=args.data_dir, name="Mutagenicity", tag="test")
-    val_data = XAIChem.Dataset(root=args.data_dir, name="Mutagenicity", tag="val")
+    train_data = XAIChem.Dataset(
+        root=args.data_dir, name="Mutagenicity", tag="training", num_classes=2
+    )
+    test_data = XAIChem.Dataset(
+        root=args.data_dir, name="Mutagenicity", tag="test", num_classes=2
+    )
+    val_data = XAIChem.Dataset(
+        root=args.data_dir, name="Mutagenicity", tag="valid", num_classes=2
+    )
 
     # Create pytorch graph batches
     train_loader = DataLoader(train_data, batch_size=256)
     test_loader = DataLoader(test_data, batch_size=256)
     val_loader = DataLoader(val_data, batch_size=256)
 
+    # Create directory where model is saved
+    save_model_dir = os.path.join(args.data_dir, "trained_models/Mutagenicity")
+    pathlib.Path(save_model_dir).mkdir(parents=True, exist_ok=True)
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     for model_id in range(10):
         config = {
             "architecture": "RGCN by Wu et al.",
             "dataset": "Mutagenicity from Wu et al.",
-            "epchos": 500,
+            "epochs": 500,
             "random_seed": 2022 + model_id * 10,
             "learning_rate": 0.001,
             "rgcn_dropout_rate": 0.4,
@@ -96,11 +107,21 @@ if __name__ == "__main__":
             num_mlp_output_units=2,
             rgcn_dropout_rate=config["rgcn_dropout_rate"],
             mlp_dropout_rate=config["mlp_dropout_rate"],
+            use_fastrgcn=True,
         ).to(device)
-        optimizer = torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
-        criterion = torch.nn.CrossEntropyLoss()
 
-        for epoch in range(1, 500):
+        optimizer = torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
+        pos_weight = torch.ones([2]).to(device)
+        criterion = torch.nn.BCEWithLogitsLoss(reduction="mean", pos_weight=pos_weight)
+        early_stop = XAIChem.EarlyStopping(
+            save_model_dir, f"Mutagenicity_rgcn_model_{model_id}", patience=30
+        )
+
+        epoch = 0
+        val_loss = np.inf
+        while epoch <= config["epochs"] and not early_stop(val_loss, model):
+            epoch += 1
+
             train(train_loader, model, criterion, optimizer, device)
 
             train_acc, train_loss = evaluate(train_loader, model, criterion, device)
@@ -121,6 +142,6 @@ if __name__ == "__main__":
 
         torch.save(
             model.state_dict(),
-            os.path.join(args.data_dir, f"trained_models/Mutagenicity/Mutagenicity_rgcn_model_{model_id}.pt"),
+            os.path.join(save_model_dir, f"Mutagenicity_rgcn_model_{model_id}.pt"),
         )
         wandb.finish()
