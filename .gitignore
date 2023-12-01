@@ -30,10 +30,17 @@ build/
 # Python
 */__pycache__/*
 *.pyc
+*/env.sh
 
 # Ipython notebooks
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 
-# Ignore pytorch saved files 
+# Data files 
+**/*_training.*
+**/*_test.*
+**/*_valid.*
 *.pt
+
+# HPC log files
+**/*.sh.*
