@@ -1,4 +1,5 @@
 import os
+from typing import List
 import torch
 
 
@@ -32,11 +33,10 @@ class EarlyStopping:
         )
 
     def __call__(self, score: float, model: torch.nn.Module) -> bool:
-
         if self.best_score is None:
             self.best_score = score
             torch.save(model.state_dict(), self.path)
-        
+
         elif self._isScoreBetter(score):
             self.best_score = score
             torch.save(model.state_dict(), self.path)
@@ -46,3 +46,24 @@ class EarlyStopping:
             self.counter += 1
 
         return self.counter == self.patience
+
+
+def loadModels(
+    model: torch.nn.Module, paths: list, device: str = "cpu"
+) -> List[torch.nn.Module]:
+    """
+    Load the specified models
+
+    :param model: model architecture
+    :param paths: list of paths where the models are saved
+    :param device: load the models on cpu or gpu (default is cpu)
+    """
+
+    models = []
+
+    for path in paths:
+        model.load_state_dict(torch.load(path, map_location=torch.device(device)))
+        model.eval()
+        models.append(model)
+
+    return models

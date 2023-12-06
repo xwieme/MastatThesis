@@ -7,7 +7,11 @@ from .features import (
     getNumBondFeatures,
 )
 from .models import RGCN
-from .handlers import EarlyStopping
+from .handlers import EarlyStopping, loadModels
 from .utils import getEdgeTypes, set_seed
 from .visualization import showMolecule
 from .structures import breakBRICKSBond
+from .prediction import predict, predictBatch
+from .masks import createMask, removeAtoms
+from .attributions import functionalGroupAttributionScores
+from . import variables

@@ -41,19 +41,21 @@ class RGCN(torch.nn.Module):
         num_mlp_layers: int = 3,
         num_rgcn_hidden_units: int = 256,
         num_mlp_hidden_units: int = 64,
-        num_mlp_output_units: int = 1,
+        num_classes: int = 1,
         activation_function: Optional[Callable] = F.relu,
         rgcn_dropout_rate: float = 0.5,
         mlp_dropout_rate: float | list = 0.1,
         use_batch_norm: bool = False,
         num_bases: int | None = None,
         use_fastrgcn: bool = False,
+        bclassification: bool = False,
     ):
         super(RGCN, self).__init__()
 
         self.activation_function = activation_function
         self.dropout_rate = rgcn_dropout_rate
         self.use_batch_norm = use_batch_norm
+        self.bclassification = bclassification
 
         if use_fastrgcn:
             self.rgcn1 = FastRGCNConv(
@@ -101,10 +103,12 @@ class RGCN(torch.nn.Module):
         self.mlp = MLP(
             in_channels=num_rgcn_hidden_units,
             hidden_channels=num_mlp_hidden_units,
-            out_channels=num_mlp_output_units,
+            out_channels=num_mlp_hidden_units,
             num_layers=num_mlp_layers,
             dropout=mlp_dropout_rate,
         )
+
+        self.out_layer = Linear(num_mlp_hidden_units, num_classes)
 
     def forward(self, x, edge_index, edge_type, batch, mask=None):
         edge_index, edge_type = add_self_loops(edge_index, edge_type, fill_value=0)
@@ -126,4 +130,9 @@ class RGCN(torch.nn.Module):
 
         molecular_embedding = self.weighted_sum(h, batch, mask)
 
-        return self.mlp(molecular_embedding)
+        h = self.mlp(molecular_embedding)
+
+        if self.bclassification:
+            return F.sigmoid(self.out_layer(h))
+        else:
+            return self.out_layer(h)

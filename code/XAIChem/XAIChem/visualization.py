@@ -38,8 +38,8 @@ def getRGBA(
 
 def showMolecule(
     molecule: Chem.rdchem.Mol,
-    legend: str = "",
     atoms_highlight_values: dict = {},
+    legend: str = "",
     show_atom_indices: bool = False,
     show_bond_indices: bool = False,
     colorscale: str = "rdbu",

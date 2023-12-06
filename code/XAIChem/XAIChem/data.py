@@ -39,7 +39,7 @@ def createDataObjectFromRdMol(
 
     return Data(
         x=x,
-        y=y
+        y=float(y)
         if num_classes is None
         else features.oneHotEncoding(y, length=num_classes).view(1, num_classes),
         edge_index=edge_index,
