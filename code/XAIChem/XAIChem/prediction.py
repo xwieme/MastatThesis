@@ -8,15 +8,11 @@ def predict(
     graph: torch_geometric.data.Data,
     models: List[torch.nn.Module],
     mask: torch.Tensor | None = None,
-    num_classes: int | None = None,
 ) -> torch.Tensor:
     # Disable gradient computation to save memory
     with torch.no_grad():
-        if num_classes is None:
-            predictions = torch.zeros(len(models))
-        else:
-            predictions = torch.zeros(len(models), num_classes)
 
+        predictions = torch.zeros(len(models))
         for i, model in enumerate(models):
             predictions[i] = model(
                 graph.x,
@@ -33,15 +29,14 @@ def predictBatch(
     data: torch_geometric.loader.DataLoader,
     models: List[torch.nn.Module],
     masks: torch.Tensor | None = None,
-    num_classes: int = 1,
 ):
     # Disable gradient computation to save memory
     with torch.no_grad():
-        predictions = torch.zeros(data.batch_size, len(models), num_classes)
+        predictions = torch.zeros(data.batch_size, len(models))
 
         for i, model in enumerate(models):
-            predictions[:, i, :] = model(
+            predictions[:, i] = model(
                 data.x, data.edge_index, data.edge_type, data.batch, masks
-            ).view(data.batch_size, -1)
+            ).view(-1)
 
     return torch.mean(predictions, dim=1)

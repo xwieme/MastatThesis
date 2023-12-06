@@ -15,7 +15,6 @@ def functionalGroupAttributionScores(
     models: List[torch.nn.Module],
     method: str,
     functional_groups: List[str] = variables.FUNCTIONAL_GROUPS,
-    num_classes: int | None = None,
 ) -> pd.DataFrame:
     """
     Compute the attribution scores for all present functional groups.
@@ -25,12 +24,10 @@ def functionalGroupAttributionScores(
     :param method: determines the method to compute the attribution, either 'mask' to
         apply a mask after the molecular embedding, or 'structure' to modify the input
         structure
-    :param num_classes: determines if the label should be a one-hot vector of the given
-        size
     """
 
     molecule = Chem.MolFromSmiles(smiles)
-    graph = createDataObjectFromRdMol(molecule, -1, num_classes)
+    graph = createDataObjectFromRdMol(molecule, -1)
 
     # Get atom indices of present functional groups
     functional_groups_matches = dict()
@@ -57,9 +54,9 @@ def functionalGroupAttributionScores(
         )
 
         for data in graphs:
-            pred = prediction.predictBatch(data, models, num_classes=num_classes)
+            pred = prediction.predictBatch(data, models)
             pred_masked = prediction.predictBatch(
-                data, models, masks.view(-1, 1), num_classes=num_classes
+                data, models, masks.view(-1, 1)
             )
 
     elif method == "structure":
@@ -83,11 +80,9 @@ def functionalGroupAttributionScores(
             batch_size=len(modified_molecules),
         )
 
-        pred = prediction.predict(graph, models, num_classes=num_classes)
+        pred = prediction.predict(graph, models)
         for data in graphs:
-            pred_masked = prediction.predictBatch(data, models, num_classes=num_classes)
-
-    print(pred - pred_masked)
+            pred_masked = prediction.predictBatch(data, models)
 
     results = pd.DataFrame(
         {
@@ -95,6 +90,8 @@ def functionalGroupAttributionScores(
             "functional_group": functional_groups_matches.values(),
             "substructure": functional_groups_matches.keys(),
             "attribution": pred - pred_masked,
+            "prediction": pred,
+            "prediction_masked": pred_masked,
         }
     )
 
