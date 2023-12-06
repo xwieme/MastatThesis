@@ -21,8 +21,8 @@ def train(dataloader, model, criterion, optimizer, device):
         data.to(device)
 
         optimizer.zero_grad()
-        out = F.sigmoid(model(data.x, data.edge_index, data.edge_type, data.batch))
-        loss = criterion(out, data.y)
+        out = model(data.x, data.edge_index, data.edge_type, data.batch)
+        loss = criterion(out.view(-1), data.y)
         loss.backward()
         optimizer.step()
 
@@ -38,12 +38,24 @@ def evaluate(dataloader, model, criterion, device):
         for data in dataloader:
             data.to(device)
 
-            out = F.sigmoid(model(data.x, data.edge_index, data.edge_type, data.batch))
-            losses += criterion(out, data.y)
+            out = model(data.x, data.edge_index, data.edge_type, data.batch)
+            losses += criterion(out.view(-1), data.y)
             predictions.extend(out.to("cpu").numpy())
             labels.extend(data.y.to("cpu").numpy())
 
     return metrics.roc_auc_score(labels, predictions), losses / len(dataloader)
+
+
+def pos_weight(train_labels):
+    task_pos_weight_list = []
+    num_pos = torch.sum(train_labels == 1)
+    num_neg = torch.sum(train_labels == 0)
+
+    weight = num_neg / (num_pos + 0.00000001)
+
+    return weight.view(
+        1,
+    )
 
 
 if __name__ == "__main__":
@@ -63,14 +75,10 @@ if __name__ == "__main__":
 
     # Create pytorch geometric data objects
     train_data = XAIChem.Dataset(
-        root=args.data_dir, name="Mutagenicity", tag="training", num_classes=2
+        root=args.data_dir, name="Mutagenicity", tag="training"
     )
-    test_data = XAIChem.Dataset(
-        root=args.data_dir, name="Mutagenicity", tag="test", num_classes=2
-    )
-    val_data = XAIChem.Dataset(
-        root=args.data_dir, name="Mutagenicity", tag="valid", num_classes=2
-    )
+    test_data = XAIChem.Dataset(root=args.data_dir, name="Mutagenicity", tag="test")
+    val_data = XAIChem.Dataset(root=args.data_dir, name="Mutagenicity", tag="valid")
 
     # Create pytorch graph batches
     train_loader = DataLoader(train_data, batch_size=256)
@@ -104,15 +112,19 @@ if __name__ == "__main__":
             num_node_features=XAIChem.getNumAtomFeatures(),
             num_rgcn_layers=config["num_rgcn_layers"],
             num_mlp_hidden_units=config["num_mlp_hidden_units"],
-            num_mlp_output_units=2,
             rgcn_dropout_rate=config["rgcn_dropout_rate"],
             mlp_dropout_rate=config["mlp_dropout_rate"],
             use_fastrgcn=True,
+            bclassification=True,
         ).to(device)
 
         optimizer = torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
-        pos_weight = torch.ones([2]).to(device)
-        criterion = torch.nn.BCEWithLogitsLoss(reduction="mean", pos_weight=pos_weight)
+
+        pos_weight = pos_weight(train_data.y)
+        criterion = torch.nn.BCEWithLogitsLoss(
+            reduction="mean", pos_weight=pos_weight.to(device)
+        )
+
         early_stop = XAIChem.EarlyStopping(
             save_model_dir, f"Mutagenicity_rgcn_model_{model_id}", patience=30
         )
