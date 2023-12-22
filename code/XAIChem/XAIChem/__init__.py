@@ -6,7 +6,10 @@ from .features import (
     getNumAtomFeatures,
     getNumBondFeatures,
 )
-from .models import RGCN
+# from .models import RGCN
+
+from . import models
+
 from .handlers import EarlyStopping, loadModels
 from .utils import getEdgeTypes, set_seed
 from .visualization import showMolecule
