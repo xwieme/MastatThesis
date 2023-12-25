@@ -1,7 +1,7 @@
 from typing import Iterable
 
-from rdkit import Chem
 import torch
+from rdkit import Chem
 
 
 def createMask(molecule: Chem.rdchem.Mol, substructure: Iterable[int]) -> torch.Tensor:

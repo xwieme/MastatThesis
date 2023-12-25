@@ -1,13 +1,12 @@
 import re
-from io import BytesIO
 from collections import defaultdict
+from io import BytesIO
 from typing import List, Set, Tuple
 
 from PIL import Image, PngImagePlugin
-from rdkit import Chem
-from rdkit.Chem import Draw
-from rdkit.Chem import rdDepictor
 from plotly.express.colors import sample_colorscale
+from rdkit import Chem
+from rdkit.Chem import Draw, rdDepictor
 
 from .structures import getSubstructureBondIds
 

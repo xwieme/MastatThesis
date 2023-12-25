@@ -1,5 +1,5 @@
-from typing import Set, List, Iterable
 from collections import deque
+from typing import Iterable, List, Set
 
 from rdkit import Chem
 

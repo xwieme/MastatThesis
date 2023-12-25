@@ -1,20 +1,12 @@
-from .data import Dataset, createDataObjectFromSmiles, createDataObjectFromRdMol
-from .features import (
-    oneHotEncoding,
-    getAtomFeatureVector,
-    getBondFeatureVector,
-    getNumAtomFeatures,
-    getNumBondFeatures,
-)
-# from .models import RGCN
-
-from . import models
-
+from .attributions import functionalGroupAttributionScores
+from .data import (Dataset, createDataObjectFromRdMol,
+                   createDataObjectFromSmiles)
+from .features import (getAtomFeatureVector, getBondFeatureVector,
+                       getNumAtomFeatures, getNumBondFeatures, oneHotEncoding)
 from .handlers import EarlyStopping, loadModels
+from .masks import createMask, removeAtoms
+from .prediction import predict, predictBatch
 from .utils import getEdgeTypes, set_seed
 from .visualization import showMolecule
-from .structures import breakBRICKSBond
-from .prediction import predict, predictBatch
-from .masks import createMask, removeAtoms
-from .attributions import functionalGroupAttributionScores
-from . import variables
+
+from . import models, substructures, attribution, variables

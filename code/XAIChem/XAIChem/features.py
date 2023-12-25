@@ -2,7 +2,6 @@ import numpy as np
 import torch
 from rdkit import Chem
 
-
 ATOMS = [
     "B",
     "C",

@@ -1,115 +1,164 @@
-from collections.abc import Callable
-from typing import Dict
+import time
+from collections import defaultdict
+from typing import Callable, Dict
 
-import numpy as np
+import pandas as pd
 import torch
+import wandb
+from torch.optim import Optimizer
 from torch_geometric.loader.dataloader import DataLoader
+from XAIChem.handlers import EarlyStopping
 
-class ModelTrainer():
 
-    def __init__(self, model: torch.nn.Module, device: torch.device , init_val_loss: float = np.inf):
-        """
-        :param init_val_loss: initial value of validation loss
-            only used for early stopping
-        """
-        self.model = model
-        self.epoch = 0
-        self.val_loss = init_val_loss
-        self.device = device
+class ModelTrainer:
+    def __init__(
+        self,
+        model: torch.nn.Module,
+        device: torch.device,
+    ):
+        self._model = model
+        self._epoch = 0
+        self._device = device
 
-        # Initialize empty list to store model predictions and true 
+        # Initialize empty list to store model predictions and true
         # labels which can be used to compute various evaluation metrics
-        self.predictions = list()
-        self.labels = list()
+        self._predictions = list()
+        self._labels = list()
 
-    def reset(self, init_val_loss: float = np.inf) -> None:
+    def reset(self) -> None:
         """
         Reset trainer parameters
-
-        :param init_val_loss: initial value of validation loss
-            only used for early stopping
         """
-        self.epoch = 0
-        self.val_loss = init_val_loss
+        self._epoch = 0
 
-    def trainEpoch(self, loader: DataLoader, criterion, optimizer):
-        self.model.train()
+    def trainEpoch(
+        self, loader: DataLoader, criterion: Callable, optimizer: Optimizer
+    ) -> None:
+        self._model.train()
 
         for data in loader:
-            data.to(self.device)
+            data.to(self._device)
 
-            out = self.model(data)
+            out = self._model(data)
             loss = criterion(out, data.y.view(-1, 1))
             loss.backward()
             optimizer.step()
             optimizer.zero_grad()
-    
-    def evaluateEpoch(self, loader, criterion, metrics: Dict[str, Callable] | None = None) -> Dict[str, float]:
-        self.model.eval()
+
+    def evaluate(
+        self,
+        loader: DataLoader,
+        criterion: Callable,
+        metrics: Dict[str, Callable] | None = None,
+    ) -> Dict[str, float]:
+        self._model.eval()
 
         # Disable gradients to save memory
         with torch.no_grad():
-       
-            # Compute average batch loss 
+            # Compute average batch loss
             losses = 0
 
             for data in loader:
-                data.to(self.device)
-                
-                pred = self.model(data)
-                losses += criterion(pred, data.y.view(-1, 1))
-        
-                self.predictions.extend(pred.view(1, -1))
-                self.labels.extend(data.y)
+                data.to(self._device)
 
-            evaluation = { "loss": losses / len(loader) }
+                pred = self._model(data)
+                losses += criterion(pred, data.y.view(-1, 1)).item()
+                self._predictions.extend(pred.view(1, -1).tolist()[0])
+                self._labels.extend(data.y.tolist())
+
+            evaluation = {"loss": losses / len(loader)}
 
             if metrics is not None:
                 for metric_name, metric in metrics.items():
-                    evaluation[metric_name] = metric(self.labels, self.predictions)
-        
-        return evaluation 
+                    evaluation[metric_name] = metric(self._labels, self._predictions)
 
-    def _trainStep(self, loaders, criterion, optimizer, metrics, evaluations, log):
+        self._predictions = list()
+        self._labels = list()
 
-        # Train one epoch using the training data set
-        self.trainEpoch(loaders["train"], criterion, optimizer)
+        return evaluation
 
-        # Evaluate current model using the provided data sets 
-        evaluations[self.epoch] = dict()
-        for loader_name, loader in loaders.items():
-            evaluations[self.epoch][loader_name] = self.evaluateEpoch(loader, criterion, metrics)
+    def train(
+        self,
+        loaders: Dict[str, DataLoader],
+        criterion: Callable,
+        optimizer: Optimizer,
+        epochs: int,
+        metrics: Dict[str, Callable] | None = None,
+        early_stop: EarlyStopping | None = None,
+        log: bool = False,
+        wandb_project: str | None = None,
+        wandb_group: str | None = None,
+        log_filename: str | None = None,
+    ) -> None:
+        """
+        Train the given ML model using the specified criterion and optimizer.
 
-        if log:
-            print(evaluations[self.epoch])
+        :param loaders: a dictionairy of DataLoader where the key is the name
+        :param criterion: loss function used during training
+        :param optimizer: optimizer used to train the ML model
+        :param epochs: maximum number of full data iterations allowed
+        :param metrics: dictionairy of names (strings) and sklearn.metric functions (default is None)
+        :param early_stop: Determines when to stop before the number of epochs is reached
+            A validation DataLoader must be present if early_stop is used. (default is None)
+        :param log: print progress or not (default is False, i.e. no printing)
+        :param wandb_project: if specified, upload model progress to wandb with given project name (default is None)
+        :param wandb_group: group runs in wandb (default is None)
+        :param log_filename: if specified, write model progess to disk with given path
+        """
 
-    def train(self, loaders: Dict[str, DataLoader], criterion, optimizer, epochs: int, metrics: Dict[str, Callable] | None = None, early_stop: None = None, log: bool = False) -> None:
-      
-        evaluations = dict()
+        # Store model progress for each dataloader
+        evaluations = {
+            dataset_name: defaultdict(list) for dataset_name in loaders.keys()
+        }
 
-        if early_stop is None:
+        # Log training time
+        start_time = time.time()
 
-            for epoch in range(epochs):
-                
-                self.epoch = epoch 
-                self._trainStep(loaders, criterion, optimizer, metrics, evaluations, log)
+        for epoch in range(epochs):
+            self._epoch = epoch
 
-        else:
+            # Train one epoch using the training data set
+            self.trainEpoch(loaders["train"], criterion, optimizer)
 
-            while self.epoch < epochs and not early_stop(self.val_loss, self.model):
-                
-                self._trainStep(loaders, criterion, optimizer, metrics, evaluations, log)
-                self.val_loss = evaluations[self.epoch]["validation"]["loss"]
-                self.epoch += 1
+            # Evaluate current model using the provided data sets
+            for loader_name, loader in loaders.items():
+                # Compute loss and requested metrics
+                evaluation = self.evaluate(
+                    loader,
+                    criterion,
+                    metrics,
+                )
 
+                # Add loss and requested metrics to model progress dict
+                for metric, value in evaluation.items():
+                    evaluations[loader_name][metric].append(value)
 
+                evaluations[loader_name]["time"].append(time.time() - start_time)
 
+            if log:
+                print(
+                    {
+                        loader_name: {
+                            metric: values[self._epoch]
+                            for metric, values in evaluation.items()
+                        }
+                        for loader_name, evaluation in evaluations.items()
+                    }
+                )
 
+            if early_stop is not None and early_stop(
+                evaluations["validation"]["loss"][self._epoch], self._model
+            ):
+                break
 
+        # if a wandb project name is given, upload model progress to wandb
+        if wandb_project is not None:
+            wandb.init(project=wandb_project, group=wandb_group)
+            wandb.log(evaluations.values())
+            wandb.finish()
 
-
-
-
-
-
-                
+        # If a log_filename is given, write model progress to disk
+        if log_filename is not None:
+            for dataset_name, model_progress in evaluations.items():
+                df = pd.DataFrame(model_progress)
+                df.to_json(f"{log_filename}_{dataset_name}.json")

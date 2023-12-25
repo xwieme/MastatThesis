@@ -1,17 +1,16 @@
-from typing import Optional, Callable
 import os.path as osp
+from typing import Callable, Optional
 
-from rdkit import Chem
 import pandas as pd
-
 import torch
+from rdkit import Chem
 from torch_geometric.data import Data, InMemoryDataset
 
 from . import features, utils
 
 
 def createDataObjectFromRdMol(
-    molecule: Chem.rdchem.Mol, y: any, num_classes: int | None = None
+    molecule: Chem.rdchem.Mol, y: float, num_classes: int | None = None
 ):
     x = torch.tensor(
         [features.getAtomFeatureVector(atom) for atom in molecule.GetAtoms()],
@@ -39,9 +38,7 @@ def createDataObjectFromRdMol(
 
     return Data(
         x=x,
-        y=float(y)
-        if num_classes is None
-        else features.oneHotEncoding(y, length=num_classes).view(1, num_classes),
+        y=float(y),        
         edge_index=edge_index,
         edge_attr=edge_attr,
         edge_type=edge_type,
@@ -49,7 +46,7 @@ def createDataObjectFromRdMol(
     )
 
 
-def createDataObjectFromSmiles(smiles: str, y: any, num_classes: int | None = None):
+def createDataObjectFromSmiles(smiles: str, y: float , num_classes: int | None = None):
     molecule = Chem.MolFromSmiles(smiles)
     return createDataObjectFromRdMol(molecule, y, num_classes)
 

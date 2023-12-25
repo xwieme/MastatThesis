@@ -1,5 +1,7 @@
 import os
+from pathlib import Path
 from typing import List
+
 import torch
 
 
@@ -20,6 +22,9 @@ class EarlyStopping:
     def __init__(
         self, data_dir: str, model_name: str, patience: int, mode: str = "lower"
     ):
+        if not os.path.exists(data_dir):
+            Path(data_dir).mkdir(parents=True)
+
         self.path = os.path.join(data_dir, f"{model_name}_early_stop.pt")
 
         self.patience = patience

@@ -1,11 +1,11 @@
 from typing import List
 
 import pandas as pd
-from rdkit import Chem
 import torch
+from rdkit import Chem
 from torch_geometric.loader import DataLoader
 
-from . import variables, prediction
+from . import prediction, variables
 from .data import createDataObjectFromRdMol
 from .masks import createMask, removeAtoms
 
@@ -55,9 +55,7 @@ def functionalGroupAttributionScores(
 
         for data in graphs:
             pred = prediction.predictBatch(data, models)
-            pred_masked = prediction.predictBatch(
-                data, models, masks.view(-1, 1)
-            )
+            pred_masked = prediction.predictBatch(data, models, masks.view(-1, 1))
 
     elif method == "structure":
         modified_molecules = list()
