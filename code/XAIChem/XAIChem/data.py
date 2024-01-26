@@ -102,6 +102,7 @@ class Dataset(InMemoryDataset):
                 lambda row: createDataObjectFromSmiles(*row, num_classes=self.nclasses),
                 axis=1,
             )
+            .values
             .tolist()
         )
 

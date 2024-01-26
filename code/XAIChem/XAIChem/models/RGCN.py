@@ -4,7 +4,7 @@ import torch
 import torch.nn.functional as F
 import torch_geometric
 from torch_geometric.nn import BatchNorm, FastRGCNConv, RGCNConv
-from torch_geometric.utils import add_self_loops
+from torch_geometric.utils import add_remaining_self_loops
 
 
 class RGCN(torch.nn.Module):
@@ -49,7 +49,7 @@ class RGCN(torch.nn.Module):
             # Initialize weights tensor for self loops for current layer if used
             if self.self_loop:
                 weight = torch.nn.Parameter(
-                    torch.Tensor(num_node_features, num_hidden_units[layer_id])
+                    torch.Tensor(1, 1)
                 )
                 torch.nn.init.xavier_uniform_(
                     weight, gain=torch.nn.init.calculate_gain("relu")
@@ -73,9 +73,10 @@ class RGCN(torch.nn.Module):
         for layer_id, rgcn in enumerate(self.rgcn_layers):
             # Add self loops using the weight of the current layer
             if self.self_loop:
-                edge_index, edge_type = add_self_loops(
-                    data.edge_index,
-                    data.edge_type,
+                
+                edge_index, edge_type = add_remaining_self_loops(
+                    edge_index,
+                    edge_type,
                     fill_value=self.self_loop_weights[layer_id].data,
                 )
 

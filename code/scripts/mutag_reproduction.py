@@ -1,159 +1,138 @@
-import os
 import argparse
-import pathlib
 
-from tqdm import tqdm
-import pandas as pd
-import numpy as np
 import torch
 import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
+from torch_geometric.nn import MLP
 from sklearn import metrics
-import wandb
+import pandas as pd
 
 import XAIChem
 
 
-def train(dataloader, model, criterion, optimizer, device):
-    model.train()
+def computePosWeight(train_labels):
 
-    for data in dataloader:
-        data.to(device)
-
-        optimizer.zero_grad()
-        out = model(data.x, data.edge_index, data.edge_type, data.batch)
-        loss = criterion(out.view(-1), data.y)
-        loss.backward()
-        optimizer.step()
-
-
-def evaluate(dataloader, model, criterion, device):
-    model.eval()
-
-    # Disable gradients computation to save GPU memory
-    with torch.no_grad():
-        predictions = list()
-        labels = list()
-        losses = 0
-        for data in dataloader:
-            data.to(device)
-
-            out = model(data.x, data.edge_index, data.edge_type, data.batch)
-            losses += criterion(out.view(-1), data.y)
-            predictions.extend(out.to("cpu").numpy())
-            labels.extend(data.y.to("cpu").numpy())
-
-    return metrics.roc_auc_score(labels, predictions), losses / len(dataloader)
-
-
-def pos_weight(train_labels):
-    task_pos_weight_list = []
     num_pos = torch.sum(train_labels == 1)
     num_neg = torch.sum(train_labels == 0)
 
-    weight = num_neg / (num_pos + 0.00000001)
+    weight = num_neg / (num_pos + 1e-8)
 
-    return weight.view(
-        1,
-    )
+    return weight
 
 
 if __name__ == "__main__":
+
     parser = argparse.ArgumentParser(
         prog="Mutagenicity_training",
         description="Train an graph neural network to predict mutagenicity class",
     )
-    parser.add_argument("--data_dir")
+    parser.add_argument("model_id")
     args = parser.parse_args()
+    model_id = int(args.model_id)
 
-    data = pd.read_csv(os.path.join(args.data_dir, "Mutagenicity/Mutagenicity.csv"))
+    print("Processing data") 
+    data = pd.read_csv("../../data/Mutagenicity/Mutagenicity.csv")
 
     for tag in ["training", "test", "valid"]:
         df = data.query(f"group == '{tag}'").to_csv(
-            os.path.join(args.data_dir, f"Mutagenicity/Mutagenicity_{tag}.csv")
+            f"../../data/Mutagenicity/Mutagenicity_{tag}.csv"
         )
 
     # Create pytorch geometric data objects
-    train_data = XAIChem.Dataset(
-        root=args.data_dir, name="Mutagenicity", tag="training"
-    )
-    test_data = XAIChem.Dataset(root=args.data_dir, name="Mutagenicity", tag="test")
-    val_data = XAIChem.Dataset(root=args.data_dir, name="Mutagenicity", tag="valid")
+    train_data = XAIChem.Dataset(root="../../data", name="Mutagenicity", tag="training")
+    test_data = XAIChem.Dataset(root="../../data", name="Mutagenicity", tag="test")
+    val_data = XAIChem.Dataset(root="../../data", name="Mutagenicity", tag="valid")
 
     # Create pytorch graph batches
-    train_loader = DataLoader(train_data, batch_size=256)
-    test_loader = DataLoader(test_data, batch_size=256)
-    val_loader = DataLoader(val_data, batch_size=256)
+    data_loaders = {
+        "train": DataLoader(train_data, batch_size=256),
+        "test": DataLoader(test_data, batch_size=256),
+        "validation": DataLoader(val_data, batch_size=256)
+    }
 
-    # Create directory where model is saved
-    save_model_dir = os.path.join(args.data_dir, "trained_models/Mutagenicity")
-    pathlib.Path(save_model_dir).mkdir(parents=True, exist_ok=True)
-
+    # Use gpu if available, otherwise use cpu
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    for model_id in range(10):
-        config = {
-            "architecture": "RGCN by Wu et al.",
-            "dataset": "Mutagenicity from Wu et al.",
-            "epochs": 500,
-            "random_seed": 2022 + model_id * 10,
-            "learning_rate": 0.001,
-            "rgcn_dropout_rate": 0.4,
-            "num_rgcn_layers": 3,
-            "mlp_dropout_rate": 0.0,
-            "num_mlp_hidden_units": 128,
-        }
 
-        wandb.init(
-            project="Mutagenicity_reproduction", name=f"model_{model_id}", config=config
-        )
-        XAIChem.set_seed(config["random_seed"])
+    # Specify model details
+    config = {
+        "epochs": 500,
+        "random_seed": 2022 + model_id * 10,
+        "learning_rate": 0.001,
+        "patience": 30,
+        "RGCN_num_layers": 3,
+        "RGCN_hidden_units": [
+            256,
+            256,
+            256,
+        ],
+        "RGCN_dropout_rate": 0.4,
+        "RGCN_use_batch_norm": True,
+        "RGCN_num_bases": None,
+        "RGCN_loop": True,
+        "MLP_hidden_units": [256, 256, 256, 1],
+        "MLP_dropout_rate": 0.0,
+    }
 
-        model = XAIChem.RGCN(
-            num_node_features=XAIChem.getNumAtomFeatures(),
-            num_rgcn_layers=config["num_rgcn_layers"],
-            num_mlp_hidden_units=config["num_mlp_hidden_units"],
-            rgcn_dropout_rate=config["rgcn_dropout_rate"],
-            mlp_dropout_rate=config["mlp_dropout_rate"],
-            use_fastrgcn=True,
-            bclassification=True,
-        ).to(device)
+    # Define evaluation metrics 
+    metrics_dict = {
+        "roc_auc": metrics.roc_auc_score,
+        "F1": metrics.f1_score,
+        "accuracy": metrics.accuracy_score,
+        "recall": metrics.recall_score
+    }
 
-        optimizer = torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
+    XAIChem.set_seed(config["random_seed"])
+    
+    print("Building model")
+    gnn = XAIChem.models.RGCN(
+        XAIChem.features.getNumAtomFeatures(),
+        config["RGCN_num_layers"],
+        config["RGCN_hidden_units"],
+        dropout_rate=config["RGCN_dropout_rate"],
+        use_batch_norm=config["RGCN_use_batch_norm"],
+        num_bases=config["RGCN_num_bases"],
+        loop=config["RGCN_loop"],
+    )
 
-        pos_weight = pos_weight(train_data.y)
-        criterion = torch.nn.BCEWithLogitsLoss(
-            reduction="mean", pos_weight=pos_weight.to(device)
-        )
+    molecular_embedder = XAIChem.models.WeightedSum(config["RGCN_hidden_units"][-1])
 
-        early_stop = XAIChem.EarlyStopping(
-            save_model_dir, f"Mutagenicity_rgcn_model_{model_id}", patience=30
-        )
+    mlp = MLP(
+        config["MLP_hidden_units"],
+        dropout=config["MLP_dropout_rate"]
+    )
 
-        epoch = 0
-        val_loss = np.inf
-        while epoch <= config["epochs"] and not early_stop(val_loss, model):
-            epoch += 1
+    model = XAIChem.models.MolecularPropertyPredictor(
+        gnn,
+        molecular_embedder,
+        mlp,
+        F.sigmoid
+    )
 
-            train(train_loader, model, criterion, optimizer, device)
+    # Transfer model to gpu
+    model.to(device)
 
-            train_acc, train_loss = evaluate(train_loader, model, criterion, device)
-            test_acc, test_loss = evaluate(test_loader, model, criterion, device)
-            val_acc, val_loss = evaluate(val_loader, model, criterion, device)
+    optimizer = torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
+    pos_weight = computePosWeight(train_data.y)
+    criterion = torch.nn.BCEWithLogitsLoss(
+        reduction="mean", pos_weight=pos_weight.to(device)
+    )
 
-            wandb.log(
-                {
-                    "epoch": epoch,
-                    "train_acc": train_acc,
-                    "train_loss": train_loss,
-                    "test_acc": test_acc,
-                    "test_loss": test_loss,
-                    "val_acc": val_acc,
-                    "val_loss": val_loss,
-                }
-            )
+    early_stop = XAIChem.EarlyStopping(
+        "../../data/Mutagenicity/trained_models", 
+        f"Mutagenicity_rgcn_model_{model_id}", 
+        config["patience"]
+    )
 
-        torch.save(
-            model.state_dict(),
-            os.path.join(save_model_dir, f"Mutagenicity_rgcn_model_{model_id}.pt"),
-        )
-        wandb.finish()
+    print("Start taining model")
+    trainer = XAIChem.models.ModelTrainer(model, device)
+    trainer.train(
+        data_loaders,
+        criterion,
+        optimizer,
+        config["epochs"],
+        f"../../data/Mutagenicity/trained_models/Mutagenicity_rgcn_model_{model_id}",
+        metrics_dict,
+        early_stop,
+        log=True,
+    )
+

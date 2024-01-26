@@ -13,17 +13,13 @@ ENV BASH_ENV=/opt/etc/bashrc
 RUN apt-get update &&\
     apt-get install -y \
         wget \
-        openssh-client \
-        tmux \
-        neovim \
         git &&\
     apt-get clean
 
 # Install miniconda
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh &&\
     bash /tmp/miniconda.sh -b -u -p $CONDA_DIR &&\
-    rm /tmp/miniconda.sh &&\
-    chown --recursive user:user $CONDA_DIR
+    rm /tmp/miniconda.sh
 
 
 # Create conda environment and setup bashrc to
@@ -52,5 +48,7 @@ RUN conda create -n lab python=3.11 -y &&\
     conda init bash &&\
     echo "\nconda activate lab" >> ~/.bashrc &&\
     cp ~/.bashrc /opt/etc/bashrc &&\
-    conda clean -tipfay
+    conda clean -tipfay &&\
+    chown --recursive user:user $CONDA_DIR 
 
+USER user

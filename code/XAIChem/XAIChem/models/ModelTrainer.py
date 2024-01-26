@@ -1,8 +1,9 @@
 import time
-from collections import defaultdict
+from itertools import product
 from typing import Callable, Dict
 
 import pandas as pd
+import numpy as np
 import torch
 import wandb
 from torch.optim import Optimizer
@@ -34,8 +35,19 @@ class ModelTrainer:
     def trainEpoch(
         self, loader: DataLoader, criterion: Callable, optimizer: Optimizer
     ) -> None:
+        """
+        Perform one pass of all training data. Parameters are optimized 
+        after each bach iteration.
+
+        :param loader: batches of training data 
+        :param criterion: loss function used to optimize the model 
+            parameters 
+        :param optimizer: optimization function used to optimize the 
+            model parameters
+        """
         self._model.train()
 
+        # Iterate through the batches
         for data in loader:
             data.to(self._device)
 
@@ -50,20 +62,43 @@ class ModelTrainer:
         loader: DataLoader,
         criterion: Callable,
         metrics: Dict[str, Callable] | None = None,
+        model_type: str = "binary-classification"
     ) -> Dict[str, float]:
+        """
+        Compute evaluation metrics of the current model using 
+        the given data set. Returns a dictionairy containing 
+        performance metric name and its corresponding value.
+
+        :param loader: batches of data 
+        :param criterion: loss function used to optimize the model 
+            parameters
+        :param metics: dictionairy of functions to compute additional 
+            performance metrics, e.g. R2, accuracy, F1, ...
+            The matrix function should take the true labels as first
+            argument and predictions as second argument.
+        """
+
         self._model.eval()
 
         # Disable gradients to save memory
         with torch.no_grad():
-            # Compute average batch loss
+            # Average loss over the batches
             losses = 0
 
+            # Iterate through the batches
             for data in loader:
                 data.to(self._device)
 
                 pred = self._model(data)
                 losses += criterion(pred, data.y.view(-1, 1)).item()
-                self._predictions.extend(pred.view(1, -1).tolist()[0])
+
+                if model_type == "prediction":
+                    self._predictions.extend(pred.view(1, -1).tolist()[0])
+
+                elif model_type == "binary-classification":
+                    self._predictions.extend(torch.round(pred).view(1, -1).tolist()[0])
+
+
                 self._labels.extend(data.y.tolist())
 
             evaluation = {"loss": losses / len(loader)}
@@ -83,11 +118,13 @@ class ModelTrainer:
         criterion: Callable,
         optimizer: Optimizer,
         epochs: int,
+        save_path: str, 
         metrics: Dict[str, Callable] | None = None,
         early_stop: EarlyStopping | None = None,
         log: bool = False,
         wandb_project: str | None = None,
         wandb_group: str | None = None,
+        wandb_name: str | None = None,
         log_filename: str | None = None,
     ) -> None:
         """
@@ -97,19 +134,32 @@ class ModelTrainer:
         :param criterion: loss function used during training
         :param optimizer: optimizer used to train the ML model
         :param epochs: maximum number of full data iterations allowed
+        :param save_path: file location where trained model is saved
         :param metrics: dictionairy of names (strings) and sklearn.metric functions (default is None)
         :param early_stop: Determines when to stop before the number of epochs is reached
             A validation DataLoader must be present if early_stop is used. (default is None)
         :param log: print progress or not (default is False, i.e. no printing)
         :param wandb_project: if specified, upload model progress to wandb with given project name (default is None)
         :param wandb_group: group runs in wandb (default is None)
+        :param wandb_name: display name of the run in wandb dashboard (default is None, i.e. a random name will be generated)
         :param log_filename: if specified, write model progess to disk with given path
         """
 
         # Store model progress for each dataloader
         evaluations = {
-            dataset_name: defaultdict(list) for dataset_name in loaders.keys()
+            "_".join(col): [] 
+            for col in product(loaders.keys(), ["loss"])
         }
+        
+        evaluations["epoch"] = []
+        evaluations["time"] = []
+        
+        if metrics is not None:
+            for col in product(loaders.keys(), metrics.keys()):
+                evaluations["_".join(col)] = []
+
+        if early_stop is not None:
+            evaluations["early_stop_count"] = []
 
         # Log training time
         start_time = time.time()
@@ -119,6 +169,10 @@ class ModelTrainer:
 
             # Train one epoch using the training data set
             self.trainEpoch(loaders["train"], criterion, optimizer)
+
+            # Log early stop counter
+            if early_stop is not None:
+                evaluations["early_stop_count"].append(early_stop.counter)
 
             # Evaluate current model using the provided data sets
             for loader_name, loader in loaders.items():
@@ -131,30 +185,47 @@ class ModelTrainer:
 
                 # Add loss and requested metrics to model progress dict
                 for metric, value in evaluation.items():
-                    evaluations[loader_name][metric].append(value)
+                    evaluations[f"{loader_name}_{metric}"].append(value)
 
-                evaluations[loader_name]["time"].append(time.time() - start_time)
+            # Log passed time and epoch
+            evaluations["time"].append(time.time() - start_time)
+            evaluations["epoch"].append(epoch)
 
             if log:
-                print(
-                    {
-                        loader_name: {
-                            metric: values[self._epoch]
-                            for metric, values in evaluation.items()
-                        }
-                        for loader_name, evaluation in evaluations.items()
-                    }
-                )
 
+                # Get a list of the metric name together with its
+                # latest value
+                content = list(
+                    zip(
+                        evaluations.keys(),
+                        np.asarray(list(evaluations.values()))[:, -1]
+                    )
+                )
+                
+                # Print each metric next to each other, add line 
+                # break for next log statement
+                for metric in content:
+                    print(f"{metric[0]}: {round(metric[1], 4)}", end="\t")
+                print("\n", end="")
+            
+            # If early stop is reach, stop training
             if early_stop is not None and early_stop(
-                evaluations["validation"]["loss"][self._epoch], self._model
+                evaluations["validation_loss"][self._epoch], self._model
             ):
                 break
 
+        # Safe latest model 
+        torch.save(self._model.state_dict(), save_path) 
+
         # if a wandb project name is given, upload model progress to wandb
         if wandb_project is not None:
-            wandb.init(project=wandb_project, group=wandb_group)
-            wandb.log(evaluations.values())
+
+            wandb.init(project=wandb_project, group=wandb_group, name=wandb_name)
+
+            # Every row of the pandas dataframe represents one training step
+            df = pd.DataFrame.from_dict(evaluations)
+            df.apply(lambda row: wandb.log(row.to_dict()), axis = 1)
+
             wandb.finish()
 
         # If a log_filename is given, write model progress to disk

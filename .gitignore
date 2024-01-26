@@ -44,3 +44,6 @@ build/
 
 # HPC log files
 **/*.sh.*
+
+# wandb
+**/wandb/**

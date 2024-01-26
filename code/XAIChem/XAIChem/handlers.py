@@ -22,15 +22,18 @@ class EarlyStopping:
     def __init__(
         self, data_dir: str, model_name: str, patience: int, mode: str = "lower"
     ):
+        # Make sure the save directory exists, create if not
         if not os.path.exists(data_dir):
             Path(data_dir).mkdir(parents=True)
 
-        self.path = os.path.join(data_dir, f"{model_name}_early_stop.pt")
+        self.save_path = os.path.join(data_dir, f"{model_name}_early_stop.pt")
 
         self.patience = patience
         self.counter = 0
 
         self.best_score = None
+
+        # Specify if a better score is lower or higher
         self._isScoreBetter = (
             lambda score: score < self.best_score
             if mode.lower() == "lower"
@@ -40,11 +43,11 @@ class EarlyStopping:
     def __call__(self, score: float, model: torch.nn.Module) -> bool:
         if self.best_score is None:
             self.best_score = score
-            torch.save(model.state_dict(), self.path)
+            torch.save(model.state_dict(), self.save_path)
 
         elif self._isScoreBetter(score):
             self.best_score = score
-            torch.save(model.state_dict(), self.path)
+            torch.save(model.state_dict(), self.save_path)
             self.counter = 0
 
         else:
