@@ -11,7 +11,7 @@ from .. import createMask
 def functionalGroupMasks(
     smiles: str | List[str],
     functional_groups: List[str] = variables.FUNCTIONAL_GROUPS,
-) -> pd.DataFrame | None:
+) -> pd.DataFrame:
     """
     Get all functional groups of the given molecule in smiles represenation and 
     create a mask for each functional group. The mask isolates a functional group 
@@ -35,7 +35,6 @@ def functionalGroupMasks(
         functional_group_masks = defaultdict(list)
 
         for functional_group in functional_groups:
-
             for matched_atom_ids in molecule.GetSubstructMatches(MolFromSmarts(functional_group)):
                 
                 functional_group_masks["molecule_smiles"].append(molecule_smiles)

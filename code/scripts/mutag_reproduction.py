@@ -1,13 +1,13 @@
 import argparse
 
 import torch
-import torch.nn.functional as F
 from torch_geometric.loader import DataLoader
-from torch_geometric.nn import MLP
 from sklearn import metrics
 import pandas as pd
 
 import XAIChem
+
+from mutag_rgcn_model import buildMutagModel
 
 
 def computePosWeight(train_labels):
@@ -30,6 +30,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
     model_id = int(args.model_id)
 
+    model, config = buildMutagModel(model_id) 
+
     print("Processing data") 
     data = pd.read_csv("../../data/Mutagenicity/Mutagenicity.csv")
 
@@ -50,29 +52,6 @@ if __name__ == "__main__":
         "validation": DataLoader(val_data, batch_size=256)
     }
 
-    # Use gpu if available, otherwise use cpu
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-
-    # Specify model details
-    config = {
-        "epochs": 500,
-        "random_seed": 2022 + model_id * 10,
-        "learning_rate": 0.001,
-        "patience": 30,
-        "RGCN_num_layers": 3,
-        "RGCN_hidden_units": [
-            256,
-            256,
-            256,
-        ],
-        "RGCN_dropout_rate": 0.4,
-        "RGCN_use_batch_norm": True,
-        "RGCN_num_bases": None,
-        "RGCN_loop": True,
-        "MLP_hidden_units": [256, 256, 256, 1],
-        "MLP_dropout_rate": 0.0,
-    }
-
     # Define evaluation metrics 
     metrics_dict = {
         "roc_auc": metrics.roc_auc_score,
@@ -81,36 +60,11 @@ if __name__ == "__main__":
         "recall": metrics.recall_score
     }
 
-    XAIChem.set_seed(config["random_seed"])
-    
-    print("Building model")
-    gnn = XAIChem.models.RGCN(
-        XAIChem.features.getNumAtomFeatures(),
-        config["RGCN_num_layers"],
-        config["RGCN_hidden_units"],
-        dropout_rate=config["RGCN_dropout_rate"],
-        use_batch_norm=config["RGCN_use_batch_norm"],
-        num_bases=config["RGCN_num_bases"],
-        loop=config["RGCN_loop"],
-    )
+    # Use gpu if available, otherwise use cpu
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu") 
+    model.to(device) # Transfer model to gpu
 
-    molecular_embedder = XAIChem.models.WeightedSum(config["RGCN_hidden_units"][-1])
-
-    mlp = MLP(
-        config["MLP_hidden_units"],
-        dropout=config["MLP_dropout_rate"]
-    )
-
-    model = XAIChem.models.MolecularPropertyPredictor(
-        gnn,
-        molecular_embedder,
-        mlp,
-        F.sigmoid
-    )
-
-    # Transfer model to gpu
-    model.to(device)
-
+    # Setup training
     optimizer = torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
     pos_weight = computePosWeight(train_data.y)
     criterion = torch.nn.BCEWithLogitsLoss(
@@ -124,7 +78,7 @@ if __name__ == "__main__":
     )
 
     print("Start taining model")
-    trainer = XAIChem.models.ModelTrainer(model, device)
+    trainer = XAIChem.models.ModelTrainer(model, device, config)
     trainer.train(
         data_loaders,
         criterion,
@@ -133,6 +87,8 @@ if __name__ == "__main__":
         f"../../data/Mutagenicity/trained_models/Mutagenicity_rgcn_model_{model_id}",
         metrics_dict,
         early_stop,
-        log=True,
+        wandb_project="mutag_reproduction",
+        wandb_group="RUN_1",
+        wandb_name=f"model_{model_id}"
     )
 

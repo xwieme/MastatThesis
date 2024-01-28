@@ -16,10 +16,12 @@ class ModelTrainer:
         self,
         model: torch.nn.Module,
         device: torch.device,
+        config: dict
     ):
         self._model = model
-        self._epoch = 0
         self._device = device
+        self._config = config
+        self._epoch = 0
 
         # Initialize empty list to store model predictions and true
         # labels which can be used to compute various evaluation metrics
@@ -125,7 +127,6 @@ class ModelTrainer:
         wandb_project: str | None = None,
         wandb_group: str | None = None,
         wandb_name: str | None = None,
-        log_filename: str | None = None,
     ) -> None:
         """
         Train the given ML model using the specified criterion and optimizer.
@@ -142,7 +143,6 @@ class ModelTrainer:
         :param wandb_project: if specified, upload model progress to wandb with given project name (default is None)
         :param wandb_group: group runs in wandb (default is None)
         :param wandb_name: display name of the run in wandb dashboard (default is None, i.e. a random name will be generated)
-        :param log_filename: if specified, write model progess to disk with given path
         """
 
         # Store model progress for each dataloader
@@ -220,16 +220,15 @@ class ModelTrainer:
         # if a wandb project name is given, upload model progress to wandb
         if wandb_project is not None:
 
-            wandb.init(project=wandb_project, group=wandb_group, name=wandb_name)
+            wandb.init(
+                project=wandb_project, 
+                group=wandb_group, 
+                name=wandb_name,
+                config=self._config
+            )
 
             # Every row of the pandas dataframe represents one training step
             df = pd.DataFrame.from_dict(evaluations)
             df.apply(lambda row: wandb.log(row.to_dict()), axis = 1)
 
             wandb.finish()
-
-        # If a log_filename is given, write model progress to disk
-        if log_filename is not None:
-            for dataset_name, model_progress in evaluations.items():
-                df = pd.DataFrame(model_progress)
-                df.to_json(f"{log_filename}_{dataset_name}.json")

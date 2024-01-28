@@ -1,92 +1,68 @@
-from torch_geometric.loader import DataLoader
-from torch_geometric.nn import MLP
+import argparse
+
 import torch
 from torch.optim import Adam 
+from torch_geometric.loader import DataLoader
+from sklearn import metrics
 
 import XAIChem
 
+from esol_rgcn_model import buildEsolModel  
+
 
 if __name__ == "__main__":
+    
+    # Get model id from user input. The model id determines the random seed.
+    parser = argparse.ArgumentParser(
+        prog="ESOL_training",
+        description="Train a GNN to predict expected solubility of molecules"
+    )
+    parser.add_argument("model_id")
+    args = parser.parse_args()
+    model_id = int(args.model_id)
 
-    # Define model configuration
-    config = {
-        "seed": 2022 + 10,
-        "batch_size": 32,
-        "learning_rate": 0.001,
-        "epochs": 500,
-        "patience": 30,
-        "RGCN_num_layers": 2,
-        "RGCN_num_units": [XAIChem.features.getNumAtomFeatures(), 256, 256],
-        "RGCN_dropout_rate": 0.5,
-        "RGCN_use_batch_norm": True,
-        "RGCN_num_bases": None,
-        "RGCN_loop": False,
-        "MLP_num_layers": 3,
-        "MLP_num_units": [256, 256, 256, 256, 1],
-        "MLP_dropout_rate": 0.5
-    }
+    model, config = buildEsolModel(model_id)
 
-    # Load data
-    print("Loading data ...")
+    print("Loading data")
     train_data = XAIChem.Dataset("../../data", "ESOL", "train")
     test_data = XAIChem.Dataset("../../data", "ESOL", "test")
     val_data = XAIChem.Dataset("../../data", "ESOL", "val")
 
     # Batch data 
-    train_loader = DataLoader(train_data, batch_size = config["batch_size"])
-    test_loader = DataLoader(test_data, batch_size = config["batch_size"])
-    val_loader = DataLoader(val_data, batch_size = config["batch_size"])
-
     data = {
-        "train": train_loader,
-        "test": test_loader,
-        "validation": val_loader
+        "train": DataLoader(train_data, batch_size = config["batch_size"]),
+        "test": DataLoader(test_data, batch_size = config["batch_size"]),
+        "validation": DataLoader(val_data, batch_size = config["batch_size"])
     }
 
-    print("Model setup ...")
-    # Construct a MolecularPropertiePredicor
-    gnn = XAIChem.models.RGCN(
-        XAIChem.features.getNumAtomFeatures(),
-        config["RGCN_num_layers"],
-        config["RGCN_num_units"],
-        dropout_rate = config["RGCN_dropout_rate"],
-        use_batch_norm = config["RGCN_use_batch_norm"],
-        num_bases = config["RGCN_num_bases"],
-        loop = config["RGCN_loop"]
-    )
-
-    molecular_embedder = XAIChem.models.WeightedSum(config["RGCN_num_units"][-1])
-
-    mlp = MLP(
-        config["MLP_num_units"], 
-        dropout = config["MLP_dropout_rate"]
-    )
-
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    model = XAIChem.models.MolecularPropertyPredictor(gnn, molecular_embedder, mlp)
-    # Transfer model to gpu
-    model.to(device)
+    model.to(device) # Transfer model to gpu
 
+    # Setup training
     criterion = torch.nn.MSELoss()
     optimizer = Adam(model.parameters(), config["learning_rate"])
     early_stopper = XAIChem.EarlyStopping(
         "../../data/ESOL/trained_models",
-        "ESOL_reproduction",
+        f"ESOL_rgcn_model_{model_id}",
         config["patience"]
     )
 
+    # Specify evaluation metrics
+    # Loss is logged automatically
+    metrics_dict = {"r2": metrics.r2_score}
+
     print("start training")
-    trainer = XAIChem.models.ModelTrainer(model, device)
+    trainer = XAIChem.models.ModelTrainer(model, device, config)
     trainer.train(
         data,
         criterion,
         optimizer,
         config["epochs"],
-        "../../data/ESOL/model_1.pt",
+        f"../../data/ESOL/model_{model_id}.pt",
         early_stop = early_stopper,
+        metrics=metrics_dict,
         wandb_project = "ESOL_reproduction",
         wandb_group = "RUN_1",
-        wandb_name = "model_1",
-        log = True
+        wandb_name = f"model_{model_id}",
     )
 
