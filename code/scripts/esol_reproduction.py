@@ -7,7 +7,7 @@ from sklearn import metrics
 
 import XAIChem
 
-from esol_rgcn_model import buildEsolModel  
+# from esol_rgcn_model import buildEsolModel  
 
 
 if __name__ == "__main__":
@@ -21,7 +21,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     model_id = int(args.model_id)
 
-    model, config = buildEsolModel(model_id)
+    model, config = XAIChem.models.PreBuildModels.rgcnWuEtAll(
+        "esol_reproduction.yaml", 
+        ["seed"], 
+        model_id=model_id
+    )
 
     print("Loading data")
     train_data = XAIChem.Dataset("../../data", "ESOL", "train")
@@ -30,9 +34,9 @@ if __name__ == "__main__":
 
     # Batch data 
     data = {
-        "train": DataLoader(train_data, batch_size = config["batch_size"]),
-        "test": DataLoader(test_data, batch_size = config["batch_size"]),
-        "validation": DataLoader(val_data, batch_size = config["batch_size"])
+        "train": DataLoader(train_data, batch_size=config["batch_size"], shuffle=True),
+        "test": DataLoader(test_data, batch_size=config["batch_size"]),
+        "validation": DataLoader(val_data, batch_size=config["batch_size"])
     }
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -44,7 +48,8 @@ if __name__ == "__main__":
     early_stopper = XAIChem.EarlyStopping(
         "../../data/ESOL/trained_models",
         f"ESOL_rgcn_model_{model_id}",
-        config["patience"]
+        config["early_stop"]["patience"],
+        config["early_stop"]["mode"]
     )
 
     # Specify evaluation metrics
@@ -59,10 +64,11 @@ if __name__ == "__main__":
         optimizer,
         config["epochs"],
         f"../../data/ESOL/model_{model_id}.pt",
-        early_stop = early_stopper,
+        early_stop=early_stopper,
         metrics=metrics_dict,
-        wandb_project = "ESOL_reproduction",
-        wandb_group = "RUN_1",
-        wandb_name = f"model_{model_id}",
+        wandb_project="ESOL_reproduction",
+        wandb_group="RUN_3",
+        wandb_name=f"model_{model_id}",
+        log=True
     )
 

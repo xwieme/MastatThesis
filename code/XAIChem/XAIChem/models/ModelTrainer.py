@@ -1,6 +1,7 @@
 import time
 from itertools import product
 from typing import Callable, Dict
+from collections import defaultdict
 
 import pandas as pd
 import numpy as np
@@ -146,20 +147,7 @@ class ModelTrainer:
         """
 
         # Store model progress for each dataloader
-        evaluations = {
-            "_".join(col): [] 
-            for col in product(loaders.keys(), ["loss"])
-        }
-        
-        evaluations["epoch"] = []
-        evaluations["time"] = []
-        
-        if metrics is not None:
-            for col in product(loaders.keys(), metrics.keys()):
-                evaluations["_".join(col)] = []
-
-        if early_stop is not None:
-            evaluations["early_stop_count"] = []
+        evaluations = defaultdict(list)
 
         # Log training time
         start_time = time.time()
@@ -170,9 +158,10 @@ class ModelTrainer:
             # Train one epoch using the training data set
             self.trainEpoch(loaders["train"], criterion, optimizer)
 
-            # Log early stop counter
+            # Log early stop progress 
             if early_stop is not None:
                 evaluations["early_stop_count"].append(early_stop.counter)
+                evaluations["best_score"].append(early_stop.best_score)
 
             # Evaluate current model using the provided data sets
             for loader_name, loader in loaders.items():
@@ -205,12 +194,13 @@ class ModelTrainer:
                 # Print each metric next to each other, add line 
                 # break for next log statement
                 for metric in content:
-                    print(f"{metric[0]}: {round(metric[1], 4)}", end="\t")
+                    if metric[1] is not None:
+                        print(f"{metric[0]}: {metric[1]:<8.4f}", end="\t")
                 print("\n", end="")
             
             # If early stop is reach, stop training
             if early_stop is not None and early_stop(
-                evaluations["validation_loss"][self._epoch], self._model
+                evaluations[f"validation_{self._config['early_stop']['metric']}"][self._epoch], self._model
             ):
                 break
 

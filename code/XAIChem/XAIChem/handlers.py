@@ -34,18 +34,19 @@ class EarlyStopping:
         self.best_score = None
 
         # Specify if a better score is lower or higher
-        self._isScoreBetter = (
-            lambda score: score < self.best_score
-            if mode.lower() == "lower"
-            else lambda score: score > self.best_score
-        )
+        self._isScoreBetter = self._lower if mode == "lower" else self._higher
 
     def __call__(self, score: float, model: torch.nn.Module) -> bool:
+        """
+        Update best_score or increase counter depending on score
+        """
+
         if self.best_score is None:
             self.best_score = score
             torch.save(model.state_dict(), self.save_path)
 
         elif self._isScoreBetter(score):
+
             self.best_score = score
             torch.save(model.state_dict(), self.save_path)
             self.counter = 0
@@ -54,6 +55,18 @@ class EarlyStopping:
             self.counter += 1
 
         return self.counter == self.patience
+
+    def _lower(self, score):
+        """
+        A lower score is better
+        """
+        return score < self.best_score 
+
+    def _higher(self, score):
+        """
+        A higher score is better
+        """
+        return score > self.best_score
 
 
 def loadModels(

@@ -4,10 +4,9 @@ import torch
 from torch_geometric.loader import DataLoader
 from sklearn import metrics
 import pandas as pd
+import numpy as np
 
 import XAIChem
-
-from mutag_rgcn_model import buildMutagModel
 
 
 def computePosWeight(train_labels):
@@ -30,7 +29,11 @@ if __name__ == "__main__":
     args = parser.parse_args()
     model_id = int(args.model_id)
 
-    model, config = buildMutagModel(model_id) 
+    model, config = XAIChem.models.PreBuildModels.rgcnWuEtAll(
+        "mutag_reproduction.yaml",
+        ["seed"],
+        model_id=model_id
+    )
 
     print("Processing data") 
     data = pd.read_csv("../../data/Mutagenicity/Mutagenicity.csv")
@@ -47,9 +50,9 @@ if __name__ == "__main__":
 
     # Create pytorch graph batches
     data_loaders = {
-        "train": DataLoader(train_data, batch_size=256),
-        "test": DataLoader(test_data, batch_size=256),
-        "validation": DataLoader(val_data, batch_size=256)
+        "train": DataLoader(train_data, batch_size=config["batch_size"], shuffle=True),
+        "test": DataLoader(test_data, batch_size=config["batch_size"]),
+        "validation": DataLoader(val_data, batch_size=config["batch_size"])
     }
 
     # Define evaluation metrics 
@@ -57,7 +60,9 @@ if __name__ == "__main__":
         "roc_auc": metrics.roc_auc_score,
         "F1": metrics.f1_score,
         "accuracy": metrics.accuracy_score,
-        "recall": metrics.recall_score
+        "recall": metrics.recall_score,
+        "precision": metrics.precision_score,
+        "mcc": metrics.matthews_corrcoef,
     }
 
     # Use gpu if available, otherwise use cpu
@@ -74,7 +79,8 @@ if __name__ == "__main__":
     early_stop = XAIChem.EarlyStopping(
         "../../data/Mutagenicity/trained_models", 
         f"Mutagenicity_rgcn_model_{model_id}", 
-        config["patience"]
+        config["early_stop"]["patience"],
+        config["early_stop"]["mode"]
     )
 
     print("Start taining model")
@@ -87,8 +93,8 @@ if __name__ == "__main__":
         f"../../data/Mutagenicity/trained_models/Mutagenicity_rgcn_model_{model_id}",
         metrics_dict,
         early_stop,
-        wandb_project="mutag_reproduction",
+        wandb_project="Mutagenicity_reproduction",
         wandb_group="RUN_1",
-        wandb_name=f"model_{model_id}"
+        wandb_name=f"model_{model_id}",
     )
 
