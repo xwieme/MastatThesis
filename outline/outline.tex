@@ -191,10 +191,83 @@
 %     \item Summary/conclusion: What should the reader expect as conclusion? In advanced versions of the outline, you should also include all the sections that will go in the Experimental section (at the level of paragraph subheadings) and indicate what information will go in the Microfilm section.
 % \end{itemize}
 
+Machine learning can be used to predict properties of molecules.\\cite{} As molecules can be 
+represented by a graph (cf. Lewis structure\\cite{}), state of the art results are obtained 
+using graph neural networks (GNN).\\cite{} However, the black box nature of GNN possesses a 
+problem. If it is unknown how the model obtained a certain prediction, it could lead to 
+distrust when the result will be used in performance critical applications or expensive 
+practicall experiments like drugs discovery.\\cite{} 
 
+The goal of explainable machine learning is to uncover the black box algorithms.\\cite{}
+This will result in more trust in the model prediction and could also reveal
+novel scientific knowledge of the studied application.\\cite{} Recently, Wu et. al used 
+substructure mask exploration to explain molecular property models in a chemically 
+intuitive manner.\cite{} Their approach uses the difference between the prediction 
+of a molecule and the prediction when a functional group of that molecule is removed. 
+An additional benefit of this method is that a linear model can be fitted to optimize 
+molecular properties without the need of training an expensive machine learning model.
 
+However, just using the difference could lead to wrong interpretations due to interaction 
+effects.\cite{} A commonly used method to fairly distribute the prediction over the 
+features is the Shapley value taken from cooperative game theory.\\cite{} This value cannot 
+be applied in the context of GNN as the Shapley value does not take the graphical structure 
+into account. Therefore the structure aware HM-value is used instead.\\cite{}
 
 \section{Theory}
+
+A game with transfer utility (TU game) is defined as a pair $(N, v)$ where $N$ is a finite 
+set of players and $v$ is a characteristic function that maps for each coalition a pay-off
+
+\begin{equation}
+
+    v: 2^N := {S | S \subseteq N} \rightarrow \mathcal{R}.
+
+\end{equation}
+
+A game with communication structure is a triple $(N, v, g)$.
+Let $g_N$ denote the set of all edges, i.e. 
+
+$$
+g_n  = \{\{i, j \} | i \ne j \and i, j \in N \}
+$$
+
+A graph is a pair $<N, g>$ where $g \subseteq g_N$ is the set of connected players.
+Let $GR$ be the set of all graphs, i.e. 
+
+$$
+GR = \{ <N, g> | N \subseteq U \and g \subseteq g_n \}
+$$
+
+Let $<S, g(S)>$ denote the induced graph of $<N, g>$ with $S \subseteq N$ and $g(S) = \{\{i, j \} | i, j \in S}$.
+A path between vertices $i$ and $j$ is a series of vertices $i_1 = i, i_2, \dots, i_k = j$ such that for all $q$ between 
+$1$ and $k-1$ the edge $\{i_q, i_{q+1}\}$ is an element of $g$. If such a path exists, $i$ and $j$ are connected, which 
+will be denoted as $i \underset{<N, g>}{\leftarrow}$.
+
+Let $N/g$ be the partition of $N$ of all connected coalitions (called components) in $g$, i.e.
+ 
+$$
+    N/g = \{\{ i | i \underset{<N, g>}{\leftarrow} j \and i \in N \} \union \{j\} | j \in N \}.
+$$
+
+The set including its neighbors will be denoted by $S^* = \{ i \in N | \exitst j \in S such that \{i, j\} \in g} \cap S$.
+The characteristic function $v/g$ is defined as the sum of the characteristic function $v$ over all components in $g$, 
+
+$$
+(v/g)(S) = \sum_{R \subseteq S} v(R).
+$$
+
+An unanimity game $(N, u_S)$ is defined as 
+
+\begin{equation}
+    u_S(T) = \begin{cases}
+
+        1 & \text{if} S \subseteq T \\
+        0 & \text{otherwise}
+
+    \end{cases}
+
+\end{equation}
+
 
 \section{Methodology}
 
