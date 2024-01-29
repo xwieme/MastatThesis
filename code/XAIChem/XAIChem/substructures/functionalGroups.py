@@ -1,6 +1,7 @@
 from typing import List
 from collections import defaultdict
 
+from tqdm import tqdm
 import pandas as pd 
 from rdkit.Chem import MolFromSmiles, MolFromSmarts 
 
@@ -27,7 +28,7 @@ def functionalGroupMasks(
 
     dataframes = list()
 
-    for molecule_smiles in smiles: 
+    for molecule_smiles in tqdm(smiles): 
         molecule = MolFromSmiles(molecule_smiles)
 
         # Create a dictionairy of lists to store the atom ids of functional groups 

@@ -1,6 +1,7 @@
 from typing import List
 from collections import defaultdict
 
+from tqdm import tqdm
 import pandas as pd
 import numpy as np
 import torch
@@ -8,6 +9,7 @@ import torch
 from ..prediction import predict 
 from .. import createDataObjectFromSmiles
 
+tqdm.pandas()
 
 def difference(models: List[torch.nn.Module], masks: pd.DataFrame, method: str = "after") -> pd.DataFrame:
     """
@@ -24,6 +26,7 @@ def difference(models: List[torch.nn.Module], masks: pd.DataFrame, method: str =
     results = defaultdict(list)
 
     # Use the models to make predictons of the unique unmasked molecules
+    print("unmasked predictions")
     for smiles in masks['molecule_smiles'].unique():
 
         data = createDataObjectFromSmiles(smiles, np.inf)
@@ -35,17 +38,20 @@ def difference(models: List[torch.nn.Module], masks: pd.DataFrame, method: str =
 
     # Convert the predictions of the unmasked molecules to a pandas dataframe 
     # and merge it to the 'masks' dataframe.
+    print("convert to dataframe")
     results = pd.DataFrame.from_dict(results)
     attribution_df = pd.merge(masks, results, on='molecule_smiles')
 
     # Now, the apply function can be used to compute the masked predictions
-    attribution_df["prediction_masked"] = attribution_df[["data", "mask"]].apply(
+    print("masked predictions")
+    attribution_df["prediction_masked"] = attribution_df[["data", "mask"]].progress_apply(
         lambda row: predict(row['data'], models, row['mask']).item(),
         axis=1
     )
 
     # Compute the attribution as the difference between the unmasked prediction and the 
     # masked prediction
+    print("compute difference")
     attribution_df["attribution"] = attribution_df['prediction'] - attribution_df['prediction_masked']
 
     return attribution_df

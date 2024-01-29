@@ -10,6 +10,7 @@ def predict(
     data: Data,
     models: List[torch.nn.Module],
     mask: torch.Tensor | None = None,
+    device: int | str | None = None,
 ) -> torch.Tensor:
 
     # Disable gradient computation to save memory
@@ -18,16 +19,20 @@ def predict(
         predictions = torch.zeros(len(models))
         data.batch = torch.zeros(1, dtype=torch.long)
 
+        if device is not None:
+            data.to(device)
+
         for i, model in enumerate(models):
             predictions[i] = model(data, mask)
 
-    return torch.mean(predictions)
+    return torch.mean(predictions).to("cpu")
 
 
 def predictBatch(
     data: DataLoader,
     models: List[torch.nn.Module],
     masks: torch.Tensor | None = None,
+    device: int | str | None = None,
 ):
     # Disable gradient computation to save memory
     with torch.no_grad():
