@@ -7,6 +7,7 @@ USER root
 
 ARG CONDA_DIR=/opt/conda/
 ENV PATH=$CONDA_DIR/bin:$CONDA_DIR/envs/lab/bin:$PATH
+ENV PYTHONPATH=/workspace/code/XAIChem
 # Environment variable used by apptainer to load the default conda env
 ENV BASH_ENV=/opt/etc/bashrc
 
@@ -37,6 +38,9 @@ RUN conda create -n lab python=3.11 -y &&\
         plotly=5.18.0 \
         pyright \
         black \
+        pyarrow \
+        fastparquet \
+        pytest \
         -c pytorch \
         -c pyg \
         -c nvidia \
@@ -49,6 +53,7 @@ RUN conda create -n lab python=3.11 -y &&\
     echo "\nconda activate lab" >> ~/.bashrc &&\
     cp ~/.bashrc /opt/etc/bashrc &&\
     conda clean -tipfay &&\
-    chown --recursive user:user $CONDA_DIR 
+    chown --recursive user:user $CONDA_DIR &&\
+    cp ~/.bashrc /home/user
 
 USER user
