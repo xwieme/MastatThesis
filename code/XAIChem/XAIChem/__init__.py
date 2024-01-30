@@ -9,4 +9,4 @@ from .prediction import predict, predictBatch
 from .utils import getEdgeTypes, set_seed
 from .visualization import showMolecule
 
-from . import models, substructures, attribution, variables
+from . import models, substructures, attribution, variables, graph
