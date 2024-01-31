@@ -17,8 +17,7 @@ def createMask(molecule: Chem.rdchem.Mol, substructure: Iterable[int]) -> torch.
     for i, atom in enumerate(molecule.GetAtoms()):
         mask[i] = atom.GetIdx() not in substructure
 
-    # mask must be a 2D tensor to mach dimensions in graph neural network model
-    return mask.view(-1, 1)
+    return mask
 
 
 def removeAtoms(molecule: Chem.rdchem.Mol, atom_ids: Iterable[int]) -> Chem.rdchem.Mol:

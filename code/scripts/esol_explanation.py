@@ -1,152 +1,107 @@
-from itertools import chain, combinations
-from typing import Iterable
-from collections import deque
+import base64
+import sys
+import time
+from io import BytesIO
+from itertools import combinations
 
-import pandas as pd
 import numpy as np
-
-import XAIChem 
-
-
-def powerset(A: Iterable):
-    """
-    Generate the powerset of A.
-
-    Example: powerset([1, 2, 3]) results in 
-    [(), (1,), (2,), (3,), (1, 2), (1, 3), (2, 3), (1, 2, 3)]
-    """
-
-    A = list(A)
-    return chain.from_iterable(combinations(A, r) for r in range(len(A)+1))
+import pandas as pd
+import torch
+import XAIChem
+from dash import Dash, html
+from rdkit import Chem
+from torch_geometric.loader import DataLoader
+from tqdm import tqdm
 
 
-def isConnected(i, j, g):
-    return (i, j) in g
+def pillTob64(image, env_format="png", **kwargs):
+    buff = BytesIO()
+    image.save(buff, format=env_format, **kwargs)
+    encoded = base64.b64encode(buff.getvalue()).decode("utf-8")
 
-
-def adjacencyMatrix(N, g):
-
-    A = np.zeros((max(N), max(N)))
-
-    # Iterate throug every edge, set an 
-    # element to one if an edge exists between 
-    # its corresponding indices
-    for i, j in g:
-        A[i-1, j-1] = 1
-        A[j-1, i-1] = 1
-
-    return A
-
-
-def path(N, g, i, j):
-    """
-    Check if there exists a path for i to j in the graph 
-    defined by the edges set g.
-    """
-
-    assert i != j, "Self loops are not defined"
-
-    A = adjacencyMatrix(N, g)
-
-    to_visit = deque(*np.where(A[i-1, :] == 1))
-    visited = {i}
-
-    current_index = to_visit.pop() + 1
-
-    while current_index != j or visited == N:
-        # Mask current index as visited
-        visited.add(current_index)
-
-        # Get all connected vertices to the current vertex
-        # If they are not visited yet, assign to to_visit
-        for neighbor in np.where(A[current_index-1, :] == 1)[0]:
-            if neighbor + 1 not in visited:
-                to_visit.append(neighbor)
-
-        # Go to the next vertex
-        current_index = to_visit.pop() + 1
-
-    return current_index == j
-
-
-def partition(S, g):
-    """
-    Create a set of connected components of S on the graph defined 
-    by the edge set g.
-    """
-
-    out = [] 
-
-    for j in S:
-        component = [j]
-        for i in S:
-            if i != j and path(N, g, i, j):
-                component.append(i)
-
-        out.append(tuple(component))
-    
-    return set(out)
-
-
-def createMc(N, t):
-
-    M = np.zeros(shape=(2**len(N) - 1, 2**len(N) - 1))
-    all_coalitions = np.asarray(list(powerset(N)), dtype=object)[1:]
-
-    # Diagonal elements
-    for i, S in enumerate(all_coalitions):
-        M[i, i] = 1 - (len(N) - len(S)) * t
-
-        for j, T in enumerate(all_coalitions):
-
-            if len(T) == 1 and not set(T).issubset(set(S)):
-                M[i, j] = -t
-            
-            elif len(S) + 1 == len(T) and set(S).issubset(set(T)):
-                M[i, j] = t
-
-    return M
-
-
-def createPg():
-    pass
+    return encoded
 
 
 if __name__ == "__main__":
+    app = Dash(__name__)
 
-    import doctest 
-    doctest.testmod()
-
+    device = torch.device("cpu")
     # Get model architecture and configuration
-#    model, config = XAIChem.models.PreBuildModels.rgcnWuEtAll(
-#        "esol_reproduction.yaml",
-#        ["seed"],
-#        model_id=0
-#    )
-#
-#    # Load trained models 
-#    paths = [
-#        f"../../data/ESOL/trained_models/ESOL_rgcn_model_{i}_early_stop.pt"
-#        for i in range(10)
-#    ]
-#    models = XAIChem.loadModels(model, paths)
-#
-#    # Load data for explanation
+    model, config = XAIChem.models.PreBuildModels.rgcnWuEtAll(
+        "esol_reproduction.yaml", ["seed"], model_id=0
+    )
+
+    # Load trained models
+    paths = [
+        f"../../data/ESOL/trained_models/ESOL_rgcn_model_{i}_early_stop.pt"
+        for i in range(10)
+    ]
+    models = XAIChem.loadModels(model, paths, device="cuda")
+
+    for model in models:
+        model.to(device)
+
+    # Load data for explanation
     molecules = pd.read_csv("../../data/ESOL/ESOL.csv")
-#
-#    masks = XAIChem.substructures.functionalGroupMasks(molecules.smiles)
-#    attributions = XAIChem.attribution.difference(models, masks)
-#
-#    print(attributions.head())
+    masks = XAIChem.substructures.functionalGroupMasks(molecules.smiles, inverse=True)
 
-    # molecule = XAIChem.createDataObjectFromSmiles(molecules["smiles"][0], np.inf)
+    molecule_smiles = "CC1CCC(C(C1)O)C(C)C"
+    masks = XAIChem.substructures.functionalGroupMasks(molecule_smiles, inverse=True)
 
-    N = {1, 2, 3}
-    g = {(1, 2), (2, 3)}
+    rdmol = Chem.MolFromSmiles(molecule_smiles)
+    molecule = XAIChem.createDataObjectFromRdMol(rdmol, np.inf)
+    # img_str = pillTob64(XAIChem.showMolecule(rdmol))
+    # app.layout = html.Div([html.Img(src=f"data:image/png;base64,{img_str}")])
 
-    M = createMc(N, 1)
-    print(M)
+    print(XAIChem.predict(molecule, models))
 
-    print(partition(N, g))
-    
-    
+    mol_masks = masks["mask"].tolist()
+    scaffold_mask = torch.stack(mol_masks, dim=0).sum(dim=0) ^ 1
+    mol_masks.append(scaffold_mask)
+    mol_masks = torch.stack(mol_masks, dim=0)
+
+    molecule_batch = [molecule for _ in range(2 ** len(mol_masks) - 1)]
+    molecule_batch = DataLoader(molecule_batch, batch_size=256)
+
+    mask_batch = []
+    for indices in tqdm(list(XAIChem.graph.powerset(list(range(len(mol_masks)))))):
+        mask = torch.stack([mol_masks[i, :] for i in indices]).sum(dim=0)
+        mask_batch.append(mask)
+
+    mask_batch = torch.stack(mask_batch, dim=0).t()
+    mask_batch.to(device)
+
+    print(mask_batch.shape)
+
+    predictions = []
+    for i, batch in enumerate(molecule_batch):
+        batch.to(device)
+        mask_batch_subset = mask_batch[:, i * 256 : (i + 1) * 256]
+        predictions.extend(
+            XAIChem.predictBatch(
+                batch,
+                models,
+                mask_batch_subset.t().contiguous().view(-1, 1),
+                device,
+            ).to("cpu")
+        )
+    N = tuple(range(len(mol_masks)))
+    # g = list(zip(*molecule.edge_index))
+    g = {(0, 1)}
+
+    print(N)
+    print(g)
+
+    HN_value = XAIChem.attribution.hamiacheNavarroValue(
+        N, np.asarray(predictions), g, 2 / len(mol_masks)
+    )
+
+    print(predictions)
+    print(HN_value)
+    print(sum(HN_value[: len(mol_masks)]))
+
+    #    attributions = XAIChem.attribution.difference(models, masks)
+    #
+    #    print(attributions.head())
+
+    # app.run("0.0.0.0", "8888")
