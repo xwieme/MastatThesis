@@ -10,11 +10,13 @@ def predict(
     data: Data,
     models: List[torch.nn.Module],
     mask: torch.Tensor | None = None,
-    device: int | str | None = None,
+    device: torch.device | str = "cpu",
 ) -> torch.Tensor:
     # Disable gradient computation to save memory
     with torch.no_grad():
         predictions = torch.zeros(len(models))
+        predictions.to(device)
+
         data.batch = torch.zeros(1, dtype=torch.long)
 
         if device is not None:

@@ -72,7 +72,6 @@ def hamiacheNavarroValue(
     Pg = createPg(N, g)
 
     Mg = Pg @ Mc @ Pg
-    print(Mg)
 
     # Converge power series
     Mg_old = np.inf
@@ -80,7 +79,35 @@ def hamiacheNavarroValue(
         Mg_old = Mg
         Mg = Mg @ Mg
 
-    print(Mg)
+    # Return the value
+    return Mg @ v
+
+
+def shapleyValue(
+    N: frozenset | tuple, v: np.ndarray, t: float | None = None
+) -> np.ndarray:
+    """
+    Computes a value for a transfer utility game (TU game) with  as developed
+    by Shapley () using the associated game formulation developed by Hamiache
+    ()
+
+    :param N: set of players
+    :param v: characteristic function mapping a coalition (i.e. a subset of N)
+        to a real value, represented as a numpy array.
+    :param t: hyperparameter specifying the amount of surplus. (default is
+        None)
+    """
+
+    Mc = createMc(N, t)
+    Pg = np.identity(Mc.shape[0])
+
+    Mg = Pg @ Mc @ Pg
+
+    # Converge power series
+    Mg_old = np.inf
+    while not np.allclose(Mg, Mg_old):
+        Mg_old = Mg
+        Mg = Mg @ Mg
 
     # Return the value
     return Mg @ v
