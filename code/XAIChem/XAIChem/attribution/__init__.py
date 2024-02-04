@@ -1,2 +1,9 @@
 from .difference import difference
-from .hamiacheNavarro import createMc, createPg, hamiacheNavarroValue, shapleyValue
+from .hamiacheNavarro import (
+    _createMc,
+    _createPg,
+    _hamiacheNavarroValue,
+    _shapleyValue,
+    hamiacheNavarroValue,
+    shapleyValue,
+)

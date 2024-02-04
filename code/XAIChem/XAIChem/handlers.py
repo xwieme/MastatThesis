@@ -46,7 +46,6 @@ class EarlyStopping:
             torch.save(model.state_dict(), self.save_path)
 
         elif self._isScoreBetter(score):
-
             self.best_score = score
             torch.save(model.state_dict(), self.save_path)
             self.counter = 0
@@ -60,7 +59,7 @@ class EarlyStopping:
         """
         A lower score is better
         """
-        return score < self.best_score 
+        return score < self.best_score
 
     def _higher(self, score):
         """
@@ -85,6 +84,7 @@ def loadModels(
     for path in paths:
         model.load_state_dict(torch.load(path, map_location=torch.device(device)))
         model.eval()
+        model.to(device)
         models.append(model)
 
     return models

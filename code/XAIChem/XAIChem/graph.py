@@ -1,6 +1,6 @@
 from collections import deque
 from itertools import chain, combinations
-from typing import Iterable
+from typing import Dict, Iterable, List, Set, Tuple
 
 import numpy as np
 
@@ -114,3 +114,39 @@ def partition(S: Iterable, g_S: Iterable):
         S_copy = S_copy - component
 
     return set(out)
+
+
+def reducedMolecularGraph(
+    molecular_graph: List[Tuple[int]], groups: Dict[int, Tuple[int]]
+) -> Set[Tuple[int]]:
+    """
+    Create a graph of molecular features (i.e. functional groups or other substructures)
+    from the full molecular graph representation of a molecule.
+
+    :param molecular_graph: list of bonded atoms
+    :param groups: a dictionairy specifying which atoms are grouped together as a substructure,
+        keys represent the group id and the value is a tuple of atom ids.
+    """
+
+    reduced_graph = set()
+
+    # Unpack groups dictionairy to map each atom id to its corresponding group id
+    group = {
+        atom_id: group_id
+        for group_id, atom_ids in groups.items()
+        for atom_id in atom_ids
+    }
+
+    # If a bond has atoms from different groups, there exists an edge between those
+    # corresponding groups. By convention use the smallest group number is the first
+    # index.
+    for i, j in molecular_graph:
+        if group[i] != group[j]:
+            reduced_graph.add(
+                (
+                    min(group[i], group[j]),
+                    max(group[i], group[j]),
+                )
+            )
+
+    return reduced_graph

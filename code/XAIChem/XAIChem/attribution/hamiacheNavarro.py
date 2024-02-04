@@ -1,13 +1,17 @@
 from functools import lru_cache
-from typing import Callable, Iterable
+from typing import Iterable, List
 
 import numpy as np
+import pandas as pd
+import torch
+from torch_geometric.data import Data
+from torch_geometric.loader import DataLoader
 
 import XAIChem
 
 
 @lru_cache(maxsize=None)
-def createMc(N, t):
+def _createMc(N, t):
     """
     Creat a matrix representation of an associated game as defined by Hamiache
     (https://doi.org/10.1007/s00182-019-00688-y).
@@ -33,7 +37,7 @@ def createMc(N, t):
     return M
 
 
-def createPg(N: frozenset | tuple, g: Iterable) -> np.ndarray:
+def _createPg(N: frozenset | tuple, g: Iterable) -> np.ndarray:
     """
     Create the matrix Pg as defined by Hamiache containing the graphical
     information. (https://doi.org/10.1007/s00182-019-00688-y)
@@ -53,7 +57,7 @@ def createPg(N: frozenset | tuple, g: Iterable) -> np.ndarray:
     return P
 
 
-def hamiacheNavarroValue(
+def _hamiacheNavarroValue(
     N: frozenset | tuple, v: np.ndarray, g: Iterable, t: float | None = None
 ) -> np.ndarray:
     """
@@ -68,8 +72,8 @@ def hamiacheNavarroValue(
         None)
     """
 
-    Mc = createMc(N, t)
-    Pg = createPg(N, g)
+    Mc = _createMc(N, t)
+    Pg = _createPg(N, g)
 
     Mg = Pg @ Mc @ Pg
 
@@ -83,7 +87,7 @@ def hamiacheNavarroValue(
     return Mg @ v
 
 
-def shapleyValue(
+def _shapleyValue(
     N: frozenset | tuple, v: np.ndarray, t: float | None = None
 ) -> np.ndarray:
     """
@@ -98,7 +102,7 @@ def shapleyValue(
         None)
     """
 
-    Mc = createMc(N, t)
+    Mc = _createMc(N, t)
     Pg = np.identity(Mc.shape[0])
 
     Mg = Pg @ Mc @ Pg
@@ -111,3 +115,133 @@ def shapleyValue(
 
     # Return the value
     return Mg @ v
+
+
+def maskedPredictions(
+    models,
+    molecule: Data,
+    masks: List[torch.Tensor],
+    batch_size: int = 256,
+    device: torch.device | str = "cpu",
+):
+    """
+    Compute the model predictions of every combination between
+    substructures of a molecule defined by the masks.
+
+    :param models: machine learning models
+    :param smiles: smiles representation of a molecule
+    :param masks: list for tensors, each selecting a substructure in the
+        molecule defined by smiles.
+    """
+
+    num_substructures = len(masks)
+
+    molecule_batch = [molecule for _ in range(2**num_substructures - 1)]
+    molecule_batch = DataLoader(molecule_batch, batch_size=batch_size)
+
+    mask_batch = []
+    for indices in XAIChem.graph.powerset(list(range(num_substructures))):
+        mask_batch.append(torch.stack([masks[i] for i in indices]).sum(dim=0))
+
+    mask_batch = torch.stack(mask_batch, dim=0)
+
+    predictions = np.zeros(2**num_substructures - 1)
+    for i, batch in enumerate(molecule_batch):
+        batch.to(device)
+        mask_batch_subset = mask_batch[i * 256 : (i + 1) * 256, :].to(device)
+
+        predictions[i * batch_size : (i + 1) * batch_size] = XAIChem.predictBatch(
+            batch, models, mask_batch_subset.view(-1, 1), device
+        ).to("cpu")
+
+    return predictions
+
+
+def hamiacheNavarroValue(
+    models,
+    smiles: str,
+    molecule_df: pd.DataFrame,
+    average_prediction: float,
+    shapley: bool = False,
+    batch_size: int = 256,
+    device: torch.device | str = "cpu",
+) -> pd.DataFrame:
+    """
+    Computes the Hamiache-Navarro value of the game where the players are defined
+    by molecular substructure given in molecule_df. The characteristic function v
+    is defined by the model prediction of a subset of the substructures minus the
+    average prediction over the entire dataset.
+
+    :param smiles: smiles representation of a molecule
+    :param molecule_df: a result from XAIChem.substructures defining the substructures
+        of interest
+    :param average_prediction: average model prediction over the entire data set
+    :param shapley: specify if the Shapley value also needs to be computed or not
+        (default is False)
+    :param batch_size: size of batch used in to compute the predictions (default is 256)
+    :param device: the device used to compute the predictions, either "cpu" or "cuda"
+        (default is "cpu")
+    """
+
+    # Compute the vector representing the characteristic function v by calcuation
+    # the model predicting of all possible combinations between the substructures
+    molecule = XAIChem.createDataObjectFromSmiles(smiles, np.inf)
+    masks = molecule_df["mask"].to_list()
+    predictions = maskedPredictions(models, molecule, masks, batch_size, device)
+
+    # Compute the HN-value
+    N = tuple(range(len(masks)))
+    g = XAIChem.graph.reducedMolecularGraph(
+        list(zip(*molecule.cpu().edge_index.numpy())), molecule_df["atom_ids"].to_dict()
+    )
+
+    molecule_df["HN_value"] = _hamiacheNavarroValue(
+        N, predictions - average_prediction, g, 2 / (len(masks) * 10)
+    )[: len(masks)]
+
+    if shapley:
+        molecule_df["Shapley_value"] = _shapleyValue(
+            N, predictions - average_prediction, 2 / (len(masks) * 10)
+        )[: len(masks)]
+
+    return molecule_df
+
+
+def shapleyValue(
+    models,
+    smiles: str,
+    molecule_df: pd.DataFrame,
+    average_prediction: float,
+    batch_size: int = 256,
+    device: torch.device | str = "cpu",
+) -> pd.DataFrame:
+    """
+    Computes the Shapley value of the game where the players are defined
+    by molecular substructure given in molecule_df. The characteristic function v
+    is defined by the model prediction of a subset of the substructures minus the
+    average prediction over the entire dataset.
+
+    :param models: list of machine learning models
+    :param smiles: smiles representation of a molecule
+    :param molecule_df: a result from XAIChem.substructures defining the substructures
+        of interest
+    :param average_prediction: average model prediction over the entire data set
+    :param batch_size: size of batch used in to compute the predictions (default is 256)
+    :param device: the device used to compute the predictions, either "cpu" or "cuda"
+        (default is "cpu")
+    """
+
+    # Compute the vector representing the characteristic function v by calcuation
+    # the model predicting of all possible combinations between the substructures
+    molecule = XAIChem.createDataObjectFromSmiles(smiles, np.inf)
+    masks = molecule_df.masks.to_list()
+    predictions = maskedPredictions(models, molecule, masks, batch_size, device)
+
+    # Compute the HN-value
+    N = tuple(range(len(masks)))
+
+    molecule_df["Shapley_value"] = _shapleyValue(
+        N, predictions - average_prediction, 2 / (len(masks) * 10)
+    )
+
+    return molecule_df

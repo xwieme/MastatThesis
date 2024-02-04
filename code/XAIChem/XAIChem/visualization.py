@@ -3,6 +3,7 @@ from collections import defaultdict
 from io import BytesIO
 from typing import List, Set, Tuple
 
+import numpy as np
 from PIL import Image, PngImagePlugin
 from plotly.express.colors import sample_colorscale
 from rdkit import Chem
@@ -12,8 +13,8 @@ from .structures import getSubstructureBondIds
 
 
 def getRGBA(
-    values: List[float], colorscale: str = "rdbu", alpha: float = 1
-) -> List[Tuple[int]]:
+    values: List[float] | np.ndarray, colorscale: str = "rdbu", alpha: float = 1
+) -> List[Tuple[float, ...]]:
     """
     Converts a list of floats to a rgb color using plotly color scales.
 
@@ -42,8 +43,10 @@ def showMolecule(
     show_atom_indices: bool = False,
     show_bond_indices: bool = False,
     colorscale: str = "rdbu",
+    width: int = 350,
+    height: int = 300,
 ) -> PngImagePlugin.PngImageFile:
-    drawer = Draw.MolDraw2DCairo(350, 300)
+    drawer = Draw.MolDraw2DCairo(width, height)
     options = drawer.drawOptions()
     options.useBWAtomPalette()
     options.annotationFontScale = 0.8
@@ -55,7 +58,7 @@ def showMolecule(
     rdDepictor.StraightenDepiction(molecule)
 
     # Convert given values to a rgba color scale using plotly
-    colors = getRGBA(atoms_highlight_values.values(), colorscale)
+    colors = getRGBA(np.tanh(list(atoms_highlight_values.values())), colorscale)
 
     highlight_atoms = defaultdict(list)
     highlight_bonds = defaultdict(list)
