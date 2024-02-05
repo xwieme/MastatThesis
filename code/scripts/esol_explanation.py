@@ -1,4 +1,5 @@
 import argparse
+from pathlib import Path
 
 import pandas as pd
 import torch
@@ -13,6 +14,10 @@ if __name__ == "__main__":
     parser.add_argument("sample_id")
     args = parser.parse_args()
     sample_id = int(args.sample_id)
+
+    out_dir = "../../data/ESOL/attributions" 
+    if not Path(out_dir).exists():
+        Path(out_dir).mkdir(parents=True)
 
     device = torch.device("cuda")
     # Get model architecture and configuration
@@ -42,15 +47,22 @@ if __name__ == "__main__":
     # print(torch.mean(predictions))
 
     molecule_smiles = molecules["smiles"].iloc[sample_id]
-    masks = XAIChem.substructures.functionalGroupMasks(molecule_smiles, inverse=True)
 
-    attributions, prediction = XAIChem.attribution.difference(
-        models, masks, device, return_prediction=True
-    )
-    attributions = XAIChem.attribution.hamiacheNavarroValue(
-        models, molecule_smiles, attributions, -3.1271107, shapley=True, device=device
-    )
+    try:
+        masks = XAIChem.substructures.functionalGroupMasks(molecule_smiles, inverse=True)
 
-    attributions.drop("mask", axis=1).to_parquet(
-        f"../../data/ESOL/attributions/attribution_{sample_id}.parquet"
-    )
+        attributions, prediction = XAIChem.attribution.difference(
+            models, masks, device, return_prediction=True
+        )
+        attributions = XAIChem.attribution.hamiacheNavarroValue(
+            models, molecule_smiles, attributions, -3.1271107, shapley=True, device=device
+        )
+
+        attributions.drop("mask", axis=1).to_json(
+            f"{out_dir}/attribution_{sample_id}.json"
+        )
+
+    except Exception as e:
+        print(e)
+        print(molecule_smiles)
+        print("#"*25)
