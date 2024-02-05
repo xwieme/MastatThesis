@@ -1,3 +1,4 @@
+import time
 from functools import lru_cache
 from typing import Iterable, List
 
@@ -183,11 +184,15 @@ def hamiacheNavarroValue(
         (default is "cpu")
     """
 
+    t1 = time.time()
+
     # Compute the vector representing the characteristic function v by calcuation
     # the model predicting of all possible combinations between the substructures
     molecule = XAIChem.createDataObjectFromSmiles(smiles, np.inf)
     masks = molecule_df["mask"].to_list()
     predictions = maskedPredictions(models, molecule, masks, batch_size, device)
+
+    t2 = time.time()
 
     # Compute the HN-value
     N = tuple(range(len(masks)))
@@ -199,10 +204,18 @@ def hamiacheNavarroValue(
         N, predictions - average_prediction, g, 2 / (len(masks) * 10)
     )[: len(masks)]
 
+    t3 = time.time()
+
+    molecule_df["time_HN_value"] = t3 - t1
+
     if shapley:
         molecule_df["Shapley_value"] = _shapleyValue(
             N, predictions - average_prediction, 2 / (len(masks) * 10)
         )[: len(masks)]
+
+        t4 = time.time()
+
+        molecule_df["time_Shapley_value"] = t4 - t3 + t2 - t1
 
     return molecule_df
 

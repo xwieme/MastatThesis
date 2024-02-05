@@ -1,4 +1,5 @@
-from typing import List
+import time
+from typing import List, Tuple
 
 import numpy as np
 import pandas as pd
@@ -13,7 +14,8 @@ def difference(
     molecule_df: pd.DataFrame,
     device,
     method: str = "after",
-) -> pd.DataFrame:
+    return_prediction: bool = False,
+) -> pd.DataFrame | Tuple[pd.DataFrame, float]:
     """
     Compute the attribution of a substructure by calculating the difference between
     the prediction of the molecule and the prediction of the molecule where the substructure
@@ -24,7 +26,11 @@ def difference(
     :param molecule_df: pandas dataframe resulting from XAIChem.substructures
     :param method: determines where the mask is applied, can be 'after' or
         'before' (default is 'after')
+    :param return_prediction: determines if the unmasked model prediction
+        must also be returned (default is False)
     """
+
+    t1 = time.time()
 
     data = createDataObjectFromSmiles(molecule_df.molecule_smiles.iloc[0], np.inf)
     prediction = predict(data, models, device=device).item()
@@ -38,5 +44,13 @@ def difference(
         )
 
     molecule_df["difference"] = prediction - molecule_df.masked_prediction
+
+    t2 = time.time()
+
+    molecule_df["non_masked_prediction"] = prediction
+    molecule_df["time_difference"] = t2 - t1
+
+    if return_prediction:
+        return molecule_df, prediction
 
     return molecule_df
