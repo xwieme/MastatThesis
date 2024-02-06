@@ -38,14 +38,14 @@ def functionalGroupMasks(
     scaffold_mask = torch.ones(len(not_masked_atom_ids)).int()
 
     # Create a dictionairy of lists to store the atom ids of functional groups
-    # together with their functional group smarts and mask
+    # together with their functional group and mask
     masks = defaultdict(list)
 
     for functional_group, smarts in functional_groups_dict.items():
         for matched_atom_ids in molecule.GetSubstructMatches(MolFromSmarts(smarts)):
             # Check if matched atoms were already matched by another functional group.
             # If this is the case, skip the match to avoid overlap
-            if set(matched_atom_ids).issubset(not_masked_atom_ids):
+            if not set(matched_atom_ids).issubset(not_masked_atom_ids):
                 continue
 
             # Remove atom id of masked atoms to create mask of scaffold
@@ -54,7 +54,7 @@ def functionalGroupMasks(
 
             mask = createMask(molecule, matched_atom_ids)
 
-            # Use xor to invert the mask. This mask represents the atoms of a
+            # Use xor to invert the mask. This mask selects the atoms of a
             # functional group.
             scaffold_mask -= mask ^ 1
 
