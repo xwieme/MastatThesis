@@ -1,24 +1,20 @@
 import time
+from collections import defaultdict
 from itertools import product
 from typing import Callable, Dict
-from collections import defaultdict
 
-import pandas as pd
 import numpy as np
+import pandas as pd
 import torch
 import wandb
 from torch.optim import Optimizer
 from torch_geometric.loader.dataloader import DataLoader
-from XAIChem.handlers import EarlyStopping
+
+from ..handlers import EarlyStopping
 
 
 class ModelTrainer:
-    def __init__(
-        self,
-        model: torch.nn.Module,
-        device: torch.device,
-        config: dict
-    ):
+    def __init__(self, model: torch.nn.Module, device: torch.device, config: dict):
         self._model = model
         self._device = device
         self._config = config
@@ -39,13 +35,13 @@ class ModelTrainer:
         self, loader: DataLoader, criterion: Callable, optimizer: Optimizer
     ) -> None:
         """
-        Perform one pass of all training data. Parameters are optimized 
+        Perform one pass of all training data. Parameters are optimized
         after each bach iteration.
 
-        :param loader: batches of training data 
-        :param criterion: loss function used to optimize the model 
-            parameters 
-        :param optimizer: optimization function used to optimize the 
+        :param loader: batches of training data
+        :param criterion: loss function used to optimize the model
+            parameters
+        :param optimizer: optimization function used to optimize the
             model parameters
         """
         self._model.train()
@@ -65,17 +61,17 @@ class ModelTrainer:
         loader: DataLoader,
         criterion: Callable,
         metrics: Dict[str, Callable] | None = None,
-        model_type: str = "binary-classification"
+        model_type: str = "binary-classification",
     ) -> Dict[str, float]:
         """
-        Compute evaluation metrics of the current model using 
-        the given data set. Returns a dictionairy containing 
+        Compute evaluation metrics of the current model using
+        the given data set. Returns a dictionairy containing
         performance metric name and its corresponding value.
 
-        :param loader: batches of data 
-        :param criterion: loss function used to optimize the model 
+        :param loader: batches of data
+        :param criterion: loss function used to optimize the model
             parameters
-        :param metics: dictionairy of functions to compute additional 
+        :param metics: dictionairy of functions to compute additional
             performance metrics, e.g. R2, accuracy, F1, ...
             The matrix function should take the true labels as first
             argument and predictions as second argument.
@@ -101,7 +97,6 @@ class ModelTrainer:
                 elif model_type == "binary-classification":
                     self._predictions.extend(torch.round(pred).view(1, -1).tolist()[0])
 
-
                 self._labels.extend(data.y.tolist())
 
             evaluation = {"loss": losses / len(loader)}
@@ -121,7 +116,7 @@ class ModelTrainer:
         criterion: Callable,
         optimizer: Optimizer,
         epochs: int,
-        save_path: str, 
+        save_path: str,
         metrics: Dict[str, Callable] | None = None,
         early_stop: EarlyStopping | None = None,
         log: bool = False,
@@ -158,7 +153,7 @@ class ModelTrainer:
             # Train one epoch using the training data set
             self.trainEpoch(loaders["train"], criterion, optimizer)
 
-            # Log early stop progress 
+            # Log early stop progress
             if early_stop is not None:
                 evaluations["early_stop_count"].append(early_stop.counter)
                 evaluations["best_score"].append(early_stop.best_score)
@@ -181,44 +176,45 @@ class ModelTrainer:
             evaluations["epoch"].append(epoch)
 
             if log:
-
                 # Get a list of the metric name together with its
                 # latest value
                 content = list(
                     zip(
                         evaluations.keys(),
-                        np.asarray(list(evaluations.values()))[:, -1]
+                        np.asarray(list(evaluations.values()))[:, -1],
                     )
                 )
-                
-                # Print each metric next to each other, add line 
+
+                # Print each metric next to each other, add line
                 # break for next log statement
                 for metric in content:
                     if metric[1] is not None:
                         print(f"{metric[0]}: {metric[1]:<8.4f}", end="\t")
                 print("\n", end="")
-            
+
             # If early stop is reach, stop training
             if early_stop is not None and early_stop(
-                evaluations[f"validation_{self._config['early_stop']['metric']}"][self._epoch], self._model
+                evaluations[f"validation_{self._config['early_stop']['metric']}"][
+                    self._epoch
+                ],
+                self._model,
             ):
                 break
 
-        # Safe latest model 
-        torch.save(self._model.state_dict(), save_path) 
+        # Safe latest model
+        torch.save(self._model.state_dict(), save_path)
 
         # if a wandb project name is given, upload model progress to wandb
         if wandb_project is not None:
-
             wandb.init(
-                project=wandb_project, 
-                group=wandb_group, 
+                project=wandb_project,
+                group=wandb_group,
                 name=wandb_name,
-                config=self._config
+                config=self._config,
             )
 
             # Every row of the pandas dataframe represents one training step
             df = pd.DataFrame.from_dict(evaluations)
-            df.apply(lambda row: wandb.log(row.to_dict()), axis = 1)
+            df.apply(lambda row: wandb.log(row.to_dict()), axis=1)
 
             wandb.finish()

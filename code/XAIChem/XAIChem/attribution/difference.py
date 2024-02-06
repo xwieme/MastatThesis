@@ -6,7 +6,8 @@ import pandas as pd
 import torch
 from torch_geometric.loader import DataLoader
 
-from XAIChem import createDataObjectFromSmiles, predict, predictBatch
+from ..data import createDataObjectFromSmiles
+from ..prediction import predict, predictBatch
 
 
 def difference(

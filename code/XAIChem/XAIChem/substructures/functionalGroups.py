@@ -1,16 +1,17 @@
 from collections import defaultdict
-from typing import List
+from typing import Dict
 
 import pandas as pd
 import torch
 from rdkit.Chem import MolFromSmarts, MolFromSmiles
 
-import XAIChem
+from ..masks import createMask
+from ..variables import FUNCTIONAL_GROUPS_DICT
 
 
 def functionalGroupMasks(
     smiles: str,
-    functional_groups: List[str] | None = None,
+    functional_groups_dict: Dict[str, str] | None = None,
     inverse: bool = False,
 ) -> pd.DataFrame:
     """
@@ -26,8 +27,8 @@ def functionalGroupMasks(
         of masking it. (default is False)
     """
 
-    if functional_groups is None:
-        functional_groups = XAIChem.variables.FUNCTIONAL_GROUPS
+    if functional_groups_dict is None:
+        functional_groups_dict = FUNCTIONAL_GROUPS_DICT
 
     molecule = MolFromSmiles(smiles)
 
@@ -38,33 +39,34 @@ def functionalGroupMasks(
 
     # Create a dictionairy of lists to store the atom ids of functional groups
     # together with their functional group smarts and mask
-    functional_group_masks = defaultdict(list)
+    masks = defaultdict(list)
 
-    for functional_group in functional_groups:
-        for matched_atom_ids in molecule.GetSubstructMatches(
-            MolFromSmarts(functional_group)
-        ):
-            mask = XAIChem.createMask(molecule, matched_atom_ids)
+    for functional_group, smarts in functional_groups_dict.items():
+        for matched_atom_ids in molecule.GetSubstructMatches(MolFromSmarts(smarts)):
+            # Check if matched atoms were already matched by another functional group.
+            # If this is the case, skip the match to avoid overlap
+            if set(matched_atom_ids).issubset(not_masked_atom_ids):
+                continue
 
             # Remove atom id of masked atoms to create mask of scaffold
             for atom_id in matched_atom_ids:
                 not_masked_atom_ids.remove(atom_id)
 
+            mask = createMask(molecule, matched_atom_ids)
+
             # Use xor to invert the mask. This mask represents the atoms of a
             # functional group.
             scaffold_mask -= mask ^ 1
 
-            functional_group_masks["molecule_smiles"].append(smiles)
-            functional_group_masks["atom_ids"].append(matched_atom_ids)
-            functional_group_masks["functional_group_smarts"].append(functional_group)
-            functional_group_masks["mask"].append(mask ^ 1 if inverse else mask)
+            masks["molecule_smiles"].append(smiles)
+            masks["atom_ids"].append(matched_atom_ids)
+            masks["functional_group"].append(functional_group)
+            masks["mask"].append(mask ^ 1 if inverse else mask)
 
     # Add the scaffold mask
-    functional_group_masks["molecule_smiles"].append(smiles)
-    functional_group_masks["atom_ids"].append(tuple(not_masked_atom_ids))
-    functional_group_masks["functional_group_smarts"].append("scaffold")
-    functional_group_masks["mask"].append(
-        scaffold_mask if inverse else scaffold_mask ^ 1
-    )
+    masks["molecule_smiles"].append(smiles)
+    masks["atom_ids"].append(tuple(not_masked_atom_ids))
+    masks["functional_group"].append("scaffold")
+    masks["mask"].append(scaffold_mask if inverse else scaffold_mask ^ 1)
 
-    return pd.DataFrame.from_dict(functional_group_masks)
+    return pd.DataFrame.from_dict(masks)

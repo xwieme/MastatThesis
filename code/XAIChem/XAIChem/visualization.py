@@ -58,7 +58,9 @@ def showMolecule(
     rdDepictor.StraightenDepiction(molecule)
 
     # Convert given values to a rgba color scale using plotly
-    colors = getRGBA(np.tanh(list(atoms_highlight_values.values())), colorscale)
+    colors = getRGBA(
+        np.tanh(list(atoms_highlight_values.values())), colorscale, alpha=0.5
+    )
 
     highlight_atoms = defaultdict(list)
     highlight_bonds = defaultdict(list)

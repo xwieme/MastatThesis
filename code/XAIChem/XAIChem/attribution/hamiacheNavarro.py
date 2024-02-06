@@ -8,7 +8,9 @@ import torch
 from torch_geometric.data import Data
 from torch_geometric.loader import DataLoader
 
-import XAIChem
+from .. import graph
+from ..data import createDataObjectFromSmiles
+from ..prediction import predictBatch
 
 
 @lru_cache(maxsize=None)
@@ -22,7 +24,7 @@ def _createMc(N, t):
     """
 
     M = np.zeros(shape=(2 ** len(N) - 1, 2 ** len(N) - 1))
-    all_coalitions = list(XAIChem.graph.powerset(N))
+    all_coalitions = list(graph.powerset(N))
 
     # Diagonal elements
     for i, S in enumerate(all_coalitions):
@@ -48,11 +50,11 @@ def _createPg(N: frozenset | tuple, g: Iterable) -> np.ndarray:
     """
 
     P = np.zeros(shape=(2 ** len(N) - 1, 2 ** len(N) - 1))
-    all_coalitions = list(XAIChem.graph.powerset(N))
+    all_coalitions = list(graph.powerset(N))
 
     for i, S in enumerate(all_coalitions):
-        g_S = XAIChem.graph.inducedGraph(S, g)
-        for R in XAIChem.graph.partition(S, g_S):
+        g_S = graph.inducedGraph(S, g)
+        for R in graph.partition(S, g_S):
             P[i, all_coalitions.index(R)] = 1
 
     return P
@@ -141,7 +143,7 @@ def maskedPredictions(
     molecule_batch = DataLoader(molecule_batch, batch_size=batch_size)
 
     mask_batch = []
-    for indices in XAIChem.graph.powerset(list(range(num_substructures))):
+    for indices in graph.powerset(list(range(num_substructures))):
         mask_batch.append(torch.stack([masks[i] for i in indices]).sum(dim=0))
 
     mask_batch = torch.stack(mask_batch, dim=0)
@@ -151,7 +153,7 @@ def maskedPredictions(
         batch.to(device)
         mask_batch_subset = mask_batch[i * 256 : (i + 1) * 256, :].to(device)
 
-        predictions[i * batch_size : (i + 1) * batch_size] = XAIChem.predictBatch(
+        predictions[i * batch_size : (i + 1) * batch_size] = predictBatch(
             batch, models, mask_batch_subset.view(-1, 1), device
         ).to("cpu")
 
@@ -188,7 +190,7 @@ def hamiacheNavarroValue(
 
     # Compute the vector representing the characteristic function v by calcuation
     # the model predicting of all possible combinations between the substructures
-    molecule = XAIChem.createDataObjectFromSmiles(smiles, np.inf)
+    molecule = createDataObjectFromSmiles(smiles, np.inf)
     masks = molecule_df["mask"].to_list()
     predictions = maskedPredictions(models, molecule, masks, batch_size, device)
 
@@ -196,7 +198,7 @@ def hamiacheNavarroValue(
 
     # Compute the HN-value
     N = tuple(range(len(masks)))
-    g = XAIChem.graph.reducedMolecularGraph(
+    g = graph.reducedMolecularGraph(
         list(zip(*molecule.cpu().edge_index.numpy())), molecule_df["atom_ids"].to_dict()
     )
 
@@ -246,7 +248,7 @@ def shapleyValue(
 
     # Compute the vector representing the characteristic function v by calcuation
     # the model predicting of all possible combinations between the substructures
-    molecule = XAIChem.createDataObjectFromSmiles(smiles, np.inf)
+    molecule = createDataObjectFromSmiles(smiles, np.inf)
     masks = molecule_df.masks.to_list()
     predictions = maskedPredictions(models, molecule, masks, batch_size, device)
 

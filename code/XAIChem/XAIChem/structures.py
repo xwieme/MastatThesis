@@ -1,5 +1,4 @@
-from collections import deque
-from typing import Iterable, List, Set
+from typing import List, Set
 
 from rdkit import Chem
 
@@ -31,39 +30,3 @@ def getSubstructureBondIds(molecule: Chem.rdchem.Mol, atom_ids: List[int]) -> Se
                 substructure_bonds.add(bond.GetIdx())
 
     return substructure_bonds
-
-
-def breakBRICKSBond(molecule: Chem.rdchem.Mol, bond: Iterable[int]) -> List[List[int]]:
-    """
-    Create two lists each containing the atom ids of the substructures resulting
-    when the given BRICKS bond is broken.
-
-    :param molecule: molecule where the BRICKS bond needs to be broken
-    :param bond: tuple of the atom ids of the BRICKS bond
-    """
-    substructures = list()
-
-    # Breadth-first search (BFS) is used to find all atom ids that are part of
-    # the substructure when the BRICKS bond is broken. BFS starts at the atom
-    # ids of the BRICK bond and ignores the other one to break the molecular
-    # graph into two substructures.
-    for break_atom_id in bond:
-        substructure_atom_ids = list()
-        substructure_atom_ids.append(break_atom_id)
-        break_atom = molecule.GetAtomWithIdx(break_atom_id)
-
-        atoms_to_visit = deque()
-        atoms_to_visit.append(break_atom)
-
-        while len(atoms_to_visit) != 0:
-            current_atom = atoms_to_visit.popleft()
-
-            for neighbor_atom in current_atom.GetNeighbors():
-                neightbor_atom_id = neighbor_atom.GetIdx()
-                if neightbor_atom_id not in [*bond, *substructure_atom_ids]:
-                    substructure_atom_ids.append(neightbor_atom_id)
-                    atoms_to_visit.append(neighbor_atom)
-
-        substructures.append(substructure_atom_ids)
-
-    return substructures
