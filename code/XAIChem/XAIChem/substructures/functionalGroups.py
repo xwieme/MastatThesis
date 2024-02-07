@@ -43,6 +43,9 @@ def functionalGroupMasks(
 
     for functional_group, smarts in functional_groups_dict.items():
         for matched_atom_ids in molecule.GetSubstructMatches(MolFromSmarts(smarts)):
+            # Remove connection Carbon atom
+            matched_atom_ids = matched_atom_ids[1:]
+
             # Check if matched atoms were already matched by another functional group.
             # If this is the case, skip the match to avoid overlap
             if not set(matched_atom_ids).issubset(not_masked_atom_ids):

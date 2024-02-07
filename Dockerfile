@@ -7,7 +7,7 @@ USER root
 
 ARG CONDA_DIR=/opt/conda/
 ENV PATH=$CONDA_DIR/bin:$CONDA_DIR/envs/lab/bin:$PATH
-ENV PYTHONPATH=/workspace/code/XAIChem
+ENV PYTHONPATH=/workspace/code/XAIChem:$CONDA_DIR/envs/lab/lib/python3.11/site-packages
 # Environment variable used by apptainer to load the default conda env
 ENV BASH_ENV=/opt/etc/bashrc
 
@@ -36,6 +36,7 @@ RUN conda create -n lab python=3.11 -y &&\
         pandas=2.1.1 \
         rdkit=2023.09.2 \
         plotly=5.18.0 \
+        dash=2.15.0 \
         pyright \
         black \
         pyarrow \
