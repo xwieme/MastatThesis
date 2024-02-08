@@ -1,3 +1,4 @@
+import base64
 import re
 from collections import defaultdict
 from io import BytesIO
@@ -53,17 +54,18 @@ def showMolecule(
     options.dummiesAreAttachments = True
     options.addAtomIndices = show_atom_indices
     options.addBondIndices = show_bond_indices
+    # options.highlightBondWidthMultiplier = 100
 
     rdDepictor.Compute2DCoords(molecule)
     rdDepictor.StraightenDepiction(molecule)
 
     # Convert given values to a rgba color scale using plotly
-    colors = getRGBA(
-        np.tanh(list(atoms_highlight_values.values())), colorscale, alpha=0.5
-    )
+    colors = getRGBA(np.tanh(list(atoms_highlight_values.values())), colorscale)
 
     highlight_atoms = defaultdict(list)
     highlight_bonds = defaultdict(list)
+    atom_radia = {}
+    bond_radia = {}
 
     for i, item in enumerate(atoms_highlight_values.items()):
         substructure, value = item
@@ -72,15 +74,27 @@ def showMolecule(
 
         for atom_id in substructure:
             highlight_atoms[atom_id].append(colors[i])
+            atom_radia[atom_id] = 1
 
         if len(substructure) > 1:
             bond_ids = getSubstructureBondIds(molecule, substructure)
             for bond_id in bond_ids:
                 highlight_bonds[bond_id].append(colors[i])
+                bond_radia[bond_id] = 500000000
 
     drawer.DrawMoleculeWithHighlights(
-        molecule, legend, dict(highlight_atoms), dict(highlight_bonds), {}, {}
+        molecule,
+        legend,
+        dict(highlight_atoms),
+        dict(highlight_bonds),
+        atom_radia,
+        bond_radia,
     )
     drawer.FinishDrawing()
+
+    values = np.zeros(len(molecule.GetAtoms()))
+    for substructure, value in atoms_highlight_values.items():
+        for atom_id in substructure:
+            values[atom_id] = value
 
     return Image.open(BytesIO(drawer.GetDrawingText()))

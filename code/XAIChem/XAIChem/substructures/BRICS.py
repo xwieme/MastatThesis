@@ -31,13 +31,13 @@ def BRICSMasks(smiles: str):
         substructure_mask = createMask(molecule, substructures[0])
         complementary_substructure_mask = (
             torch.ones(substructure_mask.shape) - substructure_mask
+        ).int()
+
+        bricks_masks["molecule_smiles"].extend([smiles, smiles])
+        bricks_masks["atom_ids"].extend(substructures[::-1])
+        bricks_masks["mask"].extend(
+            [substructure_mask, complementary_substructure_mask]
         )
-        
-        bricks_masks["molecule_smiles"].append(smiles)
-        bricks_masks["atom_ids"].append(substructures[0])
-        bricks_masks["mask"].append(substructure_mask)
-        bricks_masks["complementary_atom_ids"].append(substructures[1])
-        bricks_masks["complementary_mask"].append(complementary_substructure_mask)
 
     return pd.DataFrame.from_dict(bricks_masks)
 

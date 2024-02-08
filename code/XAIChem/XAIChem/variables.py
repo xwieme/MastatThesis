@@ -9,7 +9,7 @@ FUNCTIONAL_GROUPS_DICT = {
     "R-OEt": "[C,c]-O[C;H2][C;H3]",
     "R-OMe": "[C,c]-O[C;H3]",
     "R-SCH3": "[C,c]-S[C;H3]",
-    "R-C(=O)NH3": "[C,c]-C(=O)[N;H3]",
+    "R-C(=O)NH2": "[C,c]-C(=O)[N;H2]",
     "R-C(=O)CH3": "[C,c]-C(=O)[C;H3]",
     "R=O": "C(=O)",
     "R=S": "C(=S)",
