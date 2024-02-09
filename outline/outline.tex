@@ -9,7 +9,7 @@
 \renewcommand{\familydefault}{\sfdefault}
 
 \usepackage{extsizes}
-\usepackage[super,sort&compress,comma]{natbib} 
+\usepackage[super,sort&compress,comma]{natbib}
 \usepackage[version=3]{mhchem}
 \usepackage[left=1.5cm, right=1.5cm, top=1.785cm, bottom=2.0cm]{geometry}
 \usepackage{balance}
@@ -17,7 +17,7 @@
 \usepackage{mathtools}
 \usepackage{amsfonts}
 \usepackage{sectsty}
-\usepackage{graphicx} 
+\usepackage{graphicx}
 \usepackage{lastpage}
 \usepackage[format=plain,justification=justified,singlelinecheck=false,font={stretch=1.125,small,sf},labelfont=bf,labelsep=space]{caption}
 \usepackage{float}
@@ -25,7 +25,7 @@
 \usepackage{fnpos}
 \usepackage[english]{babel}
 \addto{\cuptionsenglish}{%
-  \renewcommand{\refname}{Notes and references}
+	\renewcommand{\refname}{Notes and references}
 }
 \usepackage{array}
 \usepackage{droidsans}
@@ -64,8 +64,8 @@
 \pagestyle{fancy}
 \thispagestyle{plain}
 \fancypagestyle{plain}{
-  %%%HEADER%%%
-  \renewcommand{\headrulewidth}{0pt}
+	%%%HEADER%%%
+	\renewcommand{\headrulewidth}{0pt}
 }
 %%%END OF HEADER%%%
 
@@ -80,7 +80,7 @@
 
 \renewcommand{\thefootnote}{\fnsymbol{footnote}}
 \renewcommand\footnoterule{\vspace*{1pt}% 
-  \color{cream}\hrule width 3.5in height 0.4pt \color{black}\vspace*{5pt}}
+	\color{cream}\hrule width 3.5in height 0.4pt \color{black}\vspace*{5pt}}
 \setcounter{secnumdepth}{5}
 
 \makeatletter
@@ -119,37 +119,37 @@
 \setlength{\figrulesep}{0.5\textfloatsep}
 
 \newcommand{\topfigrule}{\vspace*{-1pt}% 
-  \noindent{\color{cream}\rule[-\figrulesep]{\columnwidth}{1.5pt}} }
+	\noindent{\color{cream}\rule[-\figrulesep]{\columnwidth}{1.5pt}} }
 
 \newcommand{\botfigrule}{\vspace*{-2pt}% 
-  \noindent{\color{cream}\rule[\figrulesep]{\columnwidth}{1.5pt}} }
+	\noindent{\color{cream}\rule[\figrulesep]{\columnwidth}{1.5pt}} }
 
 \newcommand{\dblfigrule}{\vspace*{-1pt}% 
-  \noindent{\color{cream}\rule[-\figrulesep]{\textwidth}{1.5pt}} }
+	\noindent{\color{cream}\rule[-\figrulesep]{\textwidth}{1.5pt}} }
 
 \makeatother
 %%%END OF FIGURE SETUP%%%
 
 %%%TITLE, AUTHORS AND ABSTRACT%%%
 \twocolumn[
-  \begin{@twocolumnfalse}
-    {
-      \includegraphics[width=18.5cm]{head_foot/header_bar}}\par
-    \vspace{1em}
-    \sffamily
-    \begin{tabular}{m{4.5cm} p{13.5cm} }
+	\begin{@twocolumnfalse}
+		{
+			\includegraphics[width=18.5cm]{head_foot/header_bar}}\par
+		\vspace{1em}
+		\sffamily
+		\begin{tabular}{m{4.5cm} p{13.5cm} }
 
-                     & \noindent\LARGE{\textbf{Explainable graph neural networks $^\dag$}} \\%Article title goes here instead of the text "This is the title"
-      \vspace{0.3cm} & \vspace{0.3cm}                                                                                                                                                 \\
+			               & \noindent\LARGE{\textbf{Explainable graph neural networks $^\dag$}}                                             \\%Article title goes here instead of the text "This is the title"
+			\vspace{0.3cm} & \vspace{0.3cm}                                                                                                  \\
 
-                     & \noindent\large{Full Name,$^{\ast}$\textit{$^{a}$} Full Name,\textit{$^{b\ddag}$} and Full Name\textit{$^{a}$}}                                                \\%Author names go here instead of "Full name", etc.
+			               & \noindent\large{Full Name,$^{\ast}$\textit{$^{a}$} Full Name,\textit{$^{b\ddag}$} and Full Name\textit{$^{a}$}} \\%Author names go here instead of "Full name", etc.
 
-                     &                                                                                                                                                                \\
+			               &                                                                                                                 \\
 
-                     & \noindent\normalsize{abstract}         \\%The abstrast goes here instead of the text "The abstract should be..."
-    \end{tabular}
+			               & \noindent\normalsize{abstract}                                                                                  \\%The abstrast goes here instead of the text "The abstract should be..."
+		\end{tabular}
 
-  \end{@twocolumnfalse} \vspace{1.6cm}
+	\end{@twocolumnfalse} \vspace{1.6cm}
 
 ]
 %%%END OF TITLE, AUTHORS AND ABSTRACT%%%
@@ -191,142 +191,133 @@
 %     \item Summary/conclusion: What should the reader expect as conclusion? In advanced versions of the outline, you should also include all the sections that will go in the Experimental section (at the level of paragraph subheadings) and indicate what information will go in the Microfilm section.
 % \end{itemize}
 
-Machine learning can be used to predict properties of molecules.\\cite{} As molecules can be 
-represented by a graph (cf. Lewis structure\\cite{}), state of the art results are obtained 
-using graph neural networks (GNN).\\cite{} However, the black box nature of GNN possesses a 
-problem. If it is unknown how the model obtained a certain prediction, it could lead to 
-distrust when the result will be used in performance critical applications or expensive 
-practicall experiments like drugs discovery.\\cite{} 
+\begin{itemize}
 
-The goal of explainable machine learning is to uncover the black box algorithms.\\cite{}
-This will result in more trust in the model prediction and could also reveal
-novel scientific knowledge of the studied application.\\cite{} Recently, Wu et. al used 
-substructure mask exploration to explain molecular property models in a chemically 
-intuitive manner.\cite{} Their approach uses the difference between the prediction 
-of a molecule and the prediction when a functional group of that molecule is removed. 
-An additional benefit of this method is that a linear model can be fitted to optimize 
-molecular properties without the need of training an expensive machine learning model.
+    \item Developments in machine learning have impacted various scientific disciplines. For example, 
+        in the chemistry machine learning models are used to predict molecular properties\cite{}, 
+        design synthetic pathways\cite{} and create novel molecules with desired properties\cite{}.
+        Molecules can be represented in multiple ways and hence different machine learning 
+        algorithms are use in chemistry. Text representation using the simple molecular 
+        input line entry system (SMILES)\cite{} format can be used in natural language algorithms\cite{}.
+        Another approach is exploiting the graphical nature of molecules where atoms are 
+        nodes and chemical bonds are edges.\cite{} Using this graphical representation of molecules 
+        allows the use of graph neural networks (GNN)\cite{}. Albeit these model obtain remarkable 
+        results\cite{}, their interpretability posses a limitation into their use cases.\cite{}
+        This lack of interpretability leads to trusts issues in performance critical application 
+        like drug discovery.\cite{} Also scientific insights possibly learned by the black box 
+        model are hidden away, which limits the creation of novel knowledge.\cite{}
 
-However, just using the difference could lead to wrong interpretations due to interaction 
-effects.\cite{} A commonly used method to fairly distribute the prediction over the 
-features is the Shapley value taken from cooperative game theory.\\cite{} This value cannot 
-be applied in the context of GNN as the Shapley value does not take the graphical structure 
-into account. Therefore the structure aware HM-value is used instead.\\cite{}
+	\item The goal of explainable machine learning is to uncover the black box algorithms.\cite{}
+	      This will result in more trust in the model prediction and could also reveal
+	      novel scientific knowledge of the studied application.\cite{} Recently, Wu et. al used
+	      substructure mask exploration to explain molecular property models in a chemically
+	      intuitive manner.\cite{} Their approach uses the difference between the prediction
+	      of a molecule and the prediction when a functional group of that molecule is removed.
+	      An additional benefit of this method is that a linear model can be fitted to optimize
+	      molecular properties without the need of training an expensive machine learning model. \\
+
+	\item However, just using the difference could lead to wrong interpretations due to interaction
+	      effects.\cite{} A commonly used method to fairly distribute the prediction over the
+	      features is the Shapley value taken from cooperative game theory.\cite{} This value cannot
+	      be applied in the context of GNN as the Shapley value does not take the graphical structure
+	      into account. Therefore the structure aware HM-value is used instead.\cite{}
+\end{itemize}
+
 
 \section{Theory}
 
 \subsection{Explainable artificial intelligence: An overview}
 
-Machine learning (ML) models can achieve remarkable results, however, how 
-those results are obtained is unknown. Explainable artificial intelligence 
-(XAI) methods give an answer on the question from where the prediction comes 
-from.\\cite{} XAI methods are subdivided into different classes. A first 
-classification is on how general the explanation is. Methods that provide an 
-explanation for a specific input is an instance based explanation.\\cite{}
-If an general explanation about the internal working of the model is provided, 
-then it is a model based explanation.\\cite{} Instance based methods are 
-further subdivided into gradient based explanations, pertubations, decomposition 
-and surrogate models.\\cite{} 
+Machine learning (ML) models can achieve remarkable results, however, how
+those results are obtained is unknown. Explainable artificial intelligence
+(XAI) methods give an answer on the question from where the prediction comes
+from.\cite{} XAI methods are subdivided into different classes. A first
+classification is on how general the explanation is. Methods that provide an
+explanation for a specific input is an instance based explanation.\cite{}
+If an general explanation about the internal working of the model is provided,
+then it is a model based explanation.\cite{} Instance based methods are
+further subdivided into gradient based explanations, pertubations, decomposition
+and surrogate models.\cite{}
 
-In this thesis, the explanation method used is an instance-based perturbation. 
-This methods measures the change in the model prediction after the input is slightly 
-adapted.\\cite{} For example, which features of the ML model are the most influential 
-on the prediction, the prediction can be made by removing certain features and meausure 
-how much the prediction changes. Essentially, the goal is to distribute the model prediction 
+In this thesis, the explanation method used is an instance-based perturbation.
+This methods measures the change in the model prediction after the input is slightly
+adapted.\cite{} For example, which features of the ML model are the most influential
+on the prediction, the prediction can be made by removing certain features and meausure
+how much the prediction changes. Essentially, the goal is to distribute the model prediction
 over the features, where more important feature get a bigger part. However, merely taking
-the difference between two predictions where one has a certain feature left out will not 
-fairly obtain the goal, since interactions between feature are not taken into account. 
-One sollution is the Shapley value from cooperative game theory.\\cite{}
+the difference between two predictions where one has a certain feature left out will not
+fairly obtain the goal, since interactions between feature are not taken into account.
+One sollution is the Shapley value from cooperative game theory.\cite{}
 
 \subsection{The Shapley value}
 
-The Shapley value is originally designed for cooperative game theory.\\cite{} Cooperative 
-game theory is interested into how much each player has participated to obtain a certain 
-result (i.e. pay-off).\\cite{} This can be translated to ML by treating the features as the players 
-and the model prediction as the pay-off.\\cite{} 
+The Shapley value is originally designed for cooperative game theory.\cite{} Cooperative
+game theory is interested into how much each player has participated to obtain a certain
+result (i.e. pay-off).\cite{} This can be translated to ML by treating the features as the players
+and the model prediction as the pay-off.\cite{}
 
-A game with transfer utility (i.e. TU-game) is defined as a pair $\left(N, v\right)$ of a set 
-of players $N$ and a characteristic function $v$ which satisfies\\cite{}
-
-\begin{equation}
-    v: 2^N \coloneqq \{S | S \subseteq N\} \rightarrow \mathbb{R}, \; v\left(\emptyset\right) = 0.
-\end{equation}
-
-The pay-off of a coalition (i.e. set of players) is determined by the characteristic 
-function. The marginal contribution of player $i$ is defined as\\cite{}
+A game with transfer utility (i.e. TU-game) is defined as a pair $\left(N, v\right)$ of a set
+of players $N$ and a characteristic function $v$ which satisfies\cite{}
 
 \begin{equation}
-    m(i) = v\left(S \cup \{i\}\right) - v\left(S\right), \; \text{with } S \subseteq N \textbackslash \{i\}.
+	v: 2^N \coloneqq \{S | S \subseteq N\} \rightarrow \mathbb{R}, \; v\left(\emptyset\right) = 0.
 \end{equation}
 
-The Shapley value $\phi_i$ of player $i$ is computed as a dubble average over all marginal contributions\\cite{}
+The pay-off of a coalition (i.e. set of players) is determined by the characteristic
+function. The marginal contribution of player $i$ is defined as\cite{}
 
 \begin{equation}
-    \label{eq:Shapley}
-\begin{split}
-    \phi_i & = \frac{
-        1
-    }{
-        |N|
-    } \sum_{
-        k=0
-    }^N \frac{
-        \left(|N| - 1 - k\right)k!
-    }{
-        \left(|N| - 1\right)!
-    } \sum_{
-        S \subseteq N \textbackslash \{i\}, |S| = k
-    } m(i) \\
-    & = \sum_{
-        S \subseteq N \textbackslash \{i\}
-    } \frac{
-        \left(|N| - 1 - |S| \right)!|S|!
-    }{
-        |N|!
-    } m(i)
-\end{split}
+	m(i) = v\left(S \cup \{i\}\right) - v\left(S\right), \; \text{with } S \subseteq N \textbackslash \{i\}.
 \end{equation}
 
-The first part of \cref{eq:Shapley} is the average over all sizes of coalitions, which 
-equals to the size of the player set $N$. The second part averages over all possible coalitions 
-of size $k$. Since there are $|N| - 1$ choose $k$ ways to form coalitions of size $k$, the inverse 
-is used to assign equal weight to each coalition. Moving the summation signs to the front and 
-then removing the restriction of summing over coalitions of size k yields the second line in 
-\cref{eq:Shapley}. 
+The Shapley value $\phi_i$ of player $i$ is computed as a dubble average over all marginal contributions\cite{}
 
-A limitation of the shapley value is that every coalition is considered. However, consider 
-a graph neural network where the interest of explanation lies in the detection of the most 
-important nodes or super nodes. In this case it does not make sense to consider a coalition 
-between disconnected nodes as thes nodes cannot communicate with eachother.\\cite{} The 
+\begin{equation}
+	\label{eq:Shapley}
+	\begin{split}
+		\phi_i & = \frac{1}{|N|} \sum_{k=0}^N \frac{\left(|N| - 1 - k\right)k!}{\left(|N| - 1\right)!} \sum_{S \subseteq N \textbackslash \{i\}, |S| = k} m(i) \\
+		& = \sum_{S \subseteq N \textbackslash \{i\}} \frac{\left(|N| - 1 - |S| \right)!|S|!}{|N|!} m(i)
+	\end{split}
+\end{equation}
+
+The first part of \cref{eq:Shapley} is the average over all sizes of coalitions, which
+equals to the size of the player set $N$. The second part averages over all possible coalitions
+of size $k$. Since there are $|N| - 1$ choose $k$ ways to form coalitions of size $k$, the inverse
+is used to assign equal weight to each coalition. Moving the summation signs to the front and
+then removing the restriction of summing over coalitions of size k yields the second line in
+\cref{eq:Shapley}.
+
+A limitation of the shapley value is that every coalition is considered. However, consider
+a graph neural network where the interest of explanation lies in the detection of the most
+important nodes or super nodes. In this case it does not make sense to consider a coalition
+between disconnected nodes as thes nodes cannot communicate with eachother.\cite{} The
 solution can be found in cooperative game theory with incomplete communicate.
 
 \subsection{The Hamiache Navarro value}
 
-Let a game $(N, v)$ with a communication structure be a triple $(N, v, g)$, where $g$ is 
-set of connected nodes\\cite{},
+Let a game $(N, v)$ with a communication structure be a triple $(N, v, g)$, where $g$ is
+set of connected nodes\cite{},
 
 \begin{equation}
-    g = \{ \{i, j \} | i, j \in N \}
+	g = \{ \{i, j \} | i, j \in N \}
 \end{equation}
 
-The graph $\left< N, g \right>$ specifies the communication structure, where only adjacent 
-players (i.e. $i$ and $j$ are adjacent if and only if $\{ i, j \} \in g$) are allowed to 
+The graph $\left< N, g \right>$ specifies the communication structure, where only adjacent
+players (i.e. $i$ and $j$ are adjacent if and only if $\{ i, j \} \in g$) are allowed to
 communicate with each other. Define a path as a sequence $i = i_1, i_2, \dots, \i_k = j$
-of nodes from player $i$ to player $j$ such that 
+of nodes from player $i$ to player $j$ such that
 
 \begin{equation}
-    \{i_q, i_{q+1} \} \in g, \; 1 \le q \le k - 1.
+	\{i_q, i_{q+1} \} \in g, \; 1 \le q \le k - 1.
 \end{equation}
 
-If such a path exists between two players, then they are connected which is denoted by 
-$i \underset{\left< N, g \right>}{\rightarrow} j$.\\cite{} The partion $N/g$ of the set of 
-nodes $N$ over the graph $\left< N, g \right>$ is than the set of all connected nodes\\cite{}
+If such a path exists between two players, then they are connected which is denoted by
+$i \underset{\left< N, g \right>}{\rightarrow} j$.\cite{} The partion $N/g$ of the set of
+nodes $N$ over the graph $\left< N, g \right>$ is than the set of all connected nodes\cite{}
 
 \begin{equation}
-    N/g = \{ \{ i \underset{\left<N, g \right>}{\rightarrow} j \} j \in N \}.
+	N/g = \{ \{ i \underset{\left<N, g \right>}{\rightarrow} j \} j \in N \}.
 \end{equation}
-
-
 
 
 \subsection{Substructure mask exploration}
@@ -334,52 +325,52 @@ nodes $N$ over the graph $\left< N, g \right>$ is than the set of all connected 
 
 
 
-A game with transfer utility (TU game) is defined as a pair $(N, v)$ where $N$ is a finite 
+A game with transfer utility (TU game) is defined as a pair $(N, v)$ where $N$ is a finite
 set of players and $v$ is a characteristic function that maps for each coalition a pay-off
 
 \begin{equation}
-    v: 2^N := {S | S \subseteq N} \rightarrow \mathcal{R}.
+	v: 2^N := {S | S \subseteq N} \rightarrow \mathcal{R}.
 \end{equation}
 
 A game with communication structure is a triple $(N, v, g)$.
-Let $g_N$ denote the set of all edges, i.e. 
+Let $g_N$ denote the set of all edges, i.e.
 
 \begin{equation}
-g_n  = \{\{ i, j \} | i \ne j \land i, j \in N \}
+	g_n  = \{\{ i, j \} | i \ne j \land i, j \in N \}
 \end{equation}
 
 A graph is a pair $<N, g>$ where $g \subseteq g_N$ is the set of connected players.
-Let $GR$ be the set of all graphs, i.e. 
+Let $GR$ be the set of all graphs, i.e.
 
 \begin{equation}
-GR = \{ <N, g> | N \subseteq U \land g \subseteq g_n \}
+	GR = \{ <N, g> | N \subseteq U \land g \subseteq g_n \}
 \end{equation}
 
 Let $<S, g(S)>$ denote the induced graph of $<N, g>$ with $S \subseteq N$ and $g(S) = \{\{i, j \} | i, j \in S\}$.
-A path between vertices $i$ and $j$ is a series of vertices $i_1 = i, i_2, \dots, i_k = j$ such that for all $q$ between 
-$1$ and $k-1$ the edge $\{i_q, i_{q+1}\}$ is an element of $g$. If such a path exists, $i$ and $j$ are connected, which 
+A path between vertices $i$ and $j$ is a series of vertices $i_1 = i, i_2, \dots, i_k = j$ such that for all $q$ between
+$1$ and $k-1$ the edge $\{i_q, i_{q+1}\}$ is an element of $g$. If such a path exists, $i$ and $j$ are connected, which
 will be denoted as $i \underset{<N, g>}{\leftarrow}$.
 
 Let $N/g$ be the partition of $N$ of all connected coalitions (called components) in $g$, i.e.
- 
+
 \begin{equation}
-    N/g = \{\{ i | i \underset{<N, g>}{\rightarrow} j \land i \in N \} \cup \{j\} | j \in N \}.
+	N/g = \{\{ i | i \underset{<N, g>}{\rightarrow} j \land i \in N \} \cup \{j\} | j \in N \}.
 \end{equation}
 
 The set including its neighbors will be denoted by $S^* = \{ i \in N | E j \in S such that \{i, j\} \in g\} \cup S$.
-The characteristic function $v/g$ is defined as the sum of the characteristic function $v$ over all components in $g$, 
+The characteristic function $v/g$ is defined as the sum of the characteristic function $v$ over all components in $g$,
 
 \begin{equation}
-(v/g)(S) = \sum_{R \subseteq S} v(R).
+	(v/g)(S) = \sum_{R \subseteq S} v(R).
 \end{equation}
 
-An unanimity game $(N, u_S)$ is defined as 
+An unanimity game $(N, u_S)$ is defined as
 
 \begin{equation}
-    u_S(T) = \begin{cases}
-        1 & \text{if} S \subseteq T \\
-        0 & \text{otherwise}
-    \end{cases}
+	u_S(T) = \begin{cases}
+		1 & \text{if} S \subseteq T \\
+		0 & \text{otherwise}
+	\end{cases}
 \end{equation}
 
 

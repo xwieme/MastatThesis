@@ -5,17 +5,23 @@ LABEL version="1.0" maintainer="Xander Wieme <xander.wieme@ugent.be>"
 
 USER root 
 
+ARG DEBIAN_FRONTEND=noninteractive
 ARG CONDA_DIR=/opt/conda/
 ENV PATH=$CONDA_DIR/bin:$CONDA_DIR/envs/lab/bin:$PATH
 ENV PYTHONPATH=/workspace/code/XAIChem:$CONDA_DIR/envs/lab/lib/python3.11/site-packages
+ENV LANG=C.UTF-8
 # Environment variable used by apptainer to load the default conda env
 ENV BASH_ENV=/opt/etc/bashrc
 
 RUN apt-get update &&\
-    apt-get install -y \
+    apt-get install -y --no-install-recommends \
         wget \
-        git &&\
-    apt-get clean
+        git \
+        texlive-full \
+        biber \
+        latexmk &&\
+    apt-get clean &&\
+    apt-get auto-remove -y
 
 # Install miniconda
 RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh &&\
@@ -57,4 +63,4 @@ RUN conda create -n lab python=3.11 -y &&\
     chown --recursive user:user $CONDA_DIR &&\
     cp ~/.bashrc /home/user
 
-USER user
+# USER user
