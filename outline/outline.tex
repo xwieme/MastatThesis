@@ -193,28 +193,24 @@
 
 \begin{itemize}
 
-    \item Developments in machine learning have impacted various scientific disciplines. For example, 
-        in the chemistry machine learning models are used to predict molecular properties\cite{}, 
-        design synthetic pathways\cite{} and create novel molecules with desired properties\cite{}.
-        Molecules can be represented in multiple ways and hence different machine learning 
-        algorithms are use in chemistry. Text representation using the simple molecular 
-        input line entry system (SMILES)\cite{} format can be used in natural language algorithms\cite{}.
-        Another approach is exploiting the graphical nature of molecules where atoms are 
-        nodes and chemical bonds are edges.\cite{} Using this graphical representation of molecules 
-        allows the use of graph neural networks (GNN)\cite{}. Albeit these model obtain remarkable 
-        results\cite{}, their interpretability posses a limitation into their use cases.\cite{}
-        This lack of interpretability leads to trusts issues in performance critical application 
-        like drug discovery.\cite{} Also scientific insights possibly learned by the black box 
-        model are hidden away, which limits the creation of novel knowledge.\cite{}
+    \item Although machine learning (ML) models are able to achieve remarkable accurate results in,
+        for example, molecule property prediction\cite{}, synthetic path way design\cite{}, 
+        generation of novel molecules\cite{} ..., their predictions are opaque.\cite{} This lack 
+        of explainability creates trust issues when those ML models are used in performance critical 
+        and/or highly regulated environment such as drug discovery.\cite{} Also, potential novel 
+        scientific insights learned by the model remain hidden inside the black box.\cite{}
 
-	\item The goal of explainable machine learning is to uncover the black box algorithms.\cite{}
-	      This will result in more trust in the model prediction and could also reveal
-	      novel scientific knowledge of the studied application.\cite{} Recently, Wu et. al used
-	      substructure mask exploration to explain molecular property models in a chemically
-	      intuitive manner.\cite{} Their approach uses the difference between the prediction
+	\item Explainable artificial intelligence (XAI) uses different approaches to uncover the black 
+        box nature of ML models, resulting in more trusted models.\cite{} Using the taxonomy of 
+        Yuan et. al., there are five classes of XAI methods: gradient based, perturbation, surrogate, 
+        decomposition and generation.\cite{} However, all fail to give an explanation which is 
+        intuitive for chemists.
+
+    \item Recently, Wu et. al used substructure mask exploration to explain molecular property models 
+        in a chemically intuitive manner.\cite{} Their approach uses the difference between the prediction
 	      of a molecule and the prediction when a functional group of that molecule is removed.
 	      An additional benefit of this method is that a linear model can be fitted to optimize
-	      molecular properties without the need of training an expensive machine learning model. \\
+	      molecular properties without the need of training an expensive machine learning model.
 
 	\item However, just using the difference could lead to wrong interpretations due to interaction
 	      effects.\cite{} A commonly used method to fairly distribute the prediction over the
@@ -226,80 +222,56 @@
 
 \section{Theory}
 
-\subsection{Explainable artificial intelligence: An overview}
-
-Machine learning (ML) models can achieve remarkable results, however, how
-those results are obtained is unknown. Explainable artificial intelligence
-(XAI) methods give an answer on the question from where the prediction comes
-from.\cite{} XAI methods are subdivided into different classes. A first
-classification is on how general the explanation is. Methods that provide an
-explanation for a specific input is an instance based explanation.\cite{}
-If an general explanation about the internal working of the model is provided,
-then it is a model based explanation.\cite{} Instance based methods are
-further subdivided into gradient based explanations, pertubations, decomposition
-and surrogate models.\cite{}
-
-In this thesis, the explanation method used is an instance-based perturbation.
-This methods measures the change in the model prediction after the input is slightly
-adapted.\cite{} For example, which features of the ML model are the most influential
-on the prediction, the prediction can be made by removing certain features and meausure
-how much the prediction changes. Essentially, the goal is to distribute the model prediction
-over the features, where more important feature get a bigger part. However, merely taking
-the difference between two predictions where one has a certain feature left out will not
-fairly obtain the goal, since interactions between feature are not taken into account.
-One sollution is the Shapley value from cooperative game theory.\cite{}
-
 \subsection{The Shapley value}
 
-The Shapley value is originally designed for cooperative game theory.\cite{} Cooperative
+The Shapley value is originally designed in cooperative game theory.\cite{shapley1953value} Cooperative
 game theory is interested into how much each player has participated to obtain a certain
-result (i.e. pay-off).\cite{} This can be translated to ML by treating the features as the players
-and the model prediction as the pay-off.\cite{}
+result (i.e. pay-off).\cite{branzei2008models} This can be translated to ML by treating the features 
+as the players and the model prediction as the pay-off.\cite{merrick2020explanation}
 
 A game with transfer utility (i.e. TU-game) is defined as a pair $\left(N, v\right)$ of a set
-of players $N$ and a characteristic function $v$ which satisfies\cite{}
+of players $N$ and a characteristic function $v$ which satisfies\cite{branzei2008models}
 
 \begin{equation}
 	v: 2^N \coloneqq \{S | S \subseteq N\} \rightarrow \mathbb{R}, \; v\left(\emptyset\right) = 0.
 \end{equation}
 
 The pay-off of a coalition (i.e. set of players) is determined by the characteristic
-function. The marginal contribution of player $i$ is defined as\cite{}
+function. The marginal contribution of player $i$ is defined as\cite{zhang2022gstarx}
 
 \begin{equation}
 	m(i) = v\left(S \cup \{i\}\right) - v\left(S\right), \; \text{with } S \subseteq N \textbackslash \{i\}.
 \end{equation}
 
-The Shapley value $\phi_i$ of player $i$ is computed as a dubble average over all marginal contributions\cite{}
+The Shapley value $\phi_i$ of player $i$ is computed as a double average over all marginal contributions\cite{zhang2022gstarx}
 
 \begin{equation}
 	\label{eq:Shapley}
-	\begin{split}
-		\phi_i & = \frac{1}{|N|} \sum_{k=0}^N \frac{\left(|N| - 1 - k\right)k!}{\left(|N| - 1\right)!} \sum_{S \subseteq N \textbackslash \{i\}, |S| = k} m(i) \\
-		& = \sum_{S \subseteq N \textbackslash \{i\}} \frac{\left(|N| - 1 - |S| \right)!|S|!}{|N|!} m(i)
-	\end{split}
+        \phi_i  = \frac{1}{|N|} \sum_{k=0}^{|N|-1} \frac{\left(|N| - 1 - k\right)k!}{\left(|N| - 1\right)!} \sum_{S \subseteq N \textbackslash \{i\}, |S| = k} m(i). 
 \end{equation}
 
-The first part of \cref{eq:Shapley} is the average over all sizes of coalitions, which
-equals to the size of the player set $N$. The second part averages over all possible coalitions
-of size $k$. Since there are $|N| - 1$ choose $k$ ways to form coalitions of size $k$, the inverse
-is used to assign equal weight to each coalition. Moving the summation signs to the front and
-then removing the restriction of summing over coalitions of size k yields the second line in
-\cref{eq:Shapley}.
+There are $|N|$ coalitions with different sizes and ${|N| - 1 \choose k}$ coalitions of size $k$.
+When the summations are rearranged and substituting $k$ with $|S|$, both weights can be combined 
+resulting in 
 
-A limitation of the shapley value is that every coalition is considered. However, consider
-a graph neural network where the interest of explanation lies in the detection of the most
-important nodes or super nodes. In this case it does not make sense to consider a coalition
-between disconnected nodes as thes nodes cannot communicate with eachother.\cite{} The
-solution can be found in cooperative game theory with incomplete communicate.
+\begin{equation}
+	\phi_i = \sum_{S \subseteq N \textbackslash \{i\}} \frac{\left(|N| - 1 - |S| \right)!|S|!}{|N|!} m(i).
+\end{equation}
+
+A limitation of the Shapley value is that every coalition is considered.\cite{zhang2022gstarx} 
+However, consider a graph neural network where the interest of explanation lies in the detection 
+of the most important nodes or super nodes. In this case some coalitions are impossible. To solve 
+this restriction, values on games with incomplete communication\cite{myerson1977graphs} are explored. 
+Games with incomplete communication use a graph to represent which players can communicate with each other.
+One value was developed by Hamiache and Navarro.\cite{hamiache_value_1999, hamiache_associated_2020}.
 
 \subsection{The Hamiache Navarro value}
 
 Let a game $(N, v)$ with a communication structure be a triple $(N, v, g)$, where $g$ is
-set of connected nodes\cite{},
+set of adjacent nodes\cite{hamiache_value_1999},
 
 \begin{equation}
-	g = \{ \{i, j \} | i, j \in N \}
+	g \subseteq g_N = \{ \{i, j \} | i, j \in N \}
 \end{equation}
 
 The graph $\left< N, g \right>$ specifies the communication structure, where only adjacent
@@ -316,7 +288,7 @@ $i \underset{\left< N, g \right>}{\rightarrow} j$.\cite{} The partion $N/g$ of t
 nodes $N$ over the graph $\left< N, g \right>$ is than the set of all connected nodes\cite{}
 
 \begin{equation}
-	N/g = \{ \{ i \underset{\left<N, g \right>}{\rightarrow} j \} j \in N \}.
+N/g = \{\{ i | i \in N \land i \underset{\left<N, g \right>}{\rightarrow} j\} \cup \{j\} | j \in N \}.
 \end{equation}
 
 
