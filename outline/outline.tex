@@ -195,28 +195,28 @@
 
     \item Although machine learning (ML) models are able to achieve remarkable accurate results in,
         for example, molecule property prediction\cite{}, synthetic path way design\cite{}, 
-        generation of novel molecules\cite{} ..., their predictions are opaque.\cite{} This lack 
+        inverse molecular design\cite{} ..., their predictions are opaque.\cite{} This lack 
         of explainability creates trust issues when those ML models are used in performance critical 
         and/or highly regulated environment such as drug discovery.\cite{} Also, potential novel 
-        scientific insights learned by the model remain hidden inside the black box.\cite{}
+        scientific insights learned by the model remain hidden inside the black box.\cite{carvalho2019machine}
 
 	\item Explainable artificial intelligence (XAI) uses different approaches to uncover the black 
-        box nature of ML models, resulting in more trusted models.\cite{} Using the taxonomy of 
+        box nature of ML models, resulting in more trusted models.\cite{carvalho2019machine} Using the taxonomy of 
         Yuan et. al., there are five classes of XAI methods: gradient based, perturbation, surrogate, 
-        decomposition and generation.\cite{} However, all fail to give an explanation which is 
+        decomposition and generation.\cite{yuan2022explainability} However, all fail to give an explanation which is 
         intuitive for chemists.
 
     \item Recently, Wu et. al used substructure mask exploration to explain molecular property models 
-        in a chemically intuitive manner.\cite{} Their approach uses the difference between the prediction
+        in a chemically intuitive manner.\cite{wu2023chemistry} Their approach uses the difference between the prediction
 	      of a molecule and the prediction when a functional group of that molecule is removed.
 	      An additional benefit of this method is that a linear model can be fitted to optimize
 	      molecular properties without the need of training an expensive machine learning model.
 
 	\item However, just using the difference could lead to wrong interpretations due to interaction
-	      effects.\cite{} A commonly used method to fairly distribute the prediction over the
-	      features is the Shapley value taken from cooperative game theory.\cite{} This value cannot
+	      effects. A commonly used method to fairly distribute the prediction over the
+          features is the Shapley value\cite{shapley1953value} taken from cooperative game theory.\cite{molnar2020interpretable} This value cannot
 	      be applied in the context of GNN as the Shapley value does not take the graphical structure
-	      into account. Therefore the structure aware HM-value is used instead.\cite{}
+	      into account. Therefore the structure aware HM-value is used instead.\cite{hamiache_value_1999, hamiache_associated_2020}
 \end{itemize}
 
 
@@ -271,12 +271,12 @@ Let a game $(N, v)$ with a communication structure be a triple $(N, v, g)$, wher
 set of adjacent nodes\cite{hamiache_value_1999},
 
 \begin{equation}
-	g \subseteq g_N = \{ \{i, j \} | i, j \in N \}
+	g \subseteq g_N \coloneq \{ \{i, j \} | i, j \in N \}
 \end{equation}
 
 The graph $\left< N, g \right>$ specifies the communication structure, where only adjacent
 players (i.e. $i$ and $j$ are adjacent if and only if $\{ i, j \} \in g$) are allowed to
-communicate with each other. Define a path as a sequence $i = i_1, i_2, \dots, \i_k = j$
+communicate with each other. Define a path as a sequence $i = i_1, i_2, \dots, i_k = j$
 of nodes from player $i$ to player $j$ such that
 
 \begin{equation}
@@ -284,66 +284,59 @@ of nodes from player $i$ to player $j$ such that
 \end{equation}
 
 If such a path exists between two players, then they are connected which is denoted by
-$i \underset{\left< N, g \right>}{\rightarrow} j$.\cite{} The partion $N/g$ of the set of
-nodes $N$ over the graph $\left< N, g \right>$ is than the set of all connected nodes\cite{}
+$i \underset{\left< N, g \right>}{\rightarrow} j$. The partion $N/g$ of the set of
+nodes $N$ over the graph $\left< N, g \right>$ is than the set of all connected nodes
 
 \begin{equation}
 N/g = \{\{ i | i \in N \land i \underset{\left<N, g \right>}{\rightarrow} j\} \cup \{j\} | j \in N \}.
 \end{equation}
 
+A coalitions $S \subseteq N$ can only directly interact with its connected neighbours. Let 
+$S^*$ be the set of players in the coalition $S$ together with their connected neighbours, 
+
+\begin{equation}
+    S^* \coloneqq \{ i \in N | \exists j \in S \text{ such that } \{i, j\} \in g \} \cup S.
+\end{equation}
+
+The associated game $(N, v^*, g)$ of $(N, v, g)$ given a real number $\tau$ is defined by 
+
+\begin{equation}
+    v^*(S) = 
+    \begin{cases}
+        v(S) + \tau \sum_{j \in \mathcal{N}(S)} \left[ v(S \cup \{j\}) - v(S) - v(\{j\}) \right]  & \text{if } |S/g| = 1 \\
+        \sum_{R \in S/g} v^*(R) &  \text{otherwise}
+    \end{cases}
+    .
+\end{equation}
+
+A matrix representation of the associated game is obtained by defining the matrices $M_c$, 
+
+\begin{equation}
+    M_c[S, T] = 
+    \begin{cases} 
+        1 - |N \textbackslash S| \tau & \text{if } |S| = |T| \\
+        \tau & \text{if } |S| + 1 = |T| \land S \subseteq T \\
+        -\tau & \text{if } |T| = 1  \land T \not \subseteq S \\
+        0 & \text{otherwise}
+    \end{cases}
+\end{equation}
+
+and $P_g$,
+
+\begin{equation}
+    P_g[S, T] = 
+    \begin{cases} 
+        1 & \text{if } T \in S/g \\
+        0 & \text{otherwise} \\
+    \end{cases}
+\end{equation}
 
 \subsection{Substructure mask exploration}
 
 
 
 
-A game with transfer utility (TU game) is defined as a pair $(N, v)$ where $N$ is a finite
-set of players and $v$ is a characteristic function that maps for each coalition a pay-off
 
-\begin{equation}
-	v: 2^N := {S | S \subseteq N} \rightarrow \mathcal{R}.
-\end{equation}
-
-A game with communication structure is a triple $(N, v, g)$.
-Let $g_N$ denote the set of all edges, i.e.
-
-\begin{equation}
-	g_n  = \{\{ i, j \} | i \ne j \land i, j \in N \}
-\end{equation}
-
-A graph is a pair $<N, g>$ where $g \subseteq g_N$ is the set of connected players.
-Let $GR$ be the set of all graphs, i.e.
-
-\begin{equation}
-	GR = \{ <N, g> | N \subseteq U \land g \subseteq g_n \}
-\end{equation}
-
-Let $<S, g(S)>$ denote the induced graph of $<N, g>$ with $S \subseteq N$ and $g(S) = \{\{i, j \} | i, j \in S\}$.
-A path between vertices $i$ and $j$ is a series of vertices $i_1 = i, i_2, \dots, i_k = j$ such that for all $q$ between
-$1$ and $k-1$ the edge $\{i_q, i_{q+1}\}$ is an element of $g$. If such a path exists, $i$ and $j$ are connected, which
-will be denoted as $i \underset{<N, g>}{\leftarrow}$.
-
-Let $N/g$ be the partition of $N$ of all connected coalitions (called components) in $g$, i.e.
-
-\begin{equation}
-	N/g = \{\{ i | i \underset{<N, g>}{\rightarrow} j \land i \in N \} \cup \{j\} | j \in N \}.
-\end{equation}
-
-The set including its neighbors will be denoted by $S^* = \{ i \in N | E j \in S such that \{i, j\} \in g\} \cup S$.
-The characteristic function $v/g$ is defined as the sum of the characteristic function $v$ over all components in $g$,
-
-\begin{equation}
-	(v/g)(S) = \sum_{R \subseteq S} v(R).
-\end{equation}
-
-An unanimity game $(N, u_S)$ is defined as
-
-\begin{equation}
-	u_S(T) = \begin{cases}
-		1 & \text{if} S \subseteq T \\
-		0 & \text{otherwise}
-	\end{cases}
-\end{equation}
 
 
 \section{Methodology}
