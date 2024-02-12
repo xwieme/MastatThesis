@@ -74,13 +74,12 @@ def showMolecule(
 
         for atom_id in substructure:
             highlight_atoms[atom_id].append(colors[i])
-            atom_radia[atom_id] = 1
+            atom_radia[atom_id] = 0.5
 
         if len(substructure) > 1:
             bond_ids = getSubstructureBondIds(molecule, substructure)
             for bond_id in bond_ids:
                 highlight_bonds[bond_id].append(colors[i])
-                bond_radia[bond_id] = 500000000
 
     drawer.DrawMoleculeWithHighlights(
         molecule,
