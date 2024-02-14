@@ -4,9 +4,10 @@ from io import BytesIO
 import dash
 import pandas as pd
 import plotly.express as px
-import XAIChem
 from dash import Input, Output, callback, dcc, html
 from rdkit import Chem
+
+import XAIChem
 
 dash.register_page(__name__, name="Annotate molecules")
 
@@ -41,11 +42,14 @@ def getDropdownOptions(data):
     Output("smiles-dropown-container", "children"),
     Input("smiles-dropdown", "value"),
     Input("store-data", "data"),
+    Input("store-truevalues", "data"),
 )
-def annotateMolecule(smiles, data):
+def annotateMolecule(smiles, data, true_values):
     data = pd.DataFrame(data)
+    true_values = pd.DataFrame(true_values)
 
     attributions = data.query("molecule_smiles == @smiles").copy()
+    true_value = true_values.query(f"smiles == '{smiles}'").ESOL.iloc[0]
 
     # Each set of atom ids forming a functional group is mapped to
     # its corresponding attribution using a dictionairy. Since keys
@@ -83,7 +87,8 @@ def annotateMolecule(smiles, data):
                             html.Br(),
                             f"Prediction: {attributions['non_masked_prediction'].iloc[0]:.4f}",
                             html.Br(),
-                            f"Difference from mean: {attributions['non_masked_prediction'].iloc[0] + 3.1271107:.4f}",
+                            # f"Difference from mean: {attributions['non_masked_prediction'].iloc[0] + 3.1271107:.4f}",
+                            f"True solubility: {true_value}",
                         ]
                     ),
                     html.Img(src=img_str),

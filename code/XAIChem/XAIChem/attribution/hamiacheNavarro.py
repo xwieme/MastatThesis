@@ -162,7 +162,6 @@ def maskedPredictions(
 
 def hamiacheNavarroValue(
     models,
-    smiles: str,
     molecule_df: pd.DataFrame,
     average_prediction: float,
     shapley: bool = False,
@@ -175,7 +174,7 @@ def hamiacheNavarroValue(
     is defined by the model prediction of a subset of the substructures minus the
     average prediction over the entire dataset.
 
-    :param smiles: smiles representation of a molecule
+    :param models: machine learning models to explain
     :param molecule_df: a result from XAIChem.substructures defining the substructures
         of interest
     :param average_prediction: average model prediction over the entire data set
@@ -185,6 +184,8 @@ def hamiacheNavarroValue(
     :param device: the device used to compute the predictions, either "cpu" or "cuda"
         (default is "cpu")
     """
+
+    smiles = molecule_df.molecule_smiles.iloc[0]
 
     t1 = time.time()
 

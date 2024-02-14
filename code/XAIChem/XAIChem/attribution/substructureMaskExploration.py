@@ -10,17 +10,18 @@ from ..data import createDataObjectFromSmiles
 from ..prediction import predict, predictBatch
 
 
-def difference(
+def substructureMaskExploration(
     models: List[torch.nn.Module],
     molecule_df: pd.DataFrame,
     device,
     method: str = "after",
     return_prediction: bool = False,
-) -> pd.DataFrame | Tuple[pd.DataFrame, float]:
+) -> pd.DataFrame:
     """
     Compute the attribution of a substructure by calculating the difference between
     the prediction of the molecule and the prediction of the molecule where the substructure
     is masked (i.e. is partially not used in the model).
+    (https://doi.org/10.1038/s41467-023-38192-3)
 
     :param models: list of ML models wherefrom the average prediction is used
         to compute the attribution
@@ -44,14 +45,11 @@ def difference(
             batch, models, masks.view(-1, 1).to(device), device
         )
 
-    molecule_df["difference"] = prediction - molecule_df.masked_prediction
+    molecule_df["SME"] = prediction - molecule_df.masked_prediction
 
     t2 = time.time()
 
     molecule_df["non_masked_prediction"] = prediction
-    molecule_df["time_difference"] = t2 - t1
-
-    if return_prediction:
-        return molecule_df, prediction
+    molecule_df["time_SME"] = t2 - t1
 
     return molecule_df

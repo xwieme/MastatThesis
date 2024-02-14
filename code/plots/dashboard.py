@@ -14,6 +14,7 @@ app = Dash(
 app.layout = html.Div(
     [
         dcc.Store(id="store-data", storage_type="memory"),
+        dcc.Store(id="store-truevalues", storage_type="memory"),
         html.Br(),
         html.P(
             "Explanation of graph neural networks",
@@ -50,6 +51,11 @@ app.layout = html.Div(
 @callback(Output("store-data", "data"), Input("data-dropdown", "value"))
 def loadData(value):
     return pd.read_json(value).to_dict("records")
+
+
+@callback(Output("store-truevalues", "data"), Input("data-dropdown", "value"))
+def loadTrueData(value):
+    return pd.read_csv("../../data/ESOL/ESOL.csv").to_dict("records")
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ from typing import List, Set, Tuple
 import numpy as np
 from PIL import Image, PngImagePlugin
 from plotly.express.colors import sample_colorscale
-from rdkit import Chem
+from rdkit import Chem, Geometry
 from rdkit.Chem import Draw, rdDepictor
 
 from .structures import getSubstructureBondIds
@@ -60,7 +60,9 @@ def showMolecule(
     rdDepictor.StraightenDepiction(molecule)
 
     # Convert given values to a rgba color scale using plotly
-    colors = getRGBA(np.tanh(list(atoms_highlight_values.values())), colorscale)
+    colors = getRGBA(
+        np.tanh(list(atoms_highlight_values.values())), colorscale, alpha=1
+    )
 
     highlight_atoms = defaultdict(list)
     highlight_bonds = defaultdict(list)
@@ -74,12 +76,34 @@ def showMolecule(
 
         for atom_id in substructure:
             highlight_atoms[atom_id].append(colors[i])
-            atom_radia[atom_id] = 0.5
+            atom_radia[atom_id] = 0.1
 
         if len(substructure) > 1:
             bond_ids = getSubstructureBondIds(molecule, substructure)
             for bond_id in bond_ids:
                 highlight_bonds[bond_id].append(colors[i])
+
+    if len(atoms_highlight_values) != 0:
+        drawer.DrawMoleculeWithHighlights(
+            molecule,
+            "",
+            dict(highlight_atoms),
+            dict(highlight_bonds),
+            atom_radia,
+            bond_radia,
+        )
+
+        # Fill rings
+        conformer = molecule.GetConformer()
+        drawer.ClearDrawing()
+        for ring in Chem.GetSSSR(molecule):
+            coords = [
+                Geometry.Point2D(conformer.GetAtomPosition(atom_id)) for atom_id in ring
+            ]
+
+            drawer.SetColour(highlight_atoms[ring[0]][0])
+            drawer.SetFillPolys(True)
+            drawer.DrawPolygon(coords)
 
     drawer.DrawMoleculeWithHighlights(
         molecule,
