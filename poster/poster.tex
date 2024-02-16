@@ -1,4 +1,4 @@
-\documentclass[25pt, a0paper, portrait]{tikzposter}
+\documentclass[12pt, a2paper, portrait]{tikzposter}
 \tikzposterlatexaffectionproofoff
 
 \usetitlestyle{Empty}
@@ -57,121 +57,135 @@
 \maketitle
 
 \begin{columns}
-    % Left Column.
-    \column{0.5}
-    % Introduction block.
-    \block{Introduction} {
-        % This block should always be there and should briefly introduce your research. Citations can be made as normal \cite{acke2020a}. If you want to \emph{emphasize} something, you can.
+	% Left Column.
+	\column{0.5}
+	% Introduction block.
+    \block[titleinnersep=0.3cm, bodyinnersep=0.5cm, linewidth=0.15cm]{Introduction} {
+		% This block should always be there and should briefly introduce your research. Citations can be made as normal \cite{acke2020a}. If you want to \emph{emphasize} something, you can.
 
-        \begin{itemize}
+		\begin{itemize}
 
-            \item \emph{Opaque predictions} for machine learning models builds \emph{trust issues} and restricts creation of 
-            novel scientific insights found by those models.\cite{carvalho2019machine}.
+			\item \emph{Opaque predictions} for machine learning models builds \emph{trust issues} and restricts creation of
+			      novel scientific insights found by those models.\cite{carvalho2019machine}.
 
-        \item Current explainable artificial intelligence techniques \emph{fail} to provide a \emph{chemically intuitive 
-            explanation}.\cite{yuan2022explainability, wu2023chemistry}
+			\item Current explainable artificial intelligence techniques \emph{fail} to provide a \emph{chemically intuitive
+				      explanation}.\cite{yuan2022explainability, wu2023chemistry}
 
-            \item Recently, Wu et. al. developed a chemically intuitive explanation technique for graph 
-                neural networks by assigning attributions to \emph{chemical substructure} (e.g. functional groups, 
-                BRICS, MURCKO).\cite{wu2023chemistry}
+			\item Recently, Wu et. al. developed a chemically intuitive explanation technique for graph
+			      neural networks by assigning attributions to \emph{chemical substructure} (e.g. functional groups,
+			      BRICS, MURCKO).\cite{wu2023chemistry}
 
-            \item The difference between the model prediction of a molecule and a masked molecule is a 
-                too simple attribution. A popular method to distribute the model prediction over the 
-                features is the \emph{Shapley value}.\cite{molnar2020interpretable} However, the Shapley value does not take the graphical 
-                structure into account, which limits its use on \emph{graph neural networks}.\cite{zhang2022gstarx} 
-                This restriction is solved by using the \emph{Hamiache-Navarro value}\cite{hamiache_value_1999}, which 
-                extends the Shapley value to graphs and converges to the Shapley value on complete graphs.
+			\item The difference between the model prediction of a molecule and a masked molecule is a
+			      too simple attribution. A popular method to distribute the model prediction over the
+			      features is the \emph{Shapley value}.\cite{molnar2020interpretable} However, the Shapley value does not take the graphical
+			      structure into account, which limits its use on \emph{graph neural networks}.\cite{zhang2022gstarx}
+			      This restriction is solved by using the \emph{Hamiache-Navarro value}\cite{hamiache_value_1999}, which
+			      extends the Shapley value to graphs and converges to the Shapley value on complete graphs.
 
-        \end{itemize}
+		\end{itemize}
 
-    }
-    
-    % Results block 2.
-    \block{Research aims}{
-        % This is where you can add the rest of your results.
-        \begin{itemize}
+	}
 
-            \item Explain graph neural networks using substructure mask exploration and the Hamiache-Navarro value.
+	% Results block 2.
+	% \block{Research aims}{
+	% 	% This is where you can add the rest of your results.
+	% 	\begin{itemize}
 
-        \end{itemize}
+	% 		\item \emph{Chemically explain} graph neural networks using substructure mask exploration and the \emph{Hamiache-Navarro value}.
+	% 		\item \emph{Quantify} the correctness of the chemical intuitive \emph{explanation}.
+	% 	\end{itemize}
 
-    }
+	% }
 
-    \column{0.5}
-    % Theory
-    \block{Theory}{
-        % Add a small theory section. Keep your theory short and to the point.
-        \section{Graph neural networks}
+	\block[titleinnersep=0.3cm, bodyinnersep=0.5cm, linewidth=0.15cm]{Explain graph neural networks using the Shapley and Hamiache-Navarro value}{
 
-        \section{Shapley value}
+		\hspace{10cm} \textbf{Difference}\cite{wu2023chemistry} \hspace{13cm} \textbf{HN}
+		\begin{tikzfigure}
+			\includegraphics[scale=1]{../data/images/dimethyl_phthalate_difference.png}
+			\hspace{2cm}
+			\includegraphics[scale=1]{../data/images/dimethyl_phthalate_HN.png}
+		\end{tikzfigure}
+	}
 
-        Let $(N, v)$ be a game with a set of players $N$ and a characteristic function 
-        satisfying $2^N \coloneqq \{S | S \subseteq N\} \rightarrow \mathcal{R}, \; v(\emptyset) = 0$.
-        The Shapley value $\phi_i$ of player $i$ is defined as\cite{shapley1953value}
+	\column{0.5}
+	% Theory
+	\block[titleinnersep=0.3cm, bodyinnersep=0.5cm, linewidth=0.15cm]{Theory}{
+		% Add a small theory section. Keep your theory short and to the point.
+		\section{Graph neural networks}
 
-        \begin{equation}
-            \phi_i = \sum_{S \subseteq N \ \{i\}} \frac{\left( |N| - 1 - |S| \right)! |S|!}{|N|!} \left(v(S \cup \{i\}) - v(S) \right)
-        \end{equation}
+		\section{Shapley value}
 
-        \section{Hamiache-Navarro value}
+		Let $(N, v)$ be a game with a set of players $N$ and a characteristic function
+		satisfying $2^N \coloneqq \{S | S \subseteq N\} \rightarrow \mathcal{R}, \; v(\emptyset) = 0$.
+		The Shapley value $\phi_i$ of player $i$ is defined as\cite{shapley1953value}
 
-        Let $(N, v, g)$ be a game with communication structure given by the graph $\left< N, g \right>$, where 
-        $g \subseteq g_N \coloneqq \{ \{i, j\} | i, j \in N \}$ is the set of adjacent players. The 
-        associated game $(N, v^*, g)$ is defined as
+		\begin{equation}
+			\phi_i = \sum_{S \subseteq N \ \{i\}} \frac{\left( |N| - 1 - |S| \right)! |S|!}{|N|!} \left(v(S \cup \{i\}) - v(S) \right)
+		\end{equation}
 
-        \begin{equation}
-            v^*(S) = 
-            \begin{cases}
-                v(S) + \tau \sum_{j \in \mathcal{N}(S)} \left[ v(S \cup \{j\}) - v(S) - v(\{j\}) \right]  & \text{if } |S/g| = 1 \\
-                \sum_{R \in S/g} v^*(R) &  \text{otherwise}
-            \end{cases}
-            .
-        \end{equation}
-    }
+		\section{Hamiache-Navarro value}
+
+		Let $(N, v, g)$ be a game with communication structure given by the graph $\left< N, g \right>$, where
+		$g \subseteq g_N \coloneqq \{ \{i, j\} | i, j \in N \}$ is the set of adjacent players. The
+		associated game $(N, v^*, g)$ is defined as
+
+		\begin{equation}
+			v^*(S) =
+			\begin{cases}
+				v(S) + \tau \sum_{j \in \mathcal{N}(S)} \left[ v(S \cup \{j\}) - v(S) - v(\{j\}) \right] & \text{if } |S/g| = 1 \\
+				\sum_{R \in S/g} v^*(R)                                                                  & \text{otherwise}
+			\end{cases}
+			.
+		\end{equation}
+	}
 \end{columns}
 
-    % Results block 1.
-    \block{Hamiache-Navarro value results in narrower distribution with respect to the difference}{
-        % Add an initial part of your results here
-        
-        \begin{tikzfigure}
-            \includegraphics[scale=1.5]{../data/images/esol_attribution_distributions.png}
-        \end{tikzfigure}
-
-    }
+% Results block 1.
+% \block{Hamiache-Navarro value results in narrower distribution with respect to the difference}{
+% 	% Add an initial part of your results here
+% 
+% 	\begin{tikzfigure}
+% 		\includegraphics[scale=1.5]{../data/images/esol_attribution_distributions.png}
+% 	\end{tikzfigure}
+% 
+% }
 
 \begin{columns}
-    \column{0.5}
-    % Block containing the references.
-    \block{References} {
-        \vspace{-1cm}
-        \bibliography{poster.bib}
-    }
+	\column{0.5}
+	% Block containing the references.
+	\block{References} {
+		\vspace{-1cm}
+		\bibliography{poster.bib}
+	}
 
-    % Right Column.
-    \column{0.5}
+	% Right Column.
+	\column{0.5}
 
-    \block{substructure mask explanation}{
+	\block{Quantify correctness of explanation}{
 
-        \hspace{10cm} \textbf{Difference}\cite{wu2023chemistry} \hspace{13cm} \textbf{HN}
-        \begin{tikzfigure}
-            \includegraphics[scale=1.5]{../data/images/dimethyl_phthalate_difference.png}
-            \hspace{2cm}
-            \includegraphics[scale=1.5]{../data/images/dimethyl_phthalate_HN.png}
-        \end{tikzfigure}
-    }
+	}
+
+	% \block{substructure mask explanation}{
+
+	% 	\hspace{10cm} \textbf{Difference}\cite{wu2023chemistry} \hspace{13cm} \textbf{HN}
+	% 	\begin{tikzfigure}
+	% 		\includegraphics[scale=1.5]{../data/images/dimethyl_phthalate_difference.png}
+	% 		\hspace{2cm}
+	% 		\includegraphics[scale=1.5]{../data/images/dimethyl_phthalate_HN.png}
+	% 	\end{tikzfigure}
+	% }
 
 
-    % Contact and Acknowledgements block.
-    \block{Contact and acknowledgements} {
-        Contact via email at xander.wieme@ugent.be. \\
-        \begin{wrapfigure}[1]{r}{10cm}
-            \vspace{-4cm}
-            \begin{tikzfigure}[]
-                \includegraphics[height=4cm]{figures/ugent_logo}
-            \end{tikzfigure}
-        \end{wrapfigure}
-    }
+	% Contact and Acknowledgements block.
+	\block{Contact and acknowledgements} {
+		Contact via email at xander.wieme@ugent.be. \\
+		\begin{wrapfigure}[1]{r}{10cm}
+			\vspace{-4cm}
+			\begin{tikzfigure}[]
+				\includegraphics[height=4cm]{figures/ugent_logo}
+			\end{tikzfigure}
+		\end{wrapfigure}
+	}
 
 
 \end{columns}
