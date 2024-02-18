@@ -69,7 +69,7 @@
 			      novel scientific insights found by those models.\cite{carvalho2019machine}.
 
 			\item Current explainable artificial intelligence techniques \emph{fail} to provide a \emph{chemically intuitive
-				      explanation}.\cite{yuan2022explainability, wu2023chemistry}
+				      explanation}.\cite{yuan2022explainability}
 
 			\item Recently, Wu et. al. developed a chemically intuitive explanation technique for graph
 			      neural networks by assigning attributions to \emph{chemical substructure} (e.g. functional groups,
@@ -78,41 +78,34 @@
 			\item The difference between the model prediction of a molecule and a masked molecule is a
 			      too simple attribution. A popular method to distribute the model prediction over the
 			      features is the \emph{Shapley value}.\cite{molnar2020interpretable} However, the Shapley value does not take the graphical
-			      structure into account, which limits its use on \emph{graph neural networks}.\cite{zhang2022gstarx}
-			      This restriction is solved by using the \emph{Hamiache-Navarro value}\cite{hamiache_value_1999}, which
-			      extends the Shapley value to graphs and converges to the Shapley value on complete graphs.
+                  structure into account. Therefore, the Hamiache-Navarro value \cite{hamiache_value_1999}, which extends the Shaple 
+                  value to graphs, will be compared with the Shapley value.
 
 		\end{itemize}
 
 	}
 
-	% Results block 2.
-	% \block{Research aims}{
-	% 	% This is where you can add the rest of your results.
-	% 	\begin{itemize}
-
-	% 		\item \emph{Chemically explain} graph neural networks using substructure mask exploration and the \emph{Hamiache-Navarro value}.
-	% 		\item \emph{Quantify} the correctness of the chemical intuitive \emph{explanation}.
-	% 	\end{itemize}
-
-	% }
-
 	\block[titleinnersep=0.3cm, bodyinnersep=0.5cm, linewidth=0.15cm]{Explain graph neural networks using the Shapley and Hamiache-Navarro value}{
 
-		\hspace{10cm} \textbf{Difference}\cite{wu2023chemistry} \hspace{13cm} \textbf{HN}
+        Players can be determined based on functional groups (left) or BRICS bonds (right).
+
 		\begin{tikzfigure}
-			\includegraphics[scale=1]{../data/images/dimethyl_phthalate_difference.png}
-			\hspace{2cm}
-			\includegraphics[scale=1]{../data/images/dimethyl_phthalate_HN.png}
+			\includegraphics[scale=0.7]{../data/images/example_functional_groups.png}
+			\includegraphics[scale=0.7]{../data/images/example_brics.png}
 		\end{tikzfigure}
+	}
+
+    
+	% Block containing the references.
+	\block[titleinnersep=0.3cm, bodyinnersep=0.8cm, linewidth=0.15cm]{References} {
+		\vspace{-0.5cm}
+		\bibliography{poster.bib}
 	}
 
 	\column{0.5}
 	% Theory
 	\block[titleinnersep=0.3cm, bodyinnersep=0.5cm, linewidth=0.15cm]{Theory}{
 		% Add a small theory section. Keep your theory short and to the point.
-		\section{Graph neural networks}
-
 		\section{Shapley value}
 
 		Let $(N, v)$ be a game with a set of players $N$ and a characteristic function
@@ -138,51 +131,19 @@
 			.
 		\end{equation}
 	}
-\end{columns}
 
-% Results block 1.
-% \block{Hamiache-Navarro value results in narrower distribution with respect to the difference}{
-% 	% Add an initial part of your results here
-% 
-% 	\begin{tikzfigure}
-% 		\includegraphics[scale=1.5]{../data/images/esol_attribution_distributions.png}
-% 	\end{tikzfigure}
-% 
-% }
+    \block[titleinnersep=0.3cm, bodyinnersep=0.5cm, linewidth=0.15cm]{Relational graph neural network}{
 
-\begin{columns}
-	\column{0.5}
-	% Block containing the references.
-	\block{References} {
-		\vspace{-1cm}
-		\bibliography{poster.bib}
-	}
-
-	% Right Column.
-	\column{0.5}
-
-	\block{Quantify correctness of explanation}{
-
-	}
-
-	% \block{substructure mask explanation}{
-
-	% 	\hspace{10cm} \textbf{Difference}\cite{wu2023chemistry} \hspace{13cm} \textbf{HN}
-	% 	\begin{tikzfigure}
-	% 		\includegraphics[scale=1.5]{../data/images/dimethyl_phthalate_difference.png}
-	% 		\hspace{2cm}
-	% 		\includegraphics[scale=1.5]{../data/images/dimethyl_phthalate_HN.png}
-	% 	\end{tikzfigure}
-	% }
+    }
 
 
 	% Contact and Acknowledgements block.
-	\block{Contact and acknowledgements} {
+	\block[titleinnersep=0.3cm, bodyinnersep=0.5cm, linewidth=0.15cm]{Contact and acknowledgements} {
 		Contact via email at xander.wieme@ugent.be. \\
 		\begin{wrapfigure}[1]{r}{10cm}
-			\vspace{-4cm}
+			\vspace{-2.7cm}
 			\begin{tikzfigure}[]
-				\includegraphics[height=4cm]{figures/ugent_logo}
+				\includegraphics[height=2cm]{figures/ugent_logo}
 			\end{tikzfigure}
 		\end{wrapfigure}
 	}
