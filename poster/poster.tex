@@ -1,4 +1,4 @@
-\documentclass[12pt, a2paper, portrait]{tikzposter}
+\documentclass[14pt, a2paper, portrait]{tikzposter}
 \tikzposterlatexaffectionproofoff
 
 \usetitlestyle{Empty}
@@ -46,7 +46,7 @@
 \author[$\dagger$]{Y. Saeys}
 
 
-\affil[$\dagger$]{Ghent University, Krijgslaan 281 (S3), B-9000 Gent, België}
+\affil[$\dagger$]{Ghent University, Krijgslaan 281 (S3), B-9000 Gent, België\vspace{-2cm}}
 
 %
 %   MAIN DOCUMENT
@@ -66,7 +66,7 @@
 		\begin{itemize}
 
 			\item \emph{Opaque predictions} for machine learning models builds \emph{trust issues} and restricts creation of
-			      novel scientific insights found by those models.\cite{carvalho2019machine}.
+                novel scientific insights found by those models.\cite{carvalho2019machine}.
 
 			\item Current explainable artificial intelligence techniques \emph{fail} to provide a \emph{chemically intuitive
 				      explanation}.\cite{yuan2022explainability}
@@ -78,7 +78,7 @@
 			\item The difference between the model prediction of a molecule and a masked molecule is a
 			      too simple attribution. A popular method to distribute the model prediction over the
 			      features is the \emph{Shapley value}.\cite{molnar2020interpretable} However, the Shapley value does not take the graphical
-                  structure into account. Therefore, the Hamiache-Navarro value \cite{hamiache_value_1999}, which extends the Shaple 
+                  structure into account. Therefore, the \emph{Hamiache-Navarro value} \cite{hamiache_value_1999}, which extends the Shaple 
                   value to graphs, will be compared with the Shapley value.
 
 		\end{itemize}
@@ -93,11 +93,14 @@
 			\includegraphics[scale=0.7]{../data/images/example_functional_groups.png}
 			\includegraphics[scale=0.7]{../data/images/example_brics.png}
 		\end{tikzfigure}
+
+        Molecular properties that will be explain are the expected water solubility 
+        and mutagenicity using the data sets provided by the reference paper\cite{wu2023chemistry}.
 	}
 
     
 	% Block containing the references.
-	\block[titleinnersep=0.3cm, bodyinnersep=0.8cm, linewidth=0.15cm]{References} {
+	\block[titleinnersep=0.3cm, bodyinnersep=0.5cm, linewidth=0.15cm]{References} {
 		\vspace{-0.5cm}
 		\bibliography{poster.bib}
 	}
@@ -120,7 +123,7 @@
 
 		Let $(N, v, g)$ be a game with communication structure given by the graph $\left< N, g \right>$, where
 		$g \subseteq g_N \coloneqq \{ \{i, j\} | i, j \in N \}$ is the set of adjacent players. The
-		associated game $(N, v^*, g)$ is defined as
+        associated game $(N, v^*, g)$ is defined as\cite{hamiache_value_1999}
 
 		\begin{equation}
 			v^*(S) =
@@ -130,9 +133,15 @@
 			\end{cases}
 			.
 		\end{equation}
+
+        A sequence of associated games converges to the Hamiache-Navarro value.
 	}
 
     \block[titleinnersep=0.3cm, bodyinnersep=0.5cm, linewidth=0.15cm]{Relational graph neural network}{
+        
+        \begin{tikzfigure}
+            \includegraphics[scale=5]{../data/images/RGCN_model.png}
+        \end{tikzfigure}
 
     }
 
