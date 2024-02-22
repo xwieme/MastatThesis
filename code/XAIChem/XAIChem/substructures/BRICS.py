@@ -43,7 +43,7 @@ def BRICSMasks(smiles: str):
         masks["molecule_smiles"].append(smiles)
         masks["substruct_smiles"].append(substruct_smiles)
         masks["atom_ids"].append(substruct_atom_ids)
-        masks["mask"].append(createMask(molecule, substruct_atom_ids))
+        masks["mask"].append(createMask(molecule, substruct_atom_ids) ^ 1)
 
     return pd.DataFrame.from_dict(masks)
 

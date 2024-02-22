@@ -16,4 +16,5 @@ FUNCTIONAL_GROUPS_DICT = {
     "R-NH2": "[C,c]-[N;H2]",
     "RX": "[C,c]-[F,Cl,Br,I]",
     "ROH": "[C,c]-[O;H]",
+    "Phenyl": "[C,N]-c1[c;h1][c;h1][c;h1][c;h1][c;h1]1",
 }

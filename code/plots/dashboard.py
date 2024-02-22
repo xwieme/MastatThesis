@@ -28,7 +28,11 @@ app.layout = html.Div(
                 {
                     "label": "Expected solubility",
                     "value": "../../data/ESOL/attribution_no_mean.json",
-                }
+                },
+                {
+                    "label": "Expecte solubility BRICS",
+                    "value": "../../data/ESOL/attribution_brics_no_mean.json",
+                },
             ],
             className="focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center",
         ),

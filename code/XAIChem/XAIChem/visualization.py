@@ -72,6 +72,7 @@ def showMolecule(
     for i, item in enumerate(atoms_highlight_values.items()):
         substructure, value = item
 
+        # Annotate substructure with attribution value
         molecule.GetAtomWithIdx(substructure[0]).SetProp("atomNote", str(value))
 
         for atom_id in substructure:
@@ -114,10 +115,5 @@ def showMolecule(
         bond_radia,
     )
     drawer.FinishDrawing()
-
-    values = np.zeros(len(molecule.GetAtoms()))
-    for substructure, value in atoms_highlight_values.items():
-        for atom_id in substructure:
-            values[atom_id] = value
 
     return Image.open(BytesIO(drawer.GetDrawingText()))

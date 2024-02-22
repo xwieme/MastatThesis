@@ -15,7 +15,6 @@ def substructureMaskExploration(
     molecule_df: pd.DataFrame,
     device,
     method: str = "after",
-    return_prediction: bool = False,
 ) -> pd.DataFrame:
     """
     Compute the attribution of a substructure by calculating the difference between
@@ -28,8 +27,6 @@ def substructureMaskExploration(
     :param molecule_df: pandas dataframe resulting from XAIChem.substructures
     :param method: determines where the mask is applied, can be 'after' or
         'before' (default is 'after')
-    :param return_prediction: determines if the unmasked model prediction
-        must also be returned (default is False)
     """
 
     t1 = time.time()

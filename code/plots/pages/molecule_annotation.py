@@ -4,10 +4,9 @@ from io import BytesIO
 import dash
 import pandas as pd
 import plotly.express as px
+import XAIChem
 from dash import Input, Output, callback, dcc, html
 from rdkit import Chem
-
-import XAIChem
 
 dash.register_page(__name__, name="Annotate molecules")
 
@@ -57,7 +56,7 @@ def annotateMolecule(smiles, data, true_values):
     # for the atom ids
     attributions["atom_ids_tuple"] = attributions.atom_ids.apply(tuple)
     images = []
-    for attribution in ["difference", "HN_value", "Shapley_value"]:
+    for attribution in ["SME", "HN_value", "Shapley_value"]:
         img_str = XAIChem.showMolecule(
             Chem.MolFromSmiles(smiles),
             attributions.set_index("atom_ids_tuple")[attribution].round(4).to_dict(),
@@ -68,7 +67,7 @@ def annotateMolecule(smiles, data, true_values):
         fig = px.bar(
             attributions,
             x=attribution,
-            y="functional_group",
+            y="substruct_smiles",
             barmode="group",
             width=550,
             height=450,
