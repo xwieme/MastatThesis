@@ -24,11 +24,11 @@ def plotOccurenceFunctionalGroups(data):
     data = pd.DataFrame(data)
 
     counts_df = (
-        data.query("functional_group != 'scaffold'")
-        .functional_group.value_counts()
+        data.query("substruct_smiles != 'scaffold'")
+        .substruct_smiles.value_counts()
         .reset_index()
     )
 
-    fig = px.bar(counts_df, x="count", y="functional_group")
+    fig = px.bar(counts_df, x="count", y="substruct_smiles")
 
     return dcc.Graph(figure=fig)

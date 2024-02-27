@@ -20,8 +20,8 @@ def createTable(data):
     data = data[
         [
             "molecule_smiles",
-            "functional_group",
-            "difference",
+            "substruct_smiles",
+            "SME",
             "HN_value",
             "Shapley_value",
         ]
@@ -31,8 +31,8 @@ def createTable(data):
         id="data-table",
         columns=[
             {"name": "molecule_smiles", "id": "molecule_smiles"},
-            {"name": "functional_group", "id": "functional_group"},
-            {"name": "difference", "id": "difference"},
+            {"name": "substruct_smiles", "id": "substruct_smiles"},
+            {"name": "SME", "id": "SME"},
             {"name": "HN_value", "id": "HN_value"},
             {"name": "Shapley_value", "id": "Shapley_value"},
         ],
