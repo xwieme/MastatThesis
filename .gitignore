@@ -27,6 +27,23 @@ build/
 # Mac tmp files
 .DS_Store
 
+# Python
+*/__pycache__/*
+*.pyc
+*/env.sh
+
 # Ipython notebooks
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
+
+# Data files 
+**/*_training.*
+**/*_test.*
+**/*_valid.*
+*.pt
+
+# HPC log files
+**/*.sh.*
+
+# wandb
+**/wandb/**
