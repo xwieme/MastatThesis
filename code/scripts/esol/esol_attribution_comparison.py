@@ -1,10 +1,11 @@
+import os
 import numpy as np
 import pandas as pd
 import plotly.express as px
-import scipy
-from dash import Dash, dcc, html
-from rdkit import Chem
-from rdkit.Chem import Draw
+# from dash import Dash, dcc, html
+
+
+DATA_DIR = "../../../data"
 
 
 def spearmanRankCorr(data: pd.DataFrame, method1: str, method2: str) -> pd.DataFrame:
@@ -45,12 +46,12 @@ if __name__ == "__main__":
     app = Dash()
 
     # Load reference dataset and attribution data
-    data = pd.read_csv("../../data/ESOL/ESOL.csv")
+    data = pd.read_csv(os.path.join(DATA_DIR, "ESOL/ESOL.csv"))
     attributions_functional_groups = pd.DataFrame(
-        pd.read_json("../../data/ESOL/attribution_no_mean.json")
+        pd.read_json(os.path.join(DATA_DIR, "ESOL/attribution.json"))
     )
     attributions_brics = pd.DataFrame(
-        pd.read_json("../../data/ESOL/attribution_brics_no_mean.json")
+        pd.read_json(os.path.join(DATA_DIR, "/ESOL/attribution_brics.json"))
     )
 
     # Compute the RMSE between the model prediction and experimental data

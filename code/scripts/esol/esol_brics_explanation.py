@@ -1,10 +1,13 @@
+import os
 import argparse
 from pathlib import Path
-
 import pandas as pd
 import torch
-
 import XAIChem
+
+
+DATA_DIR = "../../../data"
+OUT_DIR = os.path.join(DATA_DIR, "ESOL/attributions_brics")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -15,7 +18,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     sample_id = int(args.sample_id)
 
-    OUT_DIR = "../../data/ESOL/attributions_brics"
     if not Path(OUT_DIR).exists():
         Path(OUT_DIR).mkdir(parents=True)
 
@@ -27,13 +29,13 @@ if __name__ == "__main__":
 
     # Load trained models
     paths = [
-        f"../../data/ESOL/trained_models/ESOL_rgcn_model_{i}_early_stop.pt"
+        os.path.join(DATA_DIR, f"ESOL/trained_models/ESOL_rgcn_model_{i}_early_stop.pt")
         for i in range(10)
     ]
     models = XAIChem.loadModels(model, paths, device="cuda")
 
     # Load data for explanation and select a molecule
-    molecules = pd.read_csv("../../data/ESOL/ESOL.csv")
+    molecules = pd.read_csv(os.path.join(DATA_DIR, "ESOL/ESOL.csv"))
     smiles = molecules.smiles.iloc[sample_id]
 
     # Explain the model prediction by breaking the molecule in parts

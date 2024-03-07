@@ -1,4 +1,5 @@
 import argparse
+import os
 
 import torch
 from torch.optim import Adam 
@@ -7,7 +8,8 @@ from sklearn import metrics
 
 import XAIChem
 
-# from esol_rgcn_model import buildEsolModel  
+
+DATA_DIR = "../../../data"
 
 
 if __name__ == "__main__":
@@ -28,9 +30,9 @@ if __name__ == "__main__":
     )
 
     print("Loading data")
-    train_data = XAIChem.Dataset("../../data", "ESOL", "train")
-    test_data = XAIChem.Dataset("../../data", "ESOL", "test")
-    val_data = XAIChem.Dataset("../../data", "ESOL", "val")
+    train_data = XAIChem.Dataset(DATA_DIR, "ESOL", "train")
+    test_data = XAIChem.Dataset(DATA_DIR, "ESOL", "test")
+    val_data = XAIChem.Dataset(DATA_DIR, "ESOL", "val")
 
     # Batch data 
     data = {
@@ -46,7 +48,7 @@ if __name__ == "__main__":
     criterion = torch.nn.MSELoss()
     optimizer = Adam(model.parameters(), config["learning_rate"])
     early_stopper = XAIChem.EarlyStopping(
-        "../../data/ESOL/trained_models",
+        os.path.join(DATA_DIR, "ESOL/trained_models"),
         f"ESOL_rgcn_model_{model_id}",
         config["early_stop"]["patience"],
         config["early_stop"]["mode"]
@@ -63,7 +65,7 @@ if __name__ == "__main__":
         criterion,
         optimizer,
         config["epochs"],
-        f"../../data/ESOL/model_{model_id}.pt",
+        os.path.join(DATA_DIR, f"ESOL/trained_models/model_{model_id}.pt"),
         early_stop=early_stopper,
         metrics=metrics_dict,
         wandb_project="ESOL_reproduction",
