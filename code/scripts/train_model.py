@@ -13,6 +13,7 @@ from torch.optim import Adam
 from torch_geometric.loader import DataLoader
 
 if __name__ == "__main__":
+
     # Get model id from user input. The model id determines the random seed.
     parser = argparse.ArgumentParser(
         prog="train_model",

@@ -4,7 +4,7 @@
 #PBS -l walltime=01:00:00
 #PBS -l mem=16gb
 
-cd $VSC_SCRATCH/MastatThesis/code/scripts
+cd $VSC_SCRATCH/MastatThesis/code/scripts/esol
 # Make python module XAIChem globaly available
 export PYTHONPATH=$VSC_SCRATCH/MastatThesis/code/XAIChem:$PYTHONPATH
 
