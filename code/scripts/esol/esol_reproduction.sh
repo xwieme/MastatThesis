@@ -1,7 +1,7 @@
 #!/bin/bash
 #PBS -l nodes=1:ppn=2
 #PBS -l gpus=1
-#PBS -l walltime=00:03:00
+#PBS -l walltime=01:00:00
 #PBS -l mem=16gb
 
 cd $VSC_SCRATCH/MastatThesis/code/scripts/esol
