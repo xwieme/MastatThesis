@@ -1,4 +1,4 @@
-,Name,SMILES,Solubility
+,Name,smiles,aqsoldb_A
 0,"(1,1-dimethylpropyl)benzene",CCC(C)(C)c1ccccc1,-4.5007459195
 1,"(1,3-benzothiazol-2-ylsulfanyl)(tert-butyl)amine",CC(C)(C)NSc1sc2ccccc2n1,-5.25699701315
 2,"(1,5,5-trimethyl-6-bicyclo[2.2.1]heptanyl) acetate",CC(=O)OC1C(C)(C)C2CCC1(C)C2,-3.8745968837

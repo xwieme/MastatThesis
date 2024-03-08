@@ -1,9 +1,20 @@
+"""
+This script compares the different attribution methods (i.e. SME, Shapley value 
+and HN value) by plotting the prediction RMSE in function of the Spearman rank 
+correlation between two methods. Two methods are used to subdivide molecules in 
+substructures (i.e. functional groups and BRICS) and their distribution of the 
+number of substructures for a molecule is compared. Also, the two substructure 
+methods are combined by taking the method producing the most number of substructures,
+because most molecules in the data set cannot be split using BRICS.
+"""
+
+
 import os
+
 import numpy as np
 import pandas as pd
 import plotly.express as px
-# from dash import Dash, dcc, html
-
+from dash import Dash, dcc, html
 
 DATA_DIR = "../../../data"
 

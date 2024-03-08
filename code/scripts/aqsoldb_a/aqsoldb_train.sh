@@ -13,7 +13,7 @@ source ../env.sh
 # Train the GNN model in an apptainer container
 apptainer exec --nv $VSC_SCRATCH/xai_chemistry_lab.sif \
     /opt/conda/envs/lab/bin/python \
-    ../model_train.py \
-    "../../../data/ESOL" \
-    "esol_reproduction" \
+    ../train_model.py \
+    "../../../data/aqsoldb_A" \
+    "aqsoldb_A" \
     $PBS_ARRAYID 
