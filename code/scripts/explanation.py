@@ -61,26 +61,34 @@ if __name__ == "__main__":
                 models, masks_functional_groups, device
             )
         )
+
+        if len(masks_functional_groups) > 12:
+            raise Exception("Too many substructures")
+
         attributions_functional_groups = XAIChem.attribution.hamiacheNavarroValue(
             models, attributions_functional_groups, 0, shapley=True, device=device
         )
 
         attributions_functional_groups.drop("mask", axis=1).to_json(
-            os.path.join(OUT_DIR_FUNC_GROUP, "attribution_{SAMPLE_ID}.json")
+            os.path.join(OUT_DIR_FUNC_GROUP, f"attribution_{SAMPLE_ID}.json")
         )
 
         # Explain prediction by breaking the molecule in parts using BRICS bonds
         explanation_df = XAIChem.substructures.BRICSMasks(molecule_smiles)
 
-        explanation_df = XAIChem.attribution.hamiacheNavarroValue(
-            models, explanation_df, 0, device=device, shapley=True
-        )
         explanation_df = XAIChem.attribution.substructureMaskExploration(
             models, explanation_df, device
         )
 
+        if len(masks_functional_groups) > 12:
+            raise Exception("Too many substructures")
+
+        explanation_df = XAIChem.attribution.hamiacheNavarroValue(
+            models, explanation_df, 0, device=device, shapley=True
+        )
+
         explanation_df.drop("mask", axis=1).to_json(
-            os.path.join(OUT_DIR_BRICS, "attribution_{SAMPLE_ID}.json")
+            os.path.join(OUT_DIR_BRICS, f"attribution_{SAMPLE_ID}.json")
         )
 
     # Write failures to log file
