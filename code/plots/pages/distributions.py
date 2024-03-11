@@ -1,6 +1,7 @@
 import dash
 import pandas as pd
 import plotly.express as px
+import plotly.figure_factory as ff
 import plotly.graph_objects as go
 from dash import Input, Output, callback, dcc, html
 from plotly.subplots import make_subplots
@@ -98,5 +99,11 @@ def createHistograms(data, substruct_smiles):
         facet_col="method",
     )
 
-    # return dcc.Graph(figure=fig)
+    #    fig = ff.create_distplot([
+    #        data_long.query("method == 'SME'").attribution.to_list(),
+    #        data_long.query("method == 'HN_value'").attribution.to_list(),
+    #        data_long.query("method == 'Shapley_value'").attribution.to_list()
+    #    ], ["SME", "HN_value", "Shapley_value"])
+
     return dcc.Graph(figure=fig)
+    # return dcc.Graph(figure=fig)

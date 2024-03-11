@@ -1,3 +1,5 @@
+import re
+
 import dash
 import pandas as pd
 import plotly.io as pio
@@ -15,6 +17,7 @@ app.layout = html.Div(
     [
         dcc.Store(id="store-data", storage_type="memory"),
         dcc.Store(id="store-truevalues", storage_type="memory"),
+        dcc.Store(id="store-valuename", storage_type="memory"),
         html.Br(),
         html.P(
             "Explanation of graph neural networks",
@@ -23,16 +26,32 @@ app.layout = html.Div(
         dcc.Dropdown(
             id="data-dropdown",
             multi=False,
-            value="../../data/ESOL/attribution_no_mean.json",
+            value="../../data/ESOL/attribution_functional_groups.json::ESOL",
             options=[
                 {
                     "label": "Expected solubility",
-                    "value": "../../data/ESOL/attribution_no_mean.json",
+                    "value": "../../data/ESOL/attribution_functional_groups.json::ESOL",
                 },
                 {
-                    "label": "Expecte solubility BRICS",
-                    "value": "../../data/ESOL/attribution_brics_no_mean.json",
+                    "label": "Expected solubility BRICS",
+                    "value": "../../data/ESOL/attribution_brics.json::ESOL",
                 },
+                {
+                    "label": "Expected solubility BRICS aqsoldb A",
+                    "value": "../../data/aqsoldb_A/attribution_brics.json::aqsoldb_A",
+                },
+                {
+                    "label": "Expected solubility functional groups aqsoldb A",
+                    "value": "../../data/aqsoldb_A/attribution_functional_groups.json::aqsoldb_A",
+                },
+                #                {
+                #                    "label": "Expected solubility BRICS aqsoldb B",
+                #                    "value": "../../data/aqsoldb_B/attribution_brics.json",
+                #                },
+                #                {
+                #                    "label": "Expected solubility functional groups aqsoldb B",
+                #                    "value": "../../data/aqsoldb_B/attribution_functional_groups.json",
+                #                },
             ],
             className="focus:ring-4 focus:outline-none font-medium rounded-lg text-sm px-5 py-2.5 text-center",
         ),
@@ -52,14 +71,24 @@ app.layout = html.Div(
 )
 
 
-@callback(Output("store-data", "data"), Input("data-dropdown", "value"))
+@callback(
+    Output("store-data", "data"),
+    Output("store-valuename", "data"),
+    Output("store-truevalues", "data"),
+    Input("data-dropdown", "value"),
+)
 def loadData(value):
-    return pd.read_json(value).to_dict("records")
+    filename, value_name = re.split("::", value)
 
+    # Get the data directory where the attribution file is saved
+    filepath_parts = re.split("/", filename)
 
-@callback(Output("store-truevalues", "data"), Input("data-dropdown", "value"))
-def loadTrueData(value):
-    return pd.read_csv("../../data/ESOL/ESOL.csv").to_dict("records")
+    true_values = pd.read_csv(
+        f"{'/'.join(filepath_parts[:-1])}/{value_name}.csv"
+    ).to_dict("records")
+    attributions = pd.read_json(filename).to_dict("records")
+
+    return attributions, value_name, true_values
 
 
 if __name__ == "__main__":

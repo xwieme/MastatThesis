@@ -1,3 +1,5 @@
+import argparse
+import os
 from collections import defaultdict
 from itertools import combinations
 
@@ -8,6 +10,8 @@ import scipy
 from dash import Dash, dcc, html
 from rdkit import Chem
 from rdkit.Chem import Draw
+
+DATA_DIR = "../../data"
 
 
 def correlationPlot(
@@ -96,16 +100,29 @@ def numSubstructDistribution(df: pd.DataFrame):
 if __name__ == "__main__":
     app = Dash()
 
+    # Setup argparse to get the subdirectory name of interest in the data directory
+    parser = argparse.ArgumentParser()
+    parser.add_argument("data_subdir_name")
+    args = parser.parse_args()
+
     ###############
     ## Load Data ##
     ###############
 
-    esol_df = pd.read_csv("../../data/ESOL/ESOL.csv")
+    dataset = pd.read_csv(
+        os.path.join(DATA_DIR, args.data_subdir_name, f"{args.data_subdir_name}.csv")
+    )
     attributions_functional_groups = pd.DataFrame(
-        pd.read_json("../../data/ESOL/attribution_no_mean.json")
+        pd.read_json(
+            os.path.join(
+                DATA_DIR, args.data_subdir_name, "attribution_functional_groups.json"
+            )
+        )
     )
     attributions_brics = pd.DataFrame(
-        pd.read_json("../../data/ESOL/attribution_brics_no_mean.json")
+        pd.read_json(
+            os.path.join(DATA_DIR, args.data_subdir_name, "attribution_brics.json")
+        )
     )
 
     ######################
@@ -113,19 +130,21 @@ if __name__ == "__main__":
     ######################
 
     # Compute the RMSE between the model prediction and experimental data
-    esol_df = esol_df.join(
+    dataset = dataset.join(
         attributions_brics[["molecule_smiles", "non_masked_prediction"]]
         .drop_duplicates()
         .set_index("molecule_smiles")
         .rename(columns={"non_masked_prediction": "prediction"}),
         on="smiles",
     )
-    esol_df["RMSE"] = np.sqrt((esol_df["ESOL"] - esol_df["prediction"]) ** 2)
+    dataset["RMSE"] = np.sqrt(
+        (dataset[args.data_subdir_name] - dataset["prediction"]) ** 2
+    )
 
     # Get the fraction of molecules where the prediction is larger than
     # the experimental RMSE of 0.6 logS
     print(
-        f"Fraction of molecules with a RMSE > 0.6: {len(esol_df.query('RMSE > 0.6')) / len(esol_df) * 100:.2f}%"
+        f"Fraction of molecules with a RMSE > 0.6: {len(dataset.query('RMSE > 0.6')) / len(dataset) * 100:.2f}%"
     )
 
     ################################
@@ -191,7 +210,7 @@ if __name__ == "__main__":
             correlation_figures[substruct_method].append(
                 correlationPlot(
                     attributions_functional_groups,
-                    esol_df,
+                    dataset,
                     method1,
                     method2,
                     f"{method1} vs {method2}",
