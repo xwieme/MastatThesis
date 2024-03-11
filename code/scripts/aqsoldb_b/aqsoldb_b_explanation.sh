@@ -12,5 +12,5 @@ export PYTHONPATH=$VSC_SCRATCH/MastatThesis/code/XAIChem:$PYTHONPATH
 apptainer exec --nv $VSC_SCRATCH/xai_chemistry_lab.sif \
     /opt/conda/envs/lab/bin/python \
     ../explanation.py \
-    "../../../data/aqsoldb_B \
+    "../../../data/aqsoldb_B" \
     $PBS_ARRAYID
