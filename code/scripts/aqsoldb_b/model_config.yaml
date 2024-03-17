@@ -1,0 +1,23 @@
+is_classification: False
+seed: 2022 + kwargs['model_id'] * 10
+batch_size: 256
+epochs: 500
+learning_rate: 0.003
+
+early_stop: 
+  metric: r2
+  mode: "higher"
+  patience: 30
+
+RGCN:
+  num_units: [256, 256]
+  dropout_rate: 0.5
+  use_batch_norm: True
+  use_residual: True
+  num_bases: 65 # Equal to the number of different edge types
+  loop: False
+
+MLP:
+  num_layers: 3
+  num_units: 64
+  dropout_rate: 0.1

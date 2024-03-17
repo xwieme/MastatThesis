@@ -38,7 +38,7 @@ def createDataObjectFromRdMol(
 
     return Data(
         x=x,
-        y=float(y),        
+        y=float(y),
         edge_index=edge_index,
         edge_attr=edge_attr,
         edge_type=edge_type,
@@ -46,7 +46,7 @@ def createDataObjectFromRdMol(
     )
 
 
-def createDataObjectFromSmiles(smiles: str, y: float , num_classes: int | None = None):
+def createDataObjectFromSmiles(smiles: str, y: float, num_classes: int | None = None):
     molecule = Chem.MolFromSmiles(smiles)
     return createDataObjectFromRdMol(molecule, y, num_classes)
 
@@ -64,27 +64,30 @@ class Dataset(InMemoryDataset):
     def __init__(
         self,
         root: str,
-        name: str,
+        # name: str,
         tag: str,
         num_classes: int | None = None,
         transform: Optional[Callable] = None,
         pre_transform: Optional[Callable] = None,
         pre_filter: Optional[Callable] = None,
     ):
-        self.name = name
+        # self.name = name
+        self.name = root.split("/")[-1]
         self.tag = tag
         self.nclasses = num_classes
 
-        super(Dataset, self).__init__(root, transform, pre_transform, pre_filter)
+        super().__init__(root, transform, pre_transform, pre_filter)
         self.data, self.slices = torch.load(self.processed_paths[0])
 
     @property
     def raw_dir(self) -> str:
-        return osp.join(self.root, self.name)
+        # return osp.join(self.root, self.name)
+        return self.root
 
     @property
     def processed_dir(self) -> str:
-        return osp.join(self.root, self.name)
+        # return osp.join(self.root, self.name)
+        return self.root
 
     @property
     def raw_file_names(self) -> str:
@@ -102,8 +105,7 @@ class Dataset(InMemoryDataset):
                 lambda row: createDataObjectFromSmiles(*row, num_classes=self.nclasses),
                 axis=1,
             )
-            .values
-            .tolist()
+            .values.tolist()
         )
 
         data, slices = self.collate(data_list)

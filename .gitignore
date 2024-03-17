@@ -37,9 +37,6 @@ build/
 */.ipynb_checkpoints/*
 
 # Data files 
-**/*_training.*
-**/*_test.*
-**/*_valid.*
 *.pt
 
 # HPC log files
