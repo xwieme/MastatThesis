@@ -42,13 +42,14 @@ def getDropdownOptions(data):
     Input("smiles-dropdown", "value"),
     Input("store-data", "data"),
     Input("store-truevalues", "data"),
+    Input("store-valuename", "data"),
 )
-def annotateMolecule(smiles, data, true_values):
+def annotateMolecule(smiles, data, true_values, value_name):
     data = pd.DataFrame(data)
     true_values = pd.DataFrame(true_values)
 
     attributions = data.query("molecule_smiles == @smiles").copy()
-    true_value = true_values.query(f"smiles == '{smiles}'").ESOL.iloc[0]
+    true_value = true_values.query(f"smiles == '{smiles}'")[value_name].iloc[0]
 
     # Each set of atom ids forming a functional group is mapped to
     # its corresponding attribution using a dictionairy. Since keys
