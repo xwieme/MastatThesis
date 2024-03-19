@@ -1,6 +1,5 @@
 import time
 from collections import defaultdict
-from itertools import product
 from typing import Callable, Dict
 
 import numpy as np
@@ -14,6 +13,10 @@ from ..handlers import EarlyStopping
 
 
 class ModelTrainer:
+    """
+    Class to train a machine learning model and upload training histroy to wandb
+    """
+
     def __init__(self, model: torch.nn.Module, device: torch.device, config: dict):
         self._model = model
         self._device = device
@@ -22,8 +25,8 @@ class ModelTrainer:
 
         # Initialize empty list to store model predictions and true
         # labels which can be used to compute various evaluation metrics
-        self._predictions = list()
-        self._labels = list()
+        self._predictions = []
+        self._labels = []
 
     def reset(self) -> None:
         """
@@ -105,8 +108,8 @@ class ModelTrainer:
                 for metric_name, metric in metrics.items():
                     evaluation[metric_name] = metric(self._labels, self._predictions)
 
-        self._predictions = list()
-        self._labels = list()
+        self._predictions = []
+        self._labels = []
 
         return evaluation
 

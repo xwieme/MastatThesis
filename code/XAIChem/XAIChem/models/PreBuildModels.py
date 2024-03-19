@@ -40,7 +40,6 @@ def rgcnWuEtAll(config_file: str, args: list, **kwargs):
         use_batch_norm=config["RGCN"]["use_batch_norm"],
         use_residual=config["RGCN"]["use_residual"],
         num_bases=config["RGCN"]["num_bases"],
-        loop=config["RGCN"]["loop"],
     )
 
     molecular_embedder = WeightedSum(config["RGCN"]["num_units"][-1])

@@ -124,6 +124,7 @@ def maskedPredictions(
     models,
     molecule: Data,
     masks: List[torch.Tensor],
+    mask_method: str,
     batch_size: int = 256,
     device: torch.device | str = "cpu",
 ):
@@ -135,6 +136,9 @@ def maskedPredictions(
     :param smiles: smiles representation of a molecule
     :param masks: list for tensors, each selecting a substructure in the
         molecule defined by smiles.
+    :param mask_method: when to apply the mask, during the RGCN part of the
+        model (i.e. 'rgcn') or during the aggregation step (i.e. 'aggregation')
+        (optional, default is None)
     """
 
     num_substructures = len(masks)
@@ -154,7 +158,7 @@ def maskedPredictions(
         mask_batch_subset = mask_batch[i * 256 : (i + 1) * 256, :].to(device)
 
         predictions[i * batch_size : (i + 1) * batch_size] = predictBatch(
-            batch, models, mask_batch_subset.view(-1, 1), device
+            batch, models, mask_batch_subset.view(-1, 1), mask_method, device
         ).to("cpu")
 
     return predictions
@@ -166,6 +170,7 @@ def hamiacheNavarroValue(
     average_prediction: float,
     shapley: bool = False,
     batch_size: int = 256,
+    mask_method: str = "aggregation",
     device: torch.device | str = "cpu",
 ) -> pd.DataFrame:
     """
@@ -181,6 +186,9 @@ def hamiacheNavarroValue(
     :param shapley: specify if the Shapley value also needs to be computed or not
         (default is False)
     :param batch_size: size of batch used in to compute the predictions (default is 256)
+    :param mask_method: when to apply the mask, during the RGCN part of the
+        model (i.e. 'rgcn') or during the aggregation step (i.e. 'aggregation')
+        (optional, default is None)
     :param device: the device used to compute the predictions, either "cpu" or "cuda"
         (default is "cpu")
     """
@@ -193,7 +201,9 @@ def hamiacheNavarroValue(
     # the model predicting of all possible combinations between the substructures
     molecule = createDataObjectFromSmiles(smiles, np.inf)
     masks = molecule_df["mask"].to_list()
-    predictions = maskedPredictions(models, molecule, masks, batch_size, device)
+    predictions = maskedPredictions(
+        models, molecule, masks, mask_method, batch_size, device
+    )
 
     t2 = time.time()
 
@@ -229,6 +239,7 @@ def shapleyValue(
     molecule_df: pd.DataFrame,
     average_prediction: float,
     batch_size: int = 256,
+    mask_method: str = "aggregation",
     device: torch.device | str = "cpu",
 ) -> pd.DataFrame:
     """
@@ -243,6 +254,9 @@ def shapleyValue(
         of interest
     :param average_prediction: average model prediction over the entire data set
     :param batch_size: size of batch used in to compute the predictions (default is 256)
+    :param mask_method: when to apply the mask, during the RGCN part of the
+        model (i.e. 'rgcn') or during the aggregation step (i.e. 'aggregation')
+        (optional, default is None)
     :param device: the device used to compute the predictions, either "cpu" or "cuda"
         (default is "cpu")
     """
@@ -251,7 +265,9 @@ def shapleyValue(
     # the model predicting of all possible combinations between the substructures
     molecule = createDataObjectFromSmiles(smiles, np.inf)
     masks = molecule_df.masks.to_list()
-    predictions = maskedPredictions(models, molecule, masks, batch_size, device)
+    predictions = maskedPredictions(
+        models, molecule, masks, mask_method, batch_size, device
+    )
 
     # Compute the HN-value
     N = tuple(range(len(masks)))

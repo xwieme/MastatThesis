@@ -32,6 +32,7 @@ def predictBatch(
     data: DataLoader,
     models: List[torch.nn.Module],
     masks: torch.Tensor | None = None,
+    mask_method: str | None = None,
     device: torch.device | str = "cpu",
 ):
     # Disable gradient computation to save memory
@@ -40,6 +41,6 @@ def predictBatch(
         predictions.to(device)
 
         for i, model in enumerate(models):
-            predictions[:, i] = model(data, masks).view(-1)
+            predictions[:, i] = model(data, masks, mask_method).view(-1)
 
     return torch.mean(predictions, dim=1)
