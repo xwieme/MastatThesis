@@ -114,18 +114,42 @@ if __name__ == "__main__":
     # Compute Spearman Rank correlation between attributions and chemical
     # intuitive ranks
     test_attributions["atom_ids"] = test_attributions.atom_ids.apply(tuple)
+    test_attributions = test_attributions[
+        ["molecule_smiles", "atom_ids", "SME", "Shapley_value", "HN_value"]
+    ].join(
+        manual_ranks.set_index(["molecule_smiles", "atom_ids"]),
+        how="left",
+        on=["molecule_smiles", "atom_ids"],
+    )
+
+    attribution_rank_correlation = (
+        test_attributions.groupby("molecule_smiles")
+        .corr(method="spearman", numeric_only=True)
+        .iloc[3::4, 0:-1]
+        .reset_index()
+        .drop(columns=["level_1"])
+        .rename(
+            columns={
+                "SME": "SME_rank_corr",
+                "Shapley_value": "Shapley_rank_corr",
+                "HN_value": "HN_rank_corr",
+            }
+        )
+    )
+
+    data["absolute_error_class"] = data.absolute_error.apply(
+        lambda value: "< 0.6" if value < 0.6 else ">= 0.6"
+    )
+
+    print(data.groupby("absolute_error_class").size())
 
     print(
-        test_attributions[["molecule_smiles", "atom_ids", "SME", "SME_rank"]]
-        .join(
-            manual_ranks.set_index(["molecule_smiles", "atom_ids"]),
-            how="left",
-            on=["molecule_smiles", "atom_ids"],
+        data.join(
+            attribution_rank_correlation.set_index("molecule_smiles"),
+            on="smiles",
         )
-        .groupby("molecule_smiles")[["SME", "manual_rank"]]
-        .corr(method="spearman")
-        .reset_index()
-        .query("level_1 == 'manual_rank'")[["SME"]]
-        .rename(columns={"SME": "corr"})
-        .describe()
+        .groupby("absolute_error_class")[
+            ["SME_rank_corr", "Shapley_rank_corr", "HN_rank_corr"]
+        ]
+        .mean()
     )
