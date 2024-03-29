@@ -89,14 +89,12 @@ if __name__ == "__main__":
 
     print("Fidelity positive")
     fidelities_pos = {
-        attribution_method: test_attributions.groupby("molecule_smiles")
-        .apply(
+        attribution_method: test_attributions.groupby("molecule_smiles").apply(
             fidelity,
             attribution_method,
             models=rgcn_models,
             device=torch_device,
         )
-        .abs()
         for attribution_method in ["SME", "Shapley_value", "HN_value"]
     }
 
@@ -120,17 +118,17 @@ if __name__ == "__main__":
     for attribution_method, fidelity_distr in fidelities_neg.items():
         print(f"{attribution_method}: {np.round(np.mean(fidelity_distr), 2)}")
 
-    # app = Dash()
+    app = Dash()
 
-    # figs_div = []
+    figs_div = []
 
-    # for attribution_method, fidelity_distr in fidelities.items():
-    #     fig = px.histogram(x=fidelity_distr)
-    #     fig.update_layout(
-    #         autosize=False, width=800, height=500, template="plotly_white"
-    #     )
+    for attribution_method, fidelity_distr in fidelities_pos.items():
+        fig = px.histogram(x=fidelity_distr)
+        fig.update_layout(
+            autosize=False, width=800, height=500, template="plotly_white"
+        )
 
-    #     figs_div.append(html.Div([html.H2(attribution_method), dcc.Graph(figure=fig)]))
+        figs_div.append(html.Div([html.H2(attribution_method), dcc.Graph(figure=fig)]))
 
-    # app.layout = html.Div([*figs_div], style={"display": "flex"})
-    # app.run()
+    app.layout = html.Div([*figs_div], style={"display": "flex"})
+    app.run()

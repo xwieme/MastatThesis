@@ -56,6 +56,7 @@
 \usepackage{epstopdf}%This line makes .eps figures into .pdf - please comment out if not required.
 \usepackage{physics}
 \usepackage{cleveref}
+\usepackage{booktabs}
 
 \definecolor{cream}{RGB}{222,217,201}
 
@@ -341,7 +342,43 @@ and $P_g$,
 
 \section{Methodology}
 
+\newpage
+
 \section{Results and discussion}
+
+
+\subsection{Evaluation metrics}
+
+
+\begin{center}
+    \begin{table}
+    \caption{Average Spearman rank correlation between the attributions and chemical intuitive ranks. Molecules where 
+        subdivided into two groups based on whether the absolute difference between the corresponding model prediction 
+        and the experimental value is below $0.6$logS.
+    }
+\begin{tabular}{lrrr}
+\toprule
+ & SME  & Shapley  & HN  \\
+absolute error &  &  &  \\
+\midrule
+< 0.6 & 0.765754 & 0.750960 & 0.740930 \\
+>= 0.6 & 0.522455 & 0.543093 & 0.534330 \\
+ \bottomrule
+\end{tabular}
+\end{table}
+\end{center}
+
+\begin{center}
+\begin{tabular}{lrrr}
+\toprule
+ & SME & Shapley  & HN \\
+\midrule
+Fidelity+ & 2.35 & 2.34 & 2.32 \\
+Fidelity- & 0.39 & 0.43 & 0.43 \\
+ \bottomrule
+\end{tabular}
+\end{center}
+
 
 \section{Conclusions}
 
