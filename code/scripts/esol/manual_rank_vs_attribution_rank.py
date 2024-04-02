@@ -58,9 +58,14 @@ if __name__ == "__main__":
     #############################
     # Spearman rank correlation #
     #############################
-    # Compute Spearman Rank correlation between attributions and chemical
-    # intuitive ranks
     test_attributions["atom_ids"] = test_attributions.atom_ids.apply(tuple)
+
+    # Consider attribution values up to six decimal digits, as more precission
+    # is chemically irrelevant
+    test_attributions[["SME", "Shapley_value", "HN_value"]] = test_attributions[
+        ["SME", "Shapley_value", "HN_value"]
+    ].round(6)
+
     test_attributions = test_attributions[
         ["molecule_smiles", "atom_ids", "SME", "Shapley_value", "HN_value"]
     ].join(
@@ -69,6 +74,8 @@ if __name__ == "__main__":
         on=["molecule_smiles", "atom_ids"],
     )
 
+    # Compute Spearman Rank correlation between attributions and chemical
+    # intuitive ranks
     attribution_rank_correlation = (
         test_attributions.groupby("molecule_smiles")
         .corr(method="spearman", numeric_only=True)
@@ -90,13 +97,17 @@ if __name__ == "__main__":
 
     print(data.absolute_error_class.value_counts())
 
+    rank_df = data.join(
+        attribution_rank_correlation.set_index("molecule_smiles"),
+        on="smiles",
+    )
+
     print(
-        data.join(
-            attribution_rank_correlation.set_index("molecule_smiles"),
-            on="smiles",
-        )
-        .groupby("absolute_error_class")[
+        rank_df.groupby("absolute_error_class")[
             ["SME_rank_corr", "Shapley_rank_corr", "HN_rank_corr"]
-        ]
-        .mean()
+        ].mean()
+    )
+
+    rank_df.to_csv(
+        os.path.join(DATA_DIR, "manual_vs_attribution_rank_correlations.csv")
     )

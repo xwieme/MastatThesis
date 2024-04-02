@@ -57,6 +57,7 @@
 \usepackage{physics}
 \usepackage{cleveref}
 \usepackage{booktabs}
+\usepackage{pdfpages}
 
 \definecolor{cream}{RGB}{222,217,201}
 
@@ -342,8 +343,8 @@ and $P_g$,
 
 \section{Methodology}
 
-\newpage
 
+\newpage
 \section{Results and discussion}
 
 
@@ -351,7 +352,7 @@ and $P_g$,
 
 
 \begin{center}
-    \begin{table}
+\begin{table}[H]
     \caption{Average Spearman rank correlation between the attributions and chemical intuitive ranks. Molecules where 
         subdivided into two groups based on whether the absolute difference between the corresponding model prediction 
         and the experimental value is below $0.6$logS.
@@ -367,6 +368,11 @@ absolute error &  &  &  \\
 \end{tabular}
 \end{table}
 \end{center}
+
+
+\input{./content/attributions_analysis.tex}
+
+
 
 \begin{center}
 \begin{tabular}{lrrr}
