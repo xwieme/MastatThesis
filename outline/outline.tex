@@ -141,7 +141,7 @@
 		\sffamily
 		\begin{tabular}{m{4.5cm} p{13.5cm} }
 
-			               & \noindent\LARGE{\textbf{Explainable graph neural networks $^\dag$}}                                             \\%Article title goes here instead of the text "This is the title"
+			               & \noindent\LARGE{\textbf{A chemical explanation of graph neural networks $^\dag$}}                                             \\%Article title goes here instead of the text "This is the title"
 			\vspace{0.3cm} & \vspace{0.3cm}                                                                                                  \\
 
 			               & \noindent\large{Full Name,$^{\ast}$\textit{$^{a}$} Full Name,\textit{$^{b\ddag}$} and Full Name\textit{$^{a}$}} \\%Author names go here instead of "Full name", etc.
@@ -336,16 +336,44 @@ and $P_g$,
 \subsection{Substructure mask exploration}
 
 
-
-
-
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.35]{../data/images/example_brics.png}
+    \includegraphics[scale=0.35]{../data/images/example_functional_groups.png}
+    \caption{Example of substructure mask based on BRICS (left) and functional groups (right).}
+\end{figure}
 
 
 \section{Methodology}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=2]{../data/images/RGCN_model.png}
+    \caption{Machine learning model architecture for the prediction of water solubility as proposed by Wu et. al.\cite{wu2023chemistry}.}
+\end{figure}
 
-\newpage
+
 \section{Results and discussion}
+
+\subsection{Distribution of attributions of functional groups}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.5]{../data/images/esol_attribution_distributions_vertical.png}
+\end{figure}
+
+\subsection{Absolute error of model prediction in function of Spearman rank correlation between two different attribution methods}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[scale=0.35]{../data/images/esol_rank_vs_AE_SME_Shapley_combined.png}
+    \includegraphics[scale=0.35]{../data/images/esol_rank_vs_AE_Shapley_HN_combined.png}
+    \caption{Absolute error of model prediction in function of Spearman rank correlation between 
+        attributions from SME and Shapley (top) and between Shapley and HN (bottom) using the full 
+        data set containing 1110 molecules.
+    }
+\end{figure}
+
 
 
 \subsection{Evaluation metrics}

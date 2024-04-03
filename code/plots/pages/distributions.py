@@ -43,8 +43,8 @@ def createBoxPlots(data):
 
     box_plots = px.box(
         data_long,
-        x="substruct_smiles",
-        y="attribution",
+        x="attribution",
+        y="substruct_smiles",
         color="method",
         color_discrete_sequence=px.colors.qualitative.G10,
     )
@@ -52,7 +52,9 @@ def createBoxPlots(data):
     box_plots.update_layout(
         margin={"b": 5, "l": 2, "r": 2, "t": 35},
     )
-    box_plots.update_layout(xaxis=dict(tickfont=dict(size=2)))
+    box_plots.update_layout(
+        xaxis={"tickfont": {"size": 12}}, autosize=False, width=500, height=1200
+    )
 
     # box_plots.update_traces(
     #     x=[x[:7] for x in data_long["substruct_smiles"].drop_duplicates()]
