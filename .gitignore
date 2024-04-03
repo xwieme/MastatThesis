@@ -44,3 +44,4 @@ build/
 
 # wandb
 **/wandb/**
+.Rproj.user

@@ -14,7 +14,7 @@ def substructureMaskExploration(
     models: List[torch.nn.Module],
     molecule_df: pd.DataFrame,
     device,
-    method: str = "after",
+    mask_method: str = "aggregation",
 ) -> pd.DataFrame:
     """
     Compute the attribution of a substructure by calculating the difference between
@@ -25,8 +25,9 @@ def substructureMaskExploration(
     :param models: list of ML models wherefrom the average prediction is used
         to compute the attribution
     :param molecule_df: pandas dataframe resulting from XAIChem.substructures
-    :param method: determines where the mask is applied, can be 'after' or
-        'before' (default is 'after')
+    :param mask_method: when to apply the mask, during the RGCN part of the
+        model (i.e. 'rgcn') or during the aggregation step (i.e. 'aggregation')
+        (optional, default is None)
     """
 
     t1 = time.time()
@@ -39,7 +40,7 @@ def substructureMaskExploration(
 
     for batch in data_batch:
         molecule_df["masked_prediction"] = predictBatch(
-            batch, models, masks.view(-1, 1).to(device), device
+            batch, models, masks.view(-1, 1).to(device), mask_method, device
         )
 
     molecule_df["SME"] = prediction - molecule_df.masked_prediction

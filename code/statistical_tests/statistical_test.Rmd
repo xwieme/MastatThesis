@@ -1,0 +1,244 @@
+---
+output: 
+  pdf_document:
+    keep_tex: yes
+fontsize: 12pt
+geometry: margin=1in
+documentclass: article
+classoption: a4paper
+---
+
+```{r setup, include = FALSE}
+library("tidyr")
+library("dplyr")
+library("readr")
+library("ggplot2")
+library("rstatix")
+library("knitr")
+```
+
+
+```{r, include = FALSE}
+rank_correlations <- read_csv(
+  file="../../data/ESOL/manual_vs_attribution_rank_correlations.csv"
+) %>% rename(id = ...1)
+```
+
+```{r, echo = FALSE}
+rank_corr_means <- rank_correlations %>%
+  select(absolute_error_class, SME_rank_corr, Shapley_rank_corr, HN_rank_corr) %>%
+  group_by(absolute_error_class) %>%
+  summarise_all("mean") %>%
+  rename(
+    SME = SME_rank_corr, 
+    Shapley = Shapley_rank_corr, 
+    HN = HN_rank_corr, 
+    AE = absolute_error_class
+  ) %>%
+  mutate(across(c(SME, Shapley, HN), \(x) round(x, 4)))
+
+knitr::kable(rank_corr_means)
+```
+
+To analyse which attribution method provides the most accurate explanation, the 
+Spearman rank correlation is computed between the substructures attributions and 
+a chemically intuitive ranking of those substructures. Also the influence of the 
+absolute error between model prediction and experimental value will be examined 
+by subdividing the molecules into two $(<0.6$ or $>=0.6)$. Since the distributions
+of the Spearman rank correlations are highly skewed to the left, non-parametric 
+test are used for the analysis. To test whether there is a significant difference 
+of rank correlation between the attribution methods two Friedman test will be used
+(one for each absolute error category). For testing the presence of a significant
+difference between the AE groups a three Wilcoxon–Mann–Whitney test will be applied.
+Friedman tests will also be used in the analysis of fidelity pos and fidelity 
+negative over the attribution methods. Control for the multiple test will be done 
+using Bonferonni, resulting in a significance level of $0.05/5 = 0.01$.
+
+```{r distributions, dev = "png", echo = FALSE}
+rank_corr_long <- rank_correlations %>% 
+  select(
+    id, absolute_error_class, SME_rank_corr, Shapley_rank_corr, HN_rank_corr
+  ) %>%
+  pivot_longer(
+    names_to = "attribution_method", 
+    values_to = "rank_corr", 
+    cols=c("SME_rank_corr", "Shapley_rank_corr", "HN_rank_corr")
+  ) %>% 
+  mutate_at(c('attribution_method', 'absolute_error_class'), as.factor)
+
+attribution_methods_labels <- c(
+  "HN_rank_corr" = "HN", 
+  "Shapley_rank_corr" = "Shapley", 
+  "SME_rank_corr" = "SME"
+)
+absolute_error_class_labels <- c("< 0.6" = "AE < 0.6", ">= 0.6" = "AE >= 0.6")
+
+ggplot(rank_corr_long, mapping = aes(x = rank_corr)) +
+  geom_histogram(bins=50) +
+  facet_grid(
+    absolute_error_class ~ attribution_method,
+    labeller = labeller(
+      .cols = attribution_methods_labels,
+      .rows = absolute_error_class_labels,
+    )
+  ) +
+  scale_x_continuous(name = "Spearman rank correlation", breaks = c(-1, 0, 1)) + 
+  theme_bw() + 
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    strip.text.y = element_text(angle = 0)
+  )
+
+```
+
+\newpage
+
+### Friedman test of attribution methods
+
+
+```{r, echo = FALSE}
+friedman_correct_mols <- rank_corr_long %>% 
+  filter(absolute_error_class == "< 0.6") %>% 
+  friedman_test(rank_corr ~ attribution_method | id)
+```
+
+
+```{r, echo = FALSE}
+firedman_incorrect_mols <- rank_corr_long %>% 
+  filter(absolute_error_class == ">= 0.6") %>% 
+  friedman_test(rank_corr ~ attribution_method | id)
+```
+
+The presence of a statistical difference in Spearman rank correlation 
+between attributions and chemically intuitive ranks for different attribution
+methods is tested using a Friedman test. The null-hypothesis assumes that there 
+is no difference between the different attribution methods, which would result 
+in similar rank sums of the different attribution methods. For both groups of 
+absolute error, smaller than $0.6$ (p-value `r round(friedman_correct_mols$p, 3)`) and 
+larger than or equal to $0.6$ (p-value `r round(firedman_incorrect_mols$p, 3)`), are not 
+significant based on the bonferonni corrected nominal level of $0.01$. Therefore, 
+it is concluded that there is not enough evidence in the data to reject the null 
+hypothesis and it is assumed the the method of computing the attribution values 
+has not a significant impact in the accurateness of the resulting explanation.
+
+Table of Friedman test result for molecules with absolute prediction error smaller 
+than $0.6$: `r knitr::kable(friedman_correct_mols)`
+
+Table of Friedman test result for molecules with absolute prediction error larger 
+than or equal to $0.6$: `r knitr::kable(firedman_incorrect_mols)`
+
+
+### Wilcoxon-Mann-Whitney test between absolute error class
+
+```{r, echo = FALSE}
+wmw_test <- function(attr_method) {
+  wilcox.test(
+    rank_corr ~ absolute_error_class, 
+    data = rank_corr_long %>% filter(attribution_method == attr_method),
+    alpha = 0.05/5
+  )
+}
+
+wmw_sme <- wmw_test("SME_rank_corr")
+wmw_shapley <- wmw_test("Shapley_rank_corr")
+wmw_hn <- wmw_test("HN_rank_corr")
+
+wmw_sme
+wmw_shapley
+wmw_hn
+```
+
+In all attribution methods there is no significance difference between the two 
+different absolute error groups (p-values are `r wmw_sme$p.value`, 
+`r wmw_shapley$p.value`, `r wmw_hn$p.value` for SME, Shapley and HN respectively
+). Therefore, it is concluded that there is not enough evidence in the data to 
+reject the null hypothesis of equal distributions. 
+
+## Power calculations
+
+```{r}
+# Verify location shift
+rank_corr_SME <- rank_corr_long %>% filter(attribution_method == "SME_rank_corr")
+X <- as.list(rank_corr_SME %>% filter(absolute_error_class == "< 0.6") %>% select(rank_corr))$rank_corr
+Y <- as.list(rank_corr_SME %>% filter(absolute_error_class == ">= 0.6") %>% select(rank_corr))$rank_corr
+
+qqplot(X, Y)
+```
+
+```{r}
+N_sim <- 10000
+N_x <- 10
+N_y <- 10
+p_values <- rep(NA, N_sim)
+
+for (i in 1:N_sim) {
+  X <- rnorm(N_x, mean = 0, sd = 1)
+  Y <- rnorm(N_y, mean = 1, sd = 1)
+  
+  p_values[i] <- wilcox.test(X, Y)$p.value
+}
+
+mean(p_values <= 0.05 / 5)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -33,9 +33,28 @@ class MolecularPropertyPredictor(torch.nn.Module):
         self.mlp = mlp
         self.out = out
 
-    def forward(self, data, mask: torch.Tensor | None = None):
-        x = self.gnn.forward(data, mask)
-        molecular_embedding = self.aggregation(x, data, mask)
+    def forward(
+        self, data, mask: torch.Tensor | None = None, mask_method: str | None = None
+    ):
+        """
+        Evaluate the model using the data input to obtain a prediction
+
+        :param data: pytorch data.Data object containg all information of the
+            current data instance(s)
+        :param mask: Tensor that masks part of the nodes in the graph (optional,
+            default is None)
+        :param mask_method: when to apply the mask, before the RGCN (i.e. 'before')
+            or after the RGCN (i.e. 'after') (optional, default is None)
+        """
+
+        assert mask_method in [
+            None,
+            "rgcn",
+            "aggregation",
+        ], f"mask method '{mask_method}' is unknown. Should be one of: None, 'rgcn', 'aggregation'"
+
+        x = self.gnn.forward(data, mask, mask_method)
+        molecular_embedding = self.aggregation(x, data, mask, mask_method)
         x = self.mlp(molecular_embedding)
 
         if self.out is not None:

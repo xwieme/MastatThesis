@@ -4,7 +4,7 @@ batch_size: 256
 epochs: 500
 learning_rate: 0.003
 
-early_stop: 
+early_stop:
   metric: r2
   mode: "higher"
   patience: 30
@@ -15,7 +15,6 @@ RGCN:
   use_batch_norm: True
   use_residual: True
   num_bases: 65 # Equal to the number of different edge types
-  loop: False
 
 MLP:
   num_layers: 3

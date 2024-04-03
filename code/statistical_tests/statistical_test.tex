@@ -1,0 +1,273 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+  12pt,
+  a4paper]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math} % this also loads fontspec
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+\usepackage{lmodern}
+\ifPDFTeX\else
+  % xetex/luatex font selection
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\usepackage{longtable,booktabs,array}
+\usepackage{calc} % for calculating minipage widths
+% Correct order of tables after \paragraph or \subparagraph
+\usepackage{etoolbox}
+\makeatletter
+\patchcmd\longtable{\par}{\if@noskipsec\mbox{}\fi\par}{}{}
+\makeatother
+% Allow footnotes in longtable head/foot
+\IfFileExists{footnotehyper.sty}{\usepackage{footnotehyper}}{\usepackage{footnote}}
+\makesavenoteenv{longtable}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same}
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+
+\begin{longtable}[]{@{}lrrr@{}}
+\toprule\noalign{}
+AE & SME & Shapley & HN \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+\textless{} 0.6 & 0.7753 & 0.7722 & 0.759 \\
+\textgreater= 0.6 & 0.5282 & 0.5723 & 0.561 \\
+\end{longtable}
+
+To analyse which attribution method provides the most accurate
+explanation, the Spearman rank correlation is computed between the
+substructures attributions and a chemically intuitive ranking of those
+substructures. Also the influence of the absolute error between model
+prediction and experimental value will be examined by subdividing the
+molecules into two \((<0.6\) or \(>=0.6)\). Since the distributions of
+the Spearman rank correlations are highly skewed to the left,
+non-parametric test are used for the analysis. To test whether there is
+a significant difference of rank correlation between the attribution
+methods two Friedman test will be used (one for each absolute error
+category). For testing the presence of a significant difference between
+the AE groups a three Wilcoxon--Mann--Whitney test will be applied.
+Friedman tests will also be used in the analysis of fidelity pos and
+fidelity negative over the attribution methods. Control for the multiple
+test will be done using Bonferonni, resulting in a significance level of
+\(0.05/5 = 0.01\).
+
+\includegraphics{statistical_test_files/figure-latex/distributions-1.png}
+
+\newpage
+
+\hypertarget{friedman-test-of-attribution-methods}{%
+\subsubsection{Friedman test of attribution
+methods}\label{friedman-test-of-attribution-methods}}
+
+The presence of a statistical difference in Spearman rank correlation
+between attributions and chemically intuitive ranks for different
+attribution methods is tested using a Friedman test. The null-hypothesis
+assumes that there is no difference between the different attribution
+methods, which would result in similar rank sums of the different
+attribution methods. For both groups of absolute error, smaller than
+\(0.6\) (p-value 0.217) and larger than or equal to \(0.6\) (p-value
+0.152), are not significant based on the bonferonni corrected nominal
+level of \(0.01\). Therefore, it is concluded that there is not enough
+evidence in the data to reject the null hypothesis and it is assumed the
+the method of computing the attribution values has not a significant
+impact in the accurateness of the resulting explanation.
+
+Table of Friedman test result for molecules with absolute prediction
+error smaller than \(0.6\):
+
+\begin{longtable}[]{@{}lrrrrl@{}}
+\toprule\noalign{}
+.y. & n & statistic & df & p & method \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+rank\_corr & 72 & 3.058823 & 2 & 0.2166631 & Friedman test \\
+\end{longtable}
+
+Table of Friedman test result for molecules with absolute prediction
+error larger than or equal to \(0.6\):
+
+\begin{longtable}[]{@{}lrrrrl@{}}
+\toprule\noalign{}
+.y. & n & statistic & df & p & method \\
+\midrule\noalign{}
+\endhead
+\bottomrule\noalign{}
+\endlastfoot
+rank\_corr & 28 & 3.769231 & 2 & 0.1518875 & Friedman test \\
+\end{longtable}
+
+\hypertarget{wilcoxon-mann-whitney-test-between-absolute-error-class}{%
+\subsubsection{Wilcoxon-Mann-Whitney test between absolute error
+class}\label{wilcoxon-mann-whitney-test-between-absolute-error-class}}
+
+\begin{verbatim}
+## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  rank_corr by absolute_error_class
+## W = 1254.5, p-value = 0.03526
+## alternative hypothesis: true location shift is not equal to 0
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  rank_corr by absolute_error_class
+## W = 1132, p-value = 0.2807
+## alternative hypothesis: true location shift is not equal to 0
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  rank_corr by absolute_error_class
+## W = 1177.5, p-value = 0.1455
+## alternative hypothesis: true location shift is not equal to 0
+\end{verbatim}
+
+In all attribution methods there is no significance difference between
+the two different absolute error groups (p-values are 0.0352554,
+0.2807212, 0.1454535 for SME, Shapley and HN respectively ). Therefore,
+it is concluded that there is not enough evidence in the data to reject
+the null hypothesis of equal distributions.
+
+\hypertarget{power-calculations}{%
+\subsection{Power calculations}\label{power-calculations}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Verify location shift}
+\NormalTok{rank\_corr\_SME }\OtherTok{\textless{}{-}}\NormalTok{ rank\_corr\_long }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(attribution\_method }\SpecialCharTok{==} \StringTok{"SME\_rank\_corr"}\NormalTok{)}
+\NormalTok{X }\OtherTok{\textless{}{-}} \FunctionTok{as.list}\NormalTok{(rank\_corr\_SME }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(absolute\_error\_class }\SpecialCharTok{==} \StringTok{"\textless{} 0.6"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(rank\_corr))}\SpecialCharTok{$}\NormalTok{rank\_corr}
+\NormalTok{Y }\OtherTok{\textless{}{-}} \FunctionTok{as.list}\NormalTok{(rank\_corr\_SME }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(absolute\_error\_class }\SpecialCharTok{==} \StringTok{"\textgreater{}= 0.6"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(rank\_corr))}\SpecialCharTok{$}\NormalTok{rank\_corr}
+
+\FunctionTok{qqplot}\NormalTok{(X, Y)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{statistical_test_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{N\_sim }\OtherTok{\textless{}{-}} \DecValTok{10000}
+\NormalTok{N\_x }\OtherTok{\textless{}{-}} \DecValTok{10}
+\NormalTok{N\_y }\OtherTok{\textless{}{-}} \DecValTok{10}
+\NormalTok{p\_values }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\ConstantTok{NA}\NormalTok{, N\_sim)}
+
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{N\_sim) \{}
+\NormalTok{  X }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(N\_x, }\AttributeTok{mean =} \DecValTok{0}\NormalTok{, }\AttributeTok{sd =} \DecValTok{1}\NormalTok{)}
+\NormalTok{  Y }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(N\_y, }\AttributeTok{mean =} \DecValTok{1}\NormalTok{, }\AttributeTok{sd =} \DecValTok{1}\NormalTok{)}
+  
+\NormalTok{  p\_values[i] }\OtherTok{\textless{}{-}} \FunctionTok{wilcox.test}\NormalTok{(X, Y)}\SpecialCharTok{$}\NormalTok{p.value}
+\NormalTok{\}}
+
+\FunctionTok{mean}\NormalTok{(p\_values }\SpecialCharTok{\textless{}=} \FloatTok{0.05} \SpecialCharTok{/} \DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2623
+\end{verbatim}
+
+\end{document}
