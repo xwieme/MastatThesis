@@ -38,6 +38,46 @@
 \makeatother
 \usepackage{xcolor}
 \usepackage[margin=1in]{geometry}
+\usepackage{color}
+\usepackage{fancyvrb}
+\newcommand{\VerbBar}{|}
+\newcommand{\VERB}{\Verb[commandchars=\\\{\}]}
+\DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+% Add ',fontsize=\small' for more characters per line
+\usepackage{framed}
+\definecolor{shadecolor}{RGB}{248,248,248}
+\newenvironment{Shaded}{\begin{snugshade}}{\end{snugshade}}
+\newcommand{\AlertTok}[1]{\textcolor[rgb]{0.94,0.16,0.16}{#1}}
+\newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\BuiltInTok}[1]{#1}
+\newcommand{\CharTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\CommentTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{#1}}
+\newcommand{\DecValTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\ErrorTok}[1]{\textcolor[rgb]{0.64,0.00,0.00}{\textbf{#1}}}
+\newcommand{\ExtensionTok}[1]{#1}
+\newcommand{\FloatTok}[1]{\textcolor[rgb]{0.00,0.00,0.81}{#1}}
+\newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\ImportTok}[1]{#1}
+\newcommand{\InformationTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
+\newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.13,0.29,0.53}{\textbf{#1}}}
+\newcommand{\NormalTok}[1]{#1}
+\newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\OtherTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{#1}}
+\newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textit{#1}}}
+\newcommand{\RegionMarkerTok}[1]{#1}
+\newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.81,0.36,0.00}{\textbf{#1}}}
+\newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\StringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\VariableTok}[1]{\textcolor[rgb]{0.00,0.00,0.00}{#1}}
+\newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.31,0.60,0.02}{#1}}
+\newcommand{\WarningTok}[1]{\textcolor[rgb]{0.56,0.35,0.01}{\textbf{\textit{#1}}}}
 \usepackage{longtable,booktabs,array}
 \usepackage{calc} % for calculating minipage widths
 % Correct order of tables after \paragraph or \subparagraph
@@ -103,15 +143,17 @@ a significant difference of rank correlation between the attribution
 methods two Friedman test will be used (one for each absolute error
 category). For testing the presence of a significant difference between
 the AE groups a three Wilcoxon--Mann--Whitney test will be applied.
-Control for the multiple test will be done using Bonferonni, resulting
-in a significance level of \(0.05/5 = 0.01\).
+Friedman tests will also be used in the analysis of fidelity pos and
+fidelity negative over the attribution methods. Control for the multiple
+test will be done using Bonferonni, resulting in a significance level of
+\(0.05/5 = 0.01\).
 
 \includegraphics{statistical_test_files/figure-latex/distributions-1.png}
 
 \newpage
 
 \hypertarget{friedman-test-of-attribution-methods}{%
-\subsection{Friedman test of attribution
+\subsubsection{Friedman test of attribution
 methods}\label{friedman-test-of-attribution-methods}}
 
 The presence of a statistical difference in Spearman rank correlation
@@ -123,8 +165,8 @@ attribution methods. For both groups of absolute error, smaller than
 \(0.6\) (p-value 0.217) and larger than or equal to \(0.6\) (p-value
 0.152), are not significant based on the bonferonni corrected nominal
 level of \(0.01\). Therefore, it is concluded that there is not enough
-evidence in the data to reject the null hypothesis and it is assumened
-the the method of computing the attribution values has not a significant
+evidence in the data to reject the null hypothesis and it is assumed the
+the method of computing the attribution values has not a significant
 impact in the accurateness of the resulting explanation.
 
 Table of Friedman test result for molecules with absolute prediction
@@ -152,5 +194,80 @@ error larger than or equal to \(0.6\):
 \endlastfoot
 rank\_corr & 28 & 3.769231 & 2 & 0.1518875 & Friedman test \\
 \end{longtable}
+
+\hypertarget{wilcoxon-mann-whitney-test-between-absolute-error-class}{%
+\subsubsection{Wilcoxon-Mann-Whitney test between absolute error
+class}\label{wilcoxon-mann-whitney-test-between-absolute-error-class}}
+
+\begin{verbatim}
+## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  rank_corr by absolute_error_class
+## W = 1254.5, p-value = 0.03526
+## alternative hypothesis: true location shift is not equal to 0
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  rank_corr by absolute_error_class
+## W = 1132, p-value = 0.2807
+## alternative hypothesis: true location shift is not equal to 0
+\end{verbatim}
+
+\begin{verbatim}
+## 
+##  Wilcoxon rank sum test with continuity correction
+## 
+## data:  rank_corr by absolute_error_class
+## W = 1177.5, p-value = 0.1455
+## alternative hypothesis: true location shift is not equal to 0
+\end{verbatim}
+
+In all attribution methods there is no significance difference between
+the two different absolute error groups (p-values are 0.0352554,
+0.2807212, 0.1454535 for SME, Shapley and HN respectively ). Therefore,
+it is concluded that there is not enough evidence in the data to reject
+the null hypothesis of equal distributions.
+
+\hypertarget{power-calculations}{%
+\subsection{Power calculations}\label{power-calculations}}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\CommentTok{\# Verify location shift}
+\NormalTok{rank\_corr\_SME }\OtherTok{\textless{}{-}}\NormalTok{ rank\_corr\_long }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(attribution\_method }\SpecialCharTok{==} \StringTok{"SME\_rank\_corr"}\NormalTok{)}
+\NormalTok{X }\OtherTok{\textless{}{-}} \FunctionTok{as.list}\NormalTok{(rank\_corr\_SME }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(absolute\_error\_class }\SpecialCharTok{==} \StringTok{"\textless{} 0.6"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(rank\_corr))}\SpecialCharTok{$}\NormalTok{rank\_corr}
+\NormalTok{Y }\OtherTok{\textless{}{-}} \FunctionTok{as.list}\NormalTok{(rank\_corr\_SME }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{filter}\NormalTok{(absolute\_error\_class }\SpecialCharTok{==} \StringTok{"\textgreater{}= 0.6"}\NormalTok{) }\SpecialCharTok{\%\textgreater{}\%} \FunctionTok{select}\NormalTok{(rank\_corr))}\SpecialCharTok{$}\NormalTok{rank\_corr}
+
+\FunctionTok{qqplot}\NormalTok{(X, Y)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{statistical_test_files/figure-latex/unnamed-chunk-6-1.pdf}
+
+\begin{Shaded}
+\begin{Highlighting}[]
+\NormalTok{N\_sim }\OtherTok{\textless{}{-}} \DecValTok{10000}
+\NormalTok{N\_x }\OtherTok{\textless{}{-}} \DecValTok{10}
+\NormalTok{N\_y }\OtherTok{\textless{}{-}} \DecValTok{10}
+\NormalTok{p\_values }\OtherTok{\textless{}{-}} \FunctionTok{rep}\NormalTok{(}\ConstantTok{NA}\NormalTok{, N\_sim)}
+
+\ControlFlowTok{for}\NormalTok{ (i }\ControlFlowTok{in} \DecValTok{1}\SpecialCharTok{:}\NormalTok{N\_sim) \{}
+\NormalTok{  X }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(N\_x, }\AttributeTok{mean =} \DecValTok{0}\NormalTok{, }\AttributeTok{sd =} \DecValTok{1}\NormalTok{)}
+\NormalTok{  Y }\OtherTok{\textless{}{-}} \FunctionTok{rnorm}\NormalTok{(N\_y, }\AttributeTok{mean =} \DecValTok{1}\NormalTok{, }\AttributeTok{sd =} \DecValTok{1}\NormalTok{)}
+  
+\NormalTok{  p\_values[i] }\OtherTok{\textless{}{-}} \FunctionTok{wilcox.test}\NormalTok{(X, Y)}\SpecialCharTok{$}\NormalTok{p.value}
+\NormalTok{\}}
+
+\FunctionTok{mean}\NormalTok{(p\_values }\SpecialCharTok{\textless{}=} \FloatTok{0.05} \SpecialCharTok{/} \DecValTok{5}\NormalTok{)}
+\end{Highlighting}
+\end{Shaded}
+
+\begin{verbatim}
+## [1] 0.2623
+\end{verbatim}
 
 \end{document}

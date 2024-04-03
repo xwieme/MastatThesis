@@ -350,6 +350,7 @@ and $P_g$,
 
 \subsection{Evaluation metrics}
 
+\subsubsection{Spearman rank correlation with chemicaly intuitively ranked substructures}
 
 \begin{center}
 \begin{table}[H]
@@ -372,9 +373,15 @@ absolute error &  &  &  \\
 
 \input{./content/attributions_analysis.tex}
 
+\subsubsection{Fidelity}
 
+Fidelity measures how faithfull the explanations are to the model. 
+Most positive fidelities are negative, meaning that removing the most important 
+substructure results in an increase in the predicted water solubility.
 
 \begin{center}
+    \begin{table}[H]
+        \caption{Average positive and negative fidelity in logS for test data set (100 molecules)}
 \begin{tabular}{lrrr}
 \toprule
  & SME & Shapley  & HN \\
@@ -383,7 +390,12 @@ Fidelity+ & 2.35 & 2.34 & 2.32 \\
 Fidelity- & 0.39 & 0.43 & 0.43 \\
  \bottomrule
 \end{tabular}
+\end{table}
 \end{center}
+
+\begin{figure}[H]
+    \includegraphics[scale=0.35]{../data/images/esol_fidelity_distributions.png}
+\end{figure}
 
 
 \section{Conclusions}

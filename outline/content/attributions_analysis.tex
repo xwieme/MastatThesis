@@ -19,7 +19,7 @@ in a significance level of \(0.05/5 = 0.01\).
 \end{figure}
 
 
-\subsection{Friedman test of attribution methods}
+\textbf{Friedman test of attribution methods}
 \label{friedman-test-of-attribution-methods}
 
 
@@ -67,5 +67,27 @@ n & statistic & df & p & method \\
 28 & 3.769231 & 2 & 0.1518875 & Friedman test \\
 \bottomrule
 \end{tabular}
+\end{table}
+\end{center}
+
+
+\textbf{Wilcoxon-Mann-Whitney test between absolute error groups}
+
+
+In all attribution methods there is no significance difference between the two different
+absolute error groups (p-values are 0.035, 0.281, 0.145 for SME, Shapley
+and HN respectively ). Therefore, it is concluded that there is not enough evidence in
+the data to reject the null hypothesis of equal distributions.
+
+\begin{center}
+    \begin{table}[H]
+        \begin{tabular}{lcccl}
+            \toprule
+            &SME & Shapley & HN \\
+            \midrule 
+        W & 1254.5 & 1132 &  1177.5 \\
+        p &  0.035 & 0.281 & 0.145 \\
+        \bottomrule
+    \end{tabular}
 \end{table}
 \end{center}

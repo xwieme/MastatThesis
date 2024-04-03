@@ -50,8 +50,9 @@ test are used for the analysis. To test whether there is a significant differenc
 of rank correlation between the attribution methods two Friedman test will be used
 (one for each absolute error category). For testing the presence of a significant
 difference between the AE groups a three Wilcoxon–Mann–Whitney test will be applied.
-Control for the multiple test will be done using Bonferonni, resulting in a
-significance level of $0.05/5 = 0.01$.
+Friedman tests will also be used in the analysis of fidelity pos and fidelity 
+negative over the attribution methods. Control for the multiple test will be done 
+using Bonferonni, resulting in a significance level of $0.05/5 = 0.01$.
 
 ```{r distributions, dev = "png", echo = FALSE}
 rank_corr_long <- rank_correlations %>% 
@@ -93,7 +94,7 @@ ggplot(rank_corr_long, mapping = aes(x = rank_corr)) +
 
 \newpage
 
-## Friedman test of attribution methods
+### Friedman test of attribution methods
 
 
 ```{r, echo = FALSE}
@@ -118,7 +119,7 @@ absolute error, smaller than $0.6$ (p-value `r round(friedman_correct_mols$p, 3)
 larger than or equal to $0.6$ (p-value `r round(firedman_incorrect_mols$p, 3)`), are not 
 significant based on the bonferonni corrected nominal level of $0.01$. Therefore, 
 it is concluded that there is not enough evidence in the data to reject the null 
-hypothesis and it is assumened the the method of computing the attribution values 
+hypothesis and it is assumed the the method of computing the attribution values 
 has not a significant impact in the accurateness of the resulting explanation.
 
 Table of Friedman test result for molecules with absolute prediction error smaller 
@@ -128,17 +129,59 @@ Table of Friedman test result for molecules with absolute prediction error large
 than or equal to $0.6$: `r knitr::kable(firedman_incorrect_mols)`
 
 
+### Wilcoxon-Mann-Whitney test between absolute error class
 
+```{r, echo = FALSE}
+wmw_test <- function(attr_method) {
+  wilcox.test(
+    rank_corr ~ absolute_error_class, 
+    data = rank_corr_long %>% filter(attribution_method == attr_method),
+    alpha = 0.05/5
+  )
+}
 
+wmw_sme <- wmw_test("SME_rank_corr")
+wmw_shapley <- wmw_test("Shapley_rank_corr")
+wmw_hn <- wmw_test("HN_rank_corr")
 
+wmw_sme
+wmw_shapley
+wmw_hn
+```
 
+In all attribution methods there is no significance difference between the two 
+different absolute error groups (p-values are `r wmw_sme$p.value`, 
+`r wmw_shapley$p.value`, `r wmw_hn$p.value` for SME, Shapley and HN respectively
+). Therefore, it is concluded that there is not enough evidence in the data to 
+reject the null hypothesis of equal distributions. 
 
+## Power calculations
 
+```{r}
+# Verify location shift
+rank_corr_SME <- rank_corr_long %>% filter(attribution_method == "SME_rank_corr")
+X <- as.list(rank_corr_SME %>% filter(absolute_error_class == "< 0.6") %>% select(rank_corr))$rank_corr
+Y <- as.list(rank_corr_SME %>% filter(absolute_error_class == ">= 0.6") %>% select(rank_corr))$rank_corr
 
+qqplot(X, Y)
+```
 
+```{r}
+N_sim <- 10000
+N_x <- 10
+N_y <- 10
+p_values <- rep(NA, N_sim)
 
+for (i in 1:N_sim) {
+  X <- rnorm(N_x, mean = 0, sd = 1)
+  Y <- rnorm(N_y, mean = 1, sd = 1)
+  
+  p_values[i] <- wilcox.test(X, Y)$p.value
+}
 
+mean(p_values <= 0.05 / 5)
 
+```
 
 
 
