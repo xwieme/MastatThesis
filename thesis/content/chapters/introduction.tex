@@ -1,0 +1,90 @@
+\chapter{Introduction}
+
+
+\section{Machine learning}
+
+\section{Deep learning}
+
+
+\section{Graph neural networks}
+
+
+\section{Explainable machine learning}
+
+\subsection{Shapley value}
+
+Feature attribution methods in XAI assign a number to each feature implying how 
+much that feature contributed to the model prediction.\cite{merrick2020explanation} 
+In other words, the features cooperate with each other to obtain a payoff given 
+by the ML model and the interest lies in the contribution of each feature to the 
+model prediction. These problems are more generally studied in cooperative game 
+theory. Formally, a cooperative game with transferable utility (i.e. a TU-game) is 
+defined as a pair $(N, v)$ consisting of a set of players (i.e. the features) 
+and a characteristic function (i.e. ML model) which satisfies\cite{zhang2022gstarx}
+
+
+\begin{equation}
+	v: 2^N \coloneqq \{S | S \subseteq N\} \rightarrow \mathbb{R}, \; v\left(\emptyset\right) = 0.
+\end{equation}
+
+A solution of a game $\phi(N, v) \in \mathbb{R}^{|N|}$ is a vector where the $i$th element 
+denotes the contribution of player $i$ to the payoff $v(N)$ obtained by all players 
+of the coalition $N$.\cite{zhang2022gstarx} Therefore, the solution vector, 
+also called a value, can be used to provide the attributions of each feature. 
+
+A popular value used in machine learning is the Shapley value, which is a unique 
+solution that satisfies the following axioms:\cite{merrick2020explanation, shapley1953value}
+
+\begin{itemize}
+
+    \item Dummy player: If a player $i$ does not add to the payoff, then it receives a 
+        zero value (i.e. $\forall S \subseteq N: v(S \cup \{i\}) = v(S) \implies \phi_i(N, v) = 0$).
+
+    \item Symmetry: If two players ($i$ and $j$) have the same contribution in all coalitions, then 
+        their values are equal (i.e. $\forall S \subseteq N \setminus \{i, j\}: v(S \cup \{i\}) = v(S \cup \{j\}) \implies \phi_i(N, v) = \phi_j(N, v)$).
+
+    \item Efficiency: The sum of the attributions of all players equals the payoff of the coalition containing 
+        all players (i.e. $\sum^{|N|}_i \phi_i(N, v) = v(N)$).
+
+    \item Linearity: The value of a game where the characteristic function $v$ is a linear combination of 
+        two other value functions $u$ and $w$, then the value is also a linear combination (i.e. 
+        $v = \alpha u + \beta w \implies \phi(N, v) = \alpha \phi(N, u) + \beta \phi(N, w)$)
+
+\end{itemize}
+
+The Shapley value $\phi_i$ of player $i$ is given by the expected marginal contribution\cite{zhang2022gstarx}
+
+\begin{equation}
+	m(i) = v\left(S \cup \{i\}\right) - v\left(S\right), \; \text{with } S \subseteq N \setminus \{i\}
+\end{equation}
+
+over all possible coalitions
+
+\begin{equation}
+\begin{aligned}
+	\label{eq:Shapley}
+    \phi_i(N, v)  &= \frac{1}{|N|} \sum_{k=0}^{|N|-1} \frac{\left(|N| - 1 - k\right)k!}{\left(|N| - 1\right)!} \sum_{S \subseteq N \setminus \{i\}, |S| = k} m(i) \\
+            &= \sum_{k=0}^{|N| - 1} \sum_{S \subseteq N \setminus \{i\}, |S| = k} \frac{\left(|N| - 1 - |S|\right)|S|!}{|N|!} m(i) \\
+            &= \sum_{S \subseteq N \setminus \{i\}} \frac{\left(|N| - 1 - |S|\right)|S|!}{|N|!} m(i)
+\end{aligned}
+\end{equation}
+
+assuming that every coalition is equally probable. This last assumption can be questioned whether it should 
+always hold. For example, define an unanimity game with characteristic function 
+
+\begin{equation}
+    u_R = \begin{cases}
+        1 \quad \text{if } R \subseteq S \\
+        0 \quad \text{otherwise}
+\end{cases}.
+\end{equation}
+
+Then the Shapley value for the unanimity game $(\{1, 2, 3\}, u_{\{1, 2, 3\}})$ is $1/3$ for every player.\cite{hamiache_value_1999} 
+Now, suppose players one and three cannot communicate with each other and hence cannot form a coalition. Since 
+the Shapley value does not take any communication structure into account, the Shapley values are still $1/3$ 
+for all players. However, it would be more intuitive if player two has a higher value, as it can communicate 
+to more players than players one and three. Because chemical structures can also be considered as graphs, where 
+the atoms are nodes and bonds between atoms are edges, it could be interesting to take the limitation of communication 
+into account. A value that is defined with a communication structure in minds is the Hamiache-Navarro value.\cite{hamiache_value_1999, hamiache_associated_2020}
+
+\subsection{Hamiache-Navarro value}

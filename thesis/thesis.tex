@@ -1,4 +1,4 @@
-\documentclass[a4paper, twoside, openright, usecolor]{CNSDANthesisEN}
+\documentclass[a4paper, twoside, openright, usecolor, 12pt]{CNSDANthesisEN}
 % The usecolor option sets the titles in blue, as requested by
 % the Ghent University housestyle. Remove this to get a black
 % and white version of things.
@@ -11,20 +11,18 @@
 % if it is required to add, please uncomment the line starting with
 % \copromotor below and fill in the correct details.
 %
-\title{My Incredibly Long But Very Interesting Thesis Title Which Doesn't
-fit on a single line}
-\subtitle{Discovering the subtitle}
-\author{FirstName LastName}
+\title{A chemical explanation of graph neural networks}
+\author{Xander Wieme}
 
-\studentnr{123456} % Fill in your student number
+\studentnr{01802113} % Fill in your student number
 
-\promotor{Prof. Dr. FirstName LastName}
+\promotor{Prof. Dr. Yvan Saeys}
 %\copromotor{Dr. FirstName LastName}
-\tutor{Ms. Jeanne DeGrote, Mr. Jean DeKleine}
+\tutor{Drs. Arne Gevaert}
 
 \orientation{Statistical Data Analysis}
 
-\academicyear{2017 - 2018}
+\academicyear{2023 - 2024}
 
 %-------------------------------------------------------------------------------
 % The preamble. Note that the following packages are already loaded by
@@ -36,19 +34,23 @@ fit on a single line}
 % listings package and adapt the file listingfile.tex accordingly.
 % 
 \usepackage{listings}
-\input{template/listingfile} % contains settings for the package listings
+\input{listingfile} % contains settings for the package listings
 % this package provides an environment for algorithms (cfr. Pseudocode)
 \usepackage[ruled]{algorithm2e} 
 % This package provides extra possibilities for tables
 \usepackage{booktabs}
 % this package is used to produce both author-date and standard numerical citations for BibTeX bibliographies
-\usepackage[round]{natbib}
+\usepackage[super,square,numbers]{natbib}
 % This packages adds the Appendix name in the toc. See below
 \usepackage[titletoc]{appendix}
 
+\usepackage{mathtools}
+% \usepackage{times}
+\usepackage{ mathptmx }
+
 % ---- ADDITIONAL SETTINGS
 \graphicspath{{Fig/}} % path to the figure directory
-
+% \setcitestyle{numbers}
 
 %-------------------------------------------------------------------------------
 % The actual document
@@ -87,10 +89,10 @@ fit on a single line}
 \pagestyle{mainmatter} % sets headers and footers correctly
 
 % Here you can add more chapters in case it is needed
-\include{content/chapters/chapt1}
-\include{content/chapters/chapt2}
-\include{content/chapters/chapt3}
-\include{content/chapters/chapt4}
+\include{content/chapters/introduction.tex}
+\include{content/chapters/methodology.tex}
+\include{content/chapters/results_and_discussion.tex}
+\include{content/chapters/conclusion.tex}
 
 % ------------ REFERENCES ------------
 % Here you have your bibliography created
@@ -98,7 +100,7 @@ fit on a single line}
 
 \addcontentsline{toc}{chapter}{References} %show bibliografie in TOC
 \bibliographystyle{apalike}  %apalike,phdbib.bst
-\bibliography{Thesis_bib}
+\bibliography{thesis}
 
 % Here you insert your appendices
 \appendix
