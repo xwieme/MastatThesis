@@ -39,14 +39,14 @@
 \usepackage[ruled]{algorithm2e} 
 % This package provides extra possibilities for tables
 \usepackage{booktabs}
-% this package is used to produce both author-date and standard numerical citations for BibTeX bibliographies
+% this package is used to produce both author-date and standard numerical citations for BibTeX btibliographies
 \usepackage[super,square,numbers]{natbib}
 % This packages adds the Appendix name in the toc. See below
 \usepackage[titletoc]{appendix}
 
 \usepackage{mathtools}
-% \usepackage{times}
 \usepackage{ mathptmx }
+\usepackage{cleveref}
 
 % ---- ADDITIONAL SETTINGS
 \graphicspath{{Fig/}} % path to the figure directory
@@ -99,7 +99,7 @@
 
 
 \addcontentsline{toc}{chapter}{References} %show bibliografie in TOC
-\bibliographystyle{apalike}  %apalike,phdbib.bst
+\bibliographystyle{ieeetr}  %apalike,phdbib.bst
 \bibliography{thesis}
 
 % Here you insert your appendices
@@ -107,8 +107,8 @@
 
 \begin{appendices}
 
-\include{app1}
-
+	\include{app1}
+	
 \end{appendices}
 
 \end{document}

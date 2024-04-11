@@ -13,78 +13,183 @@
 
 \subsection{Shapley value}
 
-Feature attribution methods in XAI assign a number to each feature implying how 
-much that feature contributed to the model prediction.\cite{merrick2020explanation} 
-In other words, the features cooperate with each other to obtain a payoff given 
-by the ML model and the interest lies in the contribution of each feature to the 
-model prediction. These problems are more generally studied in cooperative game 
-theory. Formally, a cooperative game with transferable utility (i.e. a TU-game) is 
-defined as a pair $(N, v)$ consisting of a set of players (i.e. the features) 
+Feature attribution methods in XAI assign a number to each feature implying how
+much that feature contributed to the model prediction.\cite{merrick2020explanation}
+In other words, the features cooperate with each other to obtain a payoff given
+by the ML model and the interest lies in the contribution of each feature to the
+model prediction. These problems are more generally studied in cooperative game
+theory. Formally, a cooperative game with transferable utility (i.e. a TU-game) is
+defined as a pair $(N, v)$ consisting of a set of players (i.e. the features)
 and a characteristic function (i.e. ML model) which satisfies\cite{zhang2022gstarx}
 
 
 \begin{equation}
-	v: 2^N \coloneqq \{S | S \subseteq N\} \rightarrow \mathbb{R}, \; v\left(\emptyset\right) = 0.
+	v: 2^N \coloneqq \{S | S \subseteq N\} \rightarrow \mathbb{R}, \quad v\left(\emptyset\right) = 0.
 \end{equation}
 
-A solution of a game $\phi(N, v) \in \mathbb{R}^{|N|}$ is a vector where the $i$th element 
-denotes the contribution of player $i$ to the payoff $v(N)$ obtained by all players 
-of the coalition $N$.\cite{zhang2022gstarx} Therefore, the solution vector, 
-also called a value, can be used to provide the attributions of each feature. 
 
-A popular value used in machine learning is the Shapley value, which is a unique 
-solution that satisfies the following axioms:\cite{merrick2020explanation, shapley1953value}
+A solution of a game $\phi(N, v) \in \mathbb{R}^{|N|}$ is a vector where the $i$th element
+denotes the contribution of player $i$ to the payoff $v(N)$ obtained by all players
+of the coalition $N$.\cite{zhang2022gstarx} Therefore, the solution vector,
+also called a value, can be used to provide the attributions of each feature.
+
+
+A popular value used in machine learning is the Shapley value, which distributes
+the total payoff among the players in a mathematical fair manner by satisfying the
+following axioms:\cite{merrick2020explanation, shapley1953value}
+
 
 \begin{itemize}
+	\item Dummy player: If a player $i$ does not add to the payoff, then it receives a
+	      zero value (i.e. $\forall S \subseteq N: v(S \cup \{i\}) = v(S) \implies \phi_i(N, v) = 0$).
 
-    \item Dummy player: If a player $i$ does not add to the payoff, then it receives a 
-        zero value (i.e. $\forall S \subseteq N: v(S \cup \{i\}) = v(S) \implies \phi_i(N, v) = 0$).
+	\item Symmetry: If two players ($i$ and $j$) have the same contribution in all coalitions, then
+	      their values are equal (i.e. $\forall S \subseteq N \setminus \{i, j\}: v(S \cup \{i\}) = v(S \cup \{j\}) \implies \phi_i(N, v) = \phi_j(N, v)$).
 
-    \item Symmetry: If two players ($i$ and $j$) have the same contribution in all coalitions, then 
-        their values are equal (i.e. $\forall S \subseteq N \setminus \{i, j\}: v(S \cup \{i\}) = v(S \cup \{j\}) \implies \phi_i(N, v) = \phi_j(N, v)$).
+	\item Efficiency: The sum of the attributions of all players equals the payoff of the coalition containing
+	      all players (i.e. $\sum^{|N|}_i \phi_i(N, v) = v(N)$).
 
-    \item Efficiency: The sum of the attributions of all players equals the payoff of the coalition containing 
-        all players (i.e. $\sum^{|N|}_i \phi_i(N, v) = v(N)$).
-
-    \item Linearity: The value of a game where the characteristic function $v$ is a linear combination of 
-        two other value functions $u$ and $w$, then the value is also a linear combination (i.e. 
-        $v = \alpha u + \beta w \implies \phi(N, v) = \alpha \phi(N, u) + \beta \phi(N, w)$)
-
+	\item Linearity: The value of a game where the characteristic function $v$ is a linear combination of
+	      two other value functions $u$ and $w$, then the value is also a linear combination (i.e.
+	      $v = \alpha u + \beta w \implies \phi(N, v) = \alpha \phi(N, u) + \beta \phi(N, w)$)
 \end{itemize}
 
+
 The Shapley value $\phi_i$ of player $i$ is given by the expected marginal contribution\cite{zhang2022gstarx}
+
 
 \begin{equation}
 	m(i) = v\left(S \cup \{i\}\right) - v\left(S\right), \; \text{with } S \subseteq N \setminus \{i\}
 \end{equation}
 
+
 over all possible coalitions
 
-\begin{equation}
-\begin{aligned}
-	\label{eq:Shapley}
-    \phi_i(N, v)  &= \frac{1}{|N|} \sum_{k=0}^{|N|-1} \frac{\left(|N| - 1 - k\right)k!}{\left(|N| - 1\right)!} \sum_{S \subseteq N \setminus \{i\}, |S| = k} m(i) \\
-            &= \sum_{k=0}^{|N| - 1} \sum_{S \subseteq N \setminus \{i\}, |S| = k} \frac{\left(|N| - 1 - |S|\right)|S|!}{|N|!} m(i) \\
-            &= \sum_{S \subseteq N \setminus \{i\}} \frac{\left(|N| - 1 - |S|\right)|S|!}{|N|!} m(i)
-\end{aligned}
-\end{equation}
-
-assuming that every coalition is equally probable. This last assumption can be questioned whether it should 
-always hold. For example, define an unanimity game with characteristic function 
 
 \begin{equation}
-    u_R = \begin{cases}
-        1 \quad \text{if } R \subseteq S \\
-        0 \quad \text{otherwise}
-\end{cases}.
+	\begin{aligned}
+		\label{eq:Shapley}
+		\phi_i(N, v) & = \frac{1}{|N|} \sum_{k=0}^{|N|-1} \frac{\left(|N| - 1 - k\right)k!}{\left(|N| - 1\right)!} \sum_{S \subseteq N \setminus \{i\}, |S| = k} m(i) \\
+		             & = \sum_{k=0}^{|N| - 1} \sum_{S \subseteq N \setminus \{i\}, |S| = k} \frac{\left(|N| - 1 - |S|\right)|S|!}{|N|!} m(i)                          \\
+		             & = \sum_{S \subseteq N \setminus \{i\}} \frac{\left(|N| - 1 - |S|\right)|S|!}{|N|!} m(i)
+	\end{aligned}
 \end{equation}
 
-Then the Shapley value for the unanimity game $(\{1, 2, 3\}, u_{\{1, 2, 3\}})$ is $1/3$ for every player.\cite{hamiache_value_1999} 
-Now, suppose players one and three cannot communicate with each other and hence cannot form a coalition. Since 
-the Shapley value does not take any communication structure into account, the Shapley values are still $1/3$ 
-for all players. However, it would be more intuitive if player two has a higher value, as it can communicate 
-to more players than players one and three. Because chemical structures can also be considered as graphs, where 
-the atoms are nodes and bonds between atoms are edges, it could be interesting to take the limitation of communication 
-into account. A value that is defined with a communication structure in minds is the Hamiache-Navarro value.\cite{hamiache_value_1999, hamiache_associated_2020}
+
+assuming that every coalition is equally probable. This last assumption can be questioned whether it should
+always hold. For instance, define an unanimity game as a game $(N, u_R)$ with characteristic function
+
+
+\begin{equation}
+	u_R = \begin{cases}
+		1 \quad \text{if } R \subseteq S \\
+		0 \quad \text{otherwise}
+	\end{cases}.
+\end{equation}
+
+
+Then the Shapley value for the unanimity game $(\{1, 2, 3\}, u_{\{1,2,3\}})$ is $1/3$ for every player.\cite{hamiache_value_1999}
+Now, suppose players one and three cannot communicate with each other and hence cannot form a coalition.
+Since the Shapley value does not account for any communication structure, the Shapley values are still
+$1/3$ for all players. However, it would be more intuitive if player two had a higher value, as it can
+communicate to more players than players one and three. Because it is possible to represent chemical
+structures as graphs, it could be interesting to include the graphical structure in the explanation. A
+value that does include a communication structure is the Hamiache-Navarro value.\cite{hamiache_value_1999, hamiache_associated_2020}
+
 
 \subsection{Hamiache-Navarro value}
+
+
+Before discussing the Hamiache-Navarro value, some notation is defined. Let a game $(N, v)$ with a
+communication structure be a triple $(N, v, g)$, where $g$ is a set of adjacent nodes\cite{hamiache_value_1999},
+
+
+\begin{equation}
+	g \subseteq g_N \coloneqq \{ \{i, j \} | i, j \in N \}.
+\end{equation}
+
+The graph $\left< N, g \right>$ specifies the communication structure, where players
+$i$ and $j$ can only communicate if they are adjacent (i.e. $\{i, j \} \in g$).
+A path is a sequence $i = i_1, i_2, \dots , i_k = j$ of nodes from player
+$i$ to player $j$ such that
+
+
+\begin{equation}
+	\{i_q, i_{q+1} \} \in g, \; 1 \le q \le k - 1.
+\end{equation}
+
+
+If such a path exists between two players, then they are connected by the graph $\left<N, g\right>$
+which is denoted by $i \underset{\left< N, g \right>}{\rightarrow} j$. This allows to
+define a partition $N/g$ of the set of nodes $N$ over the graph $<N, g>$ as the set of all
+connected nodes
+
+\begin{equation}
+	N/g = \{\{ i | i \in N \land i \underset{\left<N, g \right>}{\rightarrow} j\} \cup \{j\} | j \in N \}.
+\end{equation}
+
+
+A coalition $S \subseteq N$ can only directly interact with its connected neighbors. Let
+$S^*$ be the set of players which are adjacent to at least one player in the coalition $S$.
+
+
+\begin{equation}
+	S^* \coloneqq \{ i \in N | \exists j \in S \text{ such that } \{i, j\} \in g \}.
+\end{equation}
+
+The interconnection of the neighbors of $S$ is of no importance as the coalition
+$S$ cannot see them. Therefore, the coalition $S$ can value its own payoff $v^*(S)$ as its
+payoff $v(S)$ in the original game and a fraction of the net payoff obtained by cooperating with
+each of its neighbors separately\cite{hamiache2001associated}
+
+
+\begin{equation}
+	\label{eq:associated_game}
+	v^*(S) =
+	\begin{cases}
+		\displaystyle
+		v(S) + \tau \sum_{j \in S^* \setminus S} \left[ v(S \cup \{j\}) - v(S) - v(\{j\}) \right] & \text{if } |S/g| = 1 \\
+		\displaystyle
+		\sum_{R \in S/g} v^*(R)                                                                   & \text{otherwise}
+	\end{cases}
+	.
+\end{equation}
+
+This introduces a series of associated games $(N, v^*, g)$, $(N, v^{**}, g)$, \dots which converges
+to the limit game $(N, \tilde{v}, g)$. An associated game is consistent if its solution is the same
+as the solution of the original game. When the graph is complete (i.e. all players are connected to
+each other), then the solution of the associated game converges to the Shapley value.\cite{hamiache2001associated}
+
+
+In what follows, the concept of associated games are converted into a matrix approach.\cite{hamiache_associated_2020}
+To be consistent, an order of the matrix columns and rows are defined. Therefore a lexicographic order is defined
+for coalitions of the same size. Suppose $A$ and $B$ are coalitions of the same size where the elements are ordered
+from small to large (i.e. $a_1 < a_2 < \dots < a_k, \quad a_i \in A$). The coalition $A$ comes lexicographic
+before coalition $B$ ($A \prec B$) if and only if $a_1 < b_1$ or $\exists \gamma \in \mathbb{N}, 1 \le i < \gamma: a_i = b_i \land a_\gamma < b_\gamma$.
+For two arbitrary coalitions $S$ and $T$, $S < T$ if $|S| < |T|$ or $S \prec T$. Using this ordering, the characteristic
+function $v$ of the game $(N, v, g)$ can be represented as a vector in $\mathbb{R}^{2^N - 1}$. The associated game
+\cref{eq:associated_game} $v^*_\tau = M_c v$ can than be written as a linear transformation of the characteristic vector
+, where the square matrix $M_c$ for two arbitrary coalitions $\emptyset \ne S \subseteq N$
+and  \emptyset \ne T \subseteq N$ is given by
+
+	\begin{equation}
+		M_c[S, T] =
+		\begin{cases}
+			1 - |N \setminus S| \tau & \text{if } |S| = |T|                         \\
+			\tau                     & \text{if } |S| + 1 = |T| \land S \subseteq T \\
+			-\tau                    & \text{if } |T| = 1  \land T \not \subseteq S \\
+			0                        & \text{otherwise}
+		\end{cases}
+	\end{equation}
+
+
+	and $P_g$,
+
+
+\begin{equation}
+	P_g[S, T] =
+	\begin{cases}
+		1 & \text{if } T \in S/g \\
+		0 & \text{otherwise}     \\
+	\end{cases}
+\end{equation}
