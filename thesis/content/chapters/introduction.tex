@@ -3,13 +3,49 @@
 
 \section{Machine learning}
 
-\section{Deep learning}
+The goal of machine learning is to construct a function $f$ that can accurately predict the outcome variable 
+of the training data and can generalize to new data. It is common to represent the function input values (also known as features)
+as a matrix $\mathbf{X} \in \mathbb{R}^{N \times p}$ where each row is one training sample. Evaluation using the feature matrix results 
+in the predicted values $\mathbf{\hat{Y}} = f(\mathbf{X})$. After obtaining the predicted values, they are compared to the true 
+values (also called labels) in order to determine how good the model is. This comparison can be done in multiple 
+ways using various loss functions.\cite{wang2020comprehensive}  A commonly used loss function is the mean squared error 
+(MSE) (\cref{eq:mse}) which averages the squared difference between the predicted value and true label. Furthermore, optimizing the 
+loss function with respect to the learning function parameters produces the best model with the given architecture.\cite{hastie2009elements}
+
+
+\begin{equation}
+\label{eq:mse}
+    \text{MSE} = \frac{1}{N} \sum_{i=1}^N \big[y_i - f(\mathbf{x}_i)\big]^2
+\end{equation}
+
+
+One of the simplest functions $f\left(\mathbf{X}\right) = \mathbf{X}\pmb{\beta}$ is a linear combination of the features, where 
+$\pmb{\beta} \in \mathbb{R}^p$ is the vector of coefficients. This model is known as linear regression and 
+is commonly used in statistical modeling.\cite{kutner2005applied} Although the linear model is 
+very interpretable, the linearity constraint too strict which limits its applicability. Therefore, more complicated 
+ML algorithms were developed which are able to obtain improved performance on complicated data with respect to linear 
+regression.\cite{deng2012mnist} However, they pay a price in terms of interpretability.\cite{fan2021interpretability}
+ 
+
+\section{Neural networks}
+
+
+Neural networks (NN) are able to model complicated non linear relationships. Rosenblatt proposed in 1961 the perceptron 
+based on how the human brain works.\cite{rosenblatt1962principles}
+
+
+\subsection{Multi layer perceptron}
+
+\subsection{Gradient descent}
+
+\subsection{Adam}
 
 
 \section{Graph neural networks}
 
 
 \section{Explainable machine learning}
+
 
 \subsection{Shapley value}
 \label{subsec:shapley_value}
