@@ -12,6 +12,7 @@
 \section{Explainable machine learning}
 
 \subsection{Shapley value}
+\label{subsec:shapley_value}
 
 Feature attribution methods in XAI assign a number to each feature implying how
 much that feature contributed to the model prediction.\cite{merrick2020explanation}
@@ -101,46 +102,22 @@ value that does include a communication structure is the Hamiache-Navarro value.
 
 
 Before discussing the Hamiache-Navarro value, some notation is defined. Let a game $(N, v)$ with a
-communication structure be a triple $(N, v, g)$, where $g$ is a set of adjacent nodes\cite{hamiache_value_1999},
-
-
-\begin{equation}
-	g \subseteq g_N \coloneqq \{ \{i, j \} | i, j \in N \}.
-\end{equation}
-
-The graph $\left< N, g \right>$ specifies the communication structure, where players
-$i$ and $j$ can only communicate if they are adjacent (i.e. $\{i, j \} \in g$).
-A path is a sequence $i = i_1, i_2, \dots , i_k = j$ of nodes from player
-$i$ to player $j$ such that
-
-
-\begin{equation}
-	\{i_q, i_{q+1} \} \in g, \; 1 \le q \le k - 1.
-\end{equation}
-
-
-If such a path exists between two players, then they are connected by the graph $\left<N, g\right>$
-which is denoted by $i \underset{\left< N, g \right>}{\rightarrow} j$. This allows to
-define a partition $N/g$ of the set of nodes $N$ over the graph $<N, g>$ as the set of all
-connected nodes
-
-\begin{equation}
-	N/g = \{\{ i | i \in N \land i \underset{\left<N, g \right>}{\rightarrow} j\} \cup \{j\} | j \in N \}.
-\end{equation}
-
+communication structure be a triple $(N, v, g)$, where $g \subseteq g_N \coloneqq \{ \{i, j \} | i, j \in N \}$
+is a set of adjacent nodes. The graph $\left< N, g \right>$ specifies the
+communication structure, where players $i$ and $j$ can only communicate if they are adjacent
+(i.e. $\{i, j \} \in g$). A path is a sequence $i = i_1, i_2, \dots , i_k = j$ of nodes from player
+$i$ to player $j$ such that $\{i_q, i_{q+1} \} \in g$ for $1 \le q \le k - 1$. If such a path exists
+between two players, then they are connected by the graph $\left<N, g\right>$ which is denoted by
+$i \underset{\left< N, g \right>}{\rightarrow} j$. This allows to define a partition
+$N/g \coloneqq \{\{ i | i \in N \land i \underset{\left<N, g \right>}{\rightarrow} j\} \cup \{j\} | j \in N \}$
+of the set of nodes $N$ over the graph $<N, g>$ as the set of all connected nodes.\cite{hamiache_value_1999}
 
 A coalition $S \subseteq N$ can only directly interact with its connected neighbors. Let
-$S^*$ be the set of players which are adjacent to at least one player in the coalition $S$.
-
-
-\begin{equation}
-	S^* \coloneqq \{ i \in N | \exists j \in S \text{ such that } \{i, j\} \in g \}.
-\end{equation}
-
-The interconnection of the neighbors of $S$ is of no importance as the coalition
-$S$ cannot see them. Therefore, the coalition $S$ can value its own payoff $v^*(S)$ as its
-payoff $v(S)$ in the original game and a fraction of the net payoff obtained by cooperating with
-each of its neighbors separately\cite{hamiache2001associated}
+$S^* \coloneqq \{ i \in N | \exists j \in S \text{ such that } \{i, j\} \in g \}$ be the set of players
+which are adjacent to at least one player in the coalition $S$. The interconnection of the neighbors of
+$S$ is of no importance as the coalition $S$ cannot see them. Therefore, the coalition $S$ can value its
+own payoff $v^*(S)$ as its payoff $v(S)$ in the original game and a fraction $\tau$ of the net payoff obtained
+by cooperating with each of its connected neighbors separately\cite{hamiache2001associated}
 
 
 \begin{equation}
@@ -155,36 +132,38 @@ each of its neighbors separately\cite{hamiache2001associated}
 	.
 \end{equation}
 
+When the coalition $S$ is not connected (i.e. $|S/g| \ne 1$), then its own payoff is the sum of the self
+evaluated payoffs of the components $R \in S/g$ of the coalition $S$.
 This introduces a series of associated games $(N, v^*, g)$, $(N, v^{**}, g)$, \dots which converges
 to the limit game $(N, \tilde{v}, g)$. An associated game is consistent if its solution is the same
 as the solution of the original game. When the graph is complete (i.e. all players are connected to
 each other), then the solution of the associated game converges to the Shapley value.\cite{hamiache2001associated}
 
 
-In what follows, the concept of associated games are converted into a matrix approach.\cite{hamiache_associated_2020}
+In what follows, the concept of associated games are converted into a matrix approach.
 To be consistent, an order of the matrix columns and rows are defined. Therefore a lexicographic order is defined
 for coalitions of the same size. Suppose $A$ and $B$ are coalitions of the same size where the elements are ordered
 from small to large (i.e. $a_1 < a_2 < \dots < a_k, \quad a_i \in A$). The coalition $A$ comes lexicographic
 before coalition $B$ ($A \prec B$) if and only if $a_1 < b_1$ or $\exists \gamma \in \mathbb{N}, 1 \le i < \gamma: a_i = b_i \land a_\gamma < b_\gamma$.
 For two arbitrary coalitions $S$ and $T$, $S < T$ if $|S| < |T|$ or $S \prec T$. Using this ordering, the characteristic
 function $v$ of the game $(N, v, g)$ can be represented as a vector in $\mathbb{R}^{2^N - 1}$. The associated game
-\cref{eq:associated_game} $v^*_\tau = M_c v$ can than be written as a linear transformation of the characteristic vector
+\cref{eq:associated_game} $v^*_\tau = P_g M_c P_g v$ can then be written as a linear transformation of the characteristic vector
 , where the square matrix $M_c$ for two arbitrary coalitions $\emptyset \ne S \subseteq N$
-and  \emptyset \ne T \subseteq N$ is given by
-
-	\begin{equation}
-		M_c[S, T] =
-		\begin{cases}
-			1 - |N \setminus S| \tau & \text{if } |S| = |T|                         \\
-			\tau                     & \text{if } |S| + 1 = |T| \land S \subseteq T \\
-			-\tau                    & \text{if } |T| = 1  \land T \not \subseteq S \\
-			0                        & \text{otherwise}
-		\end{cases}
-	\end{equation}
+and $\emptyset \ne T \subseteq N$ is given by\cite{hamiache_associated_2020,hamiache2010matrix}
 
 
-	and $P_g$,
+\begin{equation}
+	M_c[S, T] =
+	\begin{cases}
+		1 - |N \setminus S| \tau & \text{if } |S| = |T|                         \\
+		\tau                     & \text{if } |S| + 1 = |T| \land S \subseteq T \\
+		-\tau                    & \text{if } |T| = 1  \land T \not \subseteq S \\
+		0                        & \text{otherwise}
+	\end{cases}
+\end{equation}
 
+
+and matrix $P_g$ is given by
 
 \begin{equation}
 	P_g[S, T] =
@@ -192,4 +171,23 @@ and  \emptyset \ne T \subseteq N$ is given by
 		1 & \text{if } T \in S/g \\
 		0 & \text{otherwise}     \\
 	\end{cases}
+	,
 \end{equation}
+
+
+which represents the graphical structure of the game. This allows to write the series of associated
+games as $v^*_\tau = P_g M_c P_g v, v^{**}_\tau = P_g M_c P_g v^*_\tau, \dots, v^{(k*)}_\tau = \left(P_g M_c P_g\right)^k v$.
+Provided that $\tau$ is small enough ($\tau < \frac{2}{|N|}$ for complete graphs\cite{hamiache2001associated}),
+the power series $\left(P_g M_c P_g\right)^k v$ converges as $k$ tends to infinity.\footnote{A proof can be found in \cite{hamiache_associated_2020}}
+The convergence produces a limit game $(N, \tilde{v}, g)$, where the solution $\phi_i$ of player $i$ equals the
+payoff $\tilde{v}(\{i\})$ of player $i$.\cite{zhang2022gstarx, hamiache_associated_2020}
+
+
+\textbf{Numerical example}
+
+In order to compare the Hamiache-Navarro value and the Shapley value the same example as in \cref{subsec:shapley_value}
+is used. To recap, define an unanimity game with communication structure $(\{1, 2, 3\}, u_{\{1, 2, 3\}}, \{\{1, 2\}, \{2, 3\}\})$
+where $u_{\{1, 2, 3\}}(S)$ is one if $\{1, 2, 3\} \in S$ and zero otherwise with $S \subseteq \{1, 2, 3\}$. As discussed
+in \cref{subsec:shapley_value}, the Shapley value is equal to $1/3$ for all players. However, the HN-value is not equal
+for all players. Players one and three have an HN-value of $1/4$ and the HN-value for player two is $1/2$ 
+(see \cref{app:HN_example}).\cite{hamiache_associated_2020}

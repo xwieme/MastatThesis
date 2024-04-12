@@ -1,0 +1,38 @@
+\chapter{Hamiache-Navarro value example}
+\label{app:HN_example}
+
+For the unanimity $(\{1, 2, 3\}, u_{\{1, 2, 3\}}, \{\{1, 2\}, \{2, 3\}\})$, the matrices $M_c$ and $P_g$ are 
+given by\cite{hamiache_associated_2020}
+
+
+\begin{equation}
+	M_c = \begin{pmatrix}
+		1 - 2\tau & -\tau     & -\tau     & \tau     & \tau     & 0        & 0    \\
+		-\tau     & 1 - 2\tau & -\tau     & \tau     & 0        & \tau     & 0    \\
+		-\tau     & -\tau     & 1 - 2\tau & 0i       & \tau     & \tau     & 0    \\
+		0         & 0         & -\tau     & 1 - \tau & 0        & 0        & \tau \\
+		0         & -\tau     & 0         & 0        & 1 - \tau & 0        & \tau \\
+		-\tau     & 0         & 0         & 0        & 0        & 1 - \tau & \tau \\
+		0         & 0         & 0         & 0        & 0        & 0        & 1    \\
+	\end{pmatrix},
+\end{equation}
+
+
+\begin{equation}
+	\renewcommand{\arraystretch}{0.7}
+	P_g = \begin{pmatrix}
+		1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+		0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+		0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+		0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+		1 & 0 & 1 & 0 & 0 & 0 & 0 \\
+		0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+		0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+	\end{pmatrix}.
+\end{equation}
+
+
+The vector representation of the characteristic function is $u_{\{1, 2, 3\}} = \left(\begin{smallmatrix} 0 & 0 & 0 & 0 & 0 & 0 & 1 \end{smallmatrix}\right)^T$.
+Then the limit game $\tilde{v} = (P_g M_c P_g)^k u_{\{1, 2, 3\}}$ equals 
+$\left(\begin{smallmatrix} 1/4 & 1/2 & 1/4 & 3/4 & 1/2 & 3/4 & 1\end{smallmatrix}\right)^T$. Since the solution  of the 
+original game equals the payoff of the limit game, the values of players one, two and three are $1/4, 1/2$ and $1/4$ respectively.
