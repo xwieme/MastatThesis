@@ -39,13 +39,13 @@ they pay a price in terms of interpretability.\cite{fan2021interpretability}
 
 
 Neural networks are a class of machine learning algorithms which are able to
-approximate any non-linear function.\cite{} Initially, they where developed as
-a simple mathematical model of the human brain. Although this is a strong
+approximate any non-linear function.\cite{cybenko1989approximation} Initially, they where developed as
+a simple mathematical model of the human brain.\cite{rosenblatt1962principles} Although this is a strong
 simplification, the concept of neuron signal transit from axon to dendrites
-is used as a basic building block for a neural network. This signal transmission
-takes place between two units in a neural network. Then, different architectures
+is used as a basic building block for a neural network.\cite{wang2017origin} This signal transmission
+takes place between units in a neural network. Then, different architectures
 can be used to connect different units. The multi layer perceptron (MLP) is a simple
-architecture that is frequently utilized in other, more complicated neural networks.
+architecture that is frequently utilized in other, more complicated neural networks.\cite{almeida2020multilayer}
 In an MLP three parts can be distinguished: an input layer, one or more hidden layers
 and an output layer. The values of the input layer are equal to the given feature matrix
 $\pmb{X}$. Taking $n$ different linear combinations of the input layer followed by
@@ -61,41 +61,49 @@ $l$ are given by
 
 where $\pmb{\Theta}^{(l-1)} \in \mathbb{R}^{n^{(l-1)} \times n^{(l)}}$ is the weights matrix
 of layer $l - 1$, with $n^{(l-1)}$ and $n^{(l)}$ the number of units in layers
-$l-1$ and $l$ respectively and $\pmb{A}^{(0)} = \pmb{X}$.
+$l-1$ and $l$ respectively and $\pmb{A}^{(0)} = \pmb{X}$. Popular activation
+functions are listed in \cref{tab:activation_functions}.
 
 \begin{table}[h]
 	\caption{Popular activation functions used in multi layer perceptrons.}
+	\label{tab:activation_functions}
 	\begin{center}
 		\begin{tabular}{c|c}
 			\toprule
-			Sigmoid(x) = $ \frac{1}{1 + e^{-x}}$ &
-			Tanh(x) = $\frac{e^x - e^{-x}}{e^x + e^{-x}}$ \\
+			Sigmoid(x) = $ \frac{1}{1 + e^{-x}}$                 &
+			Softmax(x) = $\frac{e^x}{\sum_{i=1}^{n_L} e^{x_i}}$                                                           \\
 			\midrule
-			ReLU(x) = $\begin{cases}
-					           x & \text{if } x > 0 \\
-					           0 & \text{otherwise}
-				           \end{cases}$             &
-			LeakyReLU(x) =  $\begin{cases}
-					                 x      & \text{if } x > 0 \\
-					                 0.01 x & \text{otherwise}
-				                 \end{cases}$
+			ReLU(x)\cite{glorot2011deep} = $\begin{cases}
+					                                x & \text{if } x > 0 \\
+					                                0 & \text{otherwise}
+				                                \end{cases}$        &
+			LeakyReLU(x)\cite{maas2013rectifier} =  $\begin{cases}
+					                                         x        & \text{if } x > 0 \\
+					                                         \alpha x & \text{otherwise}
+				                                         \end{cases}$
+			\\ & with $\alpha \ge 0$
 			\\
 			\midrule
-			SeLU(x) = $\lambda \begin{cases}
-					                   x               & \text{if } x > 0 \\
-					                   \alpha(e^x - 1) & \text{otherwise}
-				                   \end{cases}$
-			                                     &
-			Gelu(x) = $\begin{cases}
-					           x        & \text{if } x > 0 \\
-					           x\Phi(x) & \text{otherwise}
-				           \end{cases}$
+			SeLU(x)\cite{klambauer2017self} = $\lambda \begin{cases}
+					                                           x               & \text{if } x > 0 \\
+					                                           \alpha(e^x - 1) & \text{otherwise}
+				                                           \end{cases}$
+			                                                     &
+			Gelu(x)\cite{hendrycks2016gaussian} = $\begin{cases}
+					                                       x            & \text{if } x > 0 \\
+					                                       x \, \Phi(x) & \text{otherwise}
+				                                       \end{cases}$
 			\\
+			with $\gamma = 1.05070098$ and $\alpha = 1.67326324$ & with $\Phi(x)$ cumulative standard normal distribution \\
 			\bottomrule
 		\end{tabular}
 	\end{center}
 \end{table}
 
+An MLP often does not assess the whole feature matrix at once. Rather, the feature
+matrix is split up into many batches. Then, following each batch, the parameters are
+updated using an optimization algorithm. Common optimization algorithms in neural networks
+are gradient descent and Adam.
 
 
 \subsection{Gradient descent}
