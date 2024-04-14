@@ -3,38 +3,100 @@
 
 \section{Machine learning}
 
-The goal of machine learning is to construct a function $f$ that can accurately predict the outcome variable 
-of the training data and can generalize to new data. It is common to represent the function input values (also known as features)
-as a matrix $\mathbf{X} \in \mathbb{R}^{N \times p}$ where each row is one training sample. Evaluation using the feature matrix results 
-in the predicted values $\mathbf{\hat{Y}} = f(\mathbf{X})$. After obtaining the predicted values, they are compared to the true 
-values (also called labels) in order to determine how good the model is. This comparison can be done in multiple 
-ways using various loss functions.\cite{wang2020comprehensive}  A commonly used loss function is the mean squared error 
-(MSE) (\cref{eq:mse}) which averages the squared difference between the predicted value and true label. Furthermore, optimizing the 
-loss function with respect to the learning function parameters produces the best model with the given architecture.\cite{hastie2009elements}
+The goal of machine learning is to construct a function $f$, based on parameters
+$\pmb{\theta}$, that can accurately predict the outcome variable of the training
+data and can generalize to new data.\cite{hastie2009elements} It is common to represent the function input
+values (also known as features) as a matrix $\mathbf{X} \in \mathbb{R}^{N \times p}$ where
+each row is one sample. Evaluation of the learning function $f$ using the feature matrix
+results in the predicted values $\mathbf{\hat{Y}} = f(\mathbf{X}; \pmb{\theta})$. After
+obtaining the predicted values, they are compared to the true values (also called labels)
+in order to determine how good the model is, which introduces the concept of loss functions.
+Different loss functions exists for different kind of problems.\cite{wang2020comprehensive}
+A commonly used loss function is the mean squared error (MSE) (\cref{eq:mse})
+which averages the squared difference between the predicted value and true label.
+Furthermore, optimizing the loss function with respect to the learning function
+parameters produces the best model with the given architecture.\cite{hastie2009elements}
 
 
 \begin{equation}
-\label{eq:mse}
-    \text{MSE} = \frac{1}{N} \sum_{i=1}^N \big[y_i - f(\mathbf{x}_i)\big]^2
+	\label{eq:mse}
+	\text{MSE} = \frac{1}{N} \sum_{i=1}^N \big[y_i - f(\mathbf{x}_i)\big]^2
 \end{equation}
 
 
-One of the simplest functions $f\left(\mathbf{X}\right) = \mathbf{X}\pmb{\beta}$ is a linear combination of the features, where 
-$\pmb{\beta} \in \mathbb{R}^p$ is the vector of coefficients. This model is known as linear regression and 
-is commonly used in statistical modeling.\cite{kutner2005applied} Although the linear model is 
-very interpretable, the linearity constraint too strict which limits its applicability. Therefore, more complicated 
-ML algorithms were developed which are able to obtain improved performance on complicated data with respect to linear 
-regression.\cite{deng2012mnist} However, they pay a price in terms of interpretability.\cite{fan2021interpretability}
- 
+One of the simplest functions $f\left(\mathbf{X}; \pmb{\theta}\right) = \mathbf{X}\pmb{\theta}$
+is a linear combination of the features, where $\pmb{\theta} \in \mathbb{R}^p$
+is the vector of coefficients. This model, known as linear regression, is commonly
+used in statistical modeling.\cite{kutner2005applied} Although the linear model is
+very interpretable, the linearity constraint is too strict which limits its
+applicability. Therefore, more complicated ML algorithms were developed which are
+able to obtain improved performance on complicated data with respect to linear
+regression by allowing non-linear relationships.\cite{deng2012mnist} However,
+they pay a price in terms of interpretability.\cite{fan2021interpretability}
+
 
 \section{Neural networks}
 
 
-Neural networks (NN) are able to model complicated non linear relationships. Rosenblatt proposed in 1961 the perceptron 
-based on how the human brain works.\cite{rosenblatt1962principles}
+Neural networks are a class of machine learning algorithms which are able to
+approximate any non-linear function.\cite{} Initially, they where developed as
+a simple mathematical model of the human brain. Although this is a strong
+simplification, the concept of neuron signal transit from axon to dendrites
+is used as a basic building block for a neural network. This signal transmission
+takes place between two units in a neural network. Then, different architectures
+can be used to connect different units. The multi layer perceptron (MLP) is a simple
+architecture that is frequently utilized in other, more complicated neural networks.
+In an MLP three parts can be distinguished: an input layer, one or more hidden layers
+and an output layer. The values of the input layer are equal to the given feature matrix
+$\pmb{X}$. Taking $n$ different linear combinations of the input layer followed by
+a non-linear activation function $\sigma$ results in the values of the first hidden
+layer. Generally, the values $\pmb{A}^{(l)} \in \mathbb{R}^{N \times n^{(l)}}$ of layer
+$l$ are given by
 
 
-\subsection{Multi layer perceptron}
+\begin{equation}
+	\pmb{A}^{(l)} =  \sigma^{(l)} \left(\pmb{A}^{(l-1)}\pmb{\Theta}^{(l-1)} \right),
+\end{equation}
+
+
+where $\pmb{\Theta}^{(l-1)} \in \mathbb{R}^{n^{(l-1)} \times n^{(l)}}$ is the weights matrix
+of layer $l - 1$, with $n^{(l-1)}$ and $n^{(l)}$ the number of units in layers
+$l-1$ and $l$ respectively and $\pmb{A}^{(0)} = \pmb{X}$.
+
+\begin{table}[h]
+	\caption{Popular activation functions used in multi layer perceptrons.}
+	\begin{center}
+		\begin{tabular}{c|c}
+			\toprule
+			Sigmoid(x) = $ \frac{1}{1 + e^{-x}}$ &
+			Tanh(x) = $\frac{e^x - e^{-x}}{e^x + e^{-x}}$ \\
+			\midrule
+			ReLU(x) = $\begin{cases}
+					           x & \text{if } x > 0 \\
+					           0 & \text{otherwise}
+				           \end{cases}$             &
+			LeakyReLU(x) =  $\begin{cases}
+					                 x      & \text{if } x > 0 \\
+					                 0.01 x & \text{otherwise}
+				                 \end{cases}$
+			\\
+			\midrule
+			SeLU(x) = $\lambda \begin{cases}
+					                   x               & \text{if } x > 0 \\
+					                   \alpha(e^x - 1) & \text{otherwise}
+				                   \end{cases}$
+			                                     &
+			Gelu(x) = $\begin{cases}
+					           x        & \text{if } x > 0 \\
+					           x\Phi(x) & \text{otherwise}
+				           \end{cases}$
+			\\
+			\bottomrule
+		\end{tabular}
+	\end{center}
+\end{table}
+
+
 
 \subsection{Gradient descent}
 
@@ -225,5 +287,5 @@ In order to compare the Hamiache-Navarro value and the Shapley value the same ex
 is used. To recap, define an unanimity game with communication structure $(\{1, 2, 3\}, u_{\{1, 2, 3\}}, \{\{1, 2\}, \{2, 3\}\})$
 where $u_{\{1, 2, 3\}}(S)$ is one if $\{1, 2, 3\} \in S$ and zero otherwise with $S \subseteq \{1, 2, 3\}$. As discussed
 in \cref{subsec:shapley_value}, the Shapley value is equal to $1/3$ for all players. However, the HN-value is not equal
-for all players. Players one and three have an HN-value of $1/4$ and the HN-value for player two is $1/2$ 
+for all players. Players one and three have an HN-value of $1/4$ and the HN-value for player two is $1/2$
 (see \cref{app:HN_example}).\cite{hamiache_associated_2020}
