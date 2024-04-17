@@ -10,7 +10,7 @@ values (also known as features) as a matrix $\mathbf{X} \in \mathbb{R}^{N \times
 each row is one sample. Evaluation of the learning function $f$ using the feature matrix
 results in the predicted values $\mathbf{\hat{Y}} = f(\mathbf{X}; \pmb{\theta})$. After
 obtaining the predicted values, they are compared to the true values (also called labels)
-in order to determine how good the model is, which introduces the concept of loss functions.
+in order to determine how good the model is, which introduces the concept of loss functions $\mathcal{L}$.
 Different loss functions exists for different kind of problems.\cite{wang2020comprehensive}
 A commonly used loss function is the mean squared error (MSE) (\cref{eq:mse})
 which averages the squared difference between the predicted value and true label.
@@ -20,7 +20,7 @@ parameters produces the best model with the given architecture.\cite{hastie2009e
 
 \begin{equation}
 	\label{eq:mse}
-	\text{MSE} = \frac{1}{N} \sum_{i=1}^N \big[y_i - f(\mathbf{x}_i)\big]^2
+    \text{MSE}\big(\pmb{y}, \pmb{X}\big) = \frac{1}{N}  \big[\pmb{y} - f(\mathbf{X})\big]^T[\pmb{y} - f(\mathbf{X})\big]
 \end{equation}
 
 
@@ -39,17 +39,31 @@ they pay a price in terms of interpretability.\cite{fan2021interpretability}
 
 
 Neural networks are a class of machine learning algorithms which are able to
-approximate any non-linear function.\cite{cybenko1989approximation} Initially, they where developed as
+approximate complicated non-linear function.\cite{cybenko1989approximation} Initially, they where developed as
 a simple mathematical model of the human brain.\cite{rosenblatt1962principles} Although this is a strong
-simplification, the concept of neuron signal transit from axon to dendrites
-is used as a basic building block for a neural network.\cite{wang2017origin} This signal transmission
+simplification, the concept of neuron signal transit is used as a basic building 
+block for a neural network.\cite{wang2017origin} This signal transmission
 takes place between units in a neural network. Then, different architectures
-can be used to connect different units. The multi layer perceptron (MLP) is a simple
+can be used to connect different units. The multi layer perceptron (MLP) is a basic
 architecture that is frequently utilized in other, more complicated neural networks.\cite{almeida2020multilayer}
-In an MLP three parts can be distinguished: an input layer, one or more hidden layers
-and an output layer. The values of the input layer are equal to the given feature matrix
-$\pmb{X}$. Taking $n$ different linear combinations of the input layer followed by
-a non-linear activation function $\sigma$ results in the values of the first hidden
+In an MLP (\cref{fig:mlp_structure}) three parts can be distinguished: an input layer,
+one or more hidden layers and an output layer. 
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=1.5]{mlp.png}
+    \caption{General structure of a multi layer perceptron (MLP) consisting of an input layer,
+        one or multiple hidden layers and an output layer. The symbol separating two layers denote that 
+    all neurons between these two layers are connected.}
+    \label{fig:mlp_structure}
+\end{figure}
+
+
+The values of the input layer are equal to the given feature matrix
+$\pmb{X}$. Let $n^{(1)}$ denote the number of units in the first hidden layer.
+Then taking $n^{(1)}$ different linear combinations of the input layer followed by
+a non-linear activation function $\sigma$ results in the values of this first hidden
 layer. Generally, the values $\pmb{A}^{(l)} \in \mathbb{R}^{N \times n^{(l)}}$ of layer
 $l$ are given by
 
@@ -108,7 +122,31 @@ are gradient descent and Adam.
 
 \subsection{Gradient descent}
 
+
+A popular optimization algorithm to optimize the weights of a neural network is 
+gradient descent.\cite{ruder2016overview} As the name implies, this algorithm 
+uses the gradient of the loss function $\mathcal{L}$ to step in the direction of the 
+steepest decline. The size of this step is determined by the learning rate $\alpha$.
+
+\begin{equation}
+    \pmb{\Theta}_{t+1} = \pmb{\Theta}_{t} - \alpha \nabla_{\pmb{\Theta}} \mathcal{L}
+\end{equation}
+
+Computation of the gradient can be achieved using the back propagation algorithm, which 
+propagates the gradient layer by layer through the network starting at the output.
+\cite{lecun1988theoretical} A limitation of gradient descent is the fixed learning 
+rate which must carefully be chosen. One limitation of gradient descent is the 
+fixed learning rate that has to be chosen thoughtfully at the start of training. 
+If the learning rate is too large, the step can pass beyond the minimum. Otherwise, 
+if the learning rate is too small it can take a very long time until convergence. 
+A possible solution is to stop after a few iterations, adjust learning rate and 
+continue training. However, this is not really efficient. A better algorithm, 
+which is nowadays the standard optimization algorithm in deep learning, is Adam.
+
+
 \subsection{Adam}
+
+
 
 
 \section{Graph neural networks}
