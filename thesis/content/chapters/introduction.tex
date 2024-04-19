@@ -1,6 +1,36 @@
 \chapter{Introduction}
 
 
+Prediction of molecule properties is an important task in materials design and
+drug discovery. This is because when a data set of molecules can be filtered
+before starting experimental test, both time and money are saved, leading to
+a faster development of novel drugs and materials. However, the use of ab initio
+quantum chemical algorithms are currently intractable due to their high
+computational cost. Since the chemical space of drugable molecules is estimated
+to be $10^{60}$, more efficient algorithms are necessary. One approach is the
+use of machine learning (ML) algorithms, as these algorithms are able to find complicated
+patterns in large data sets. The problem with ML algorithms is that the best
+performing are commonly black boxes, which limits the creation of novel scientific
+knowledge. This also results in trust issues in performance critical and highly regulated
+environments.
+
+
+Explainable artificial intelligence (XAI) uses various techniques to explain the prediction
+of black box machine learning algorithms. These methods, however, need to take domain knowledge
+into account. For example, chemical molecules can be represented as graphs using the Lewis
+structure. When existing XAI methods for graph try to explain the most important nodes
+or subgraph of a molecule, the result is not very chemically meaningful. This comes from the
+fact that chemist do not think in terms of individual atoms, but in substructures such as
+functional groups. Recently, Wu et. al. developed substructure graph exploration, where a
+molecule is partitioned into different substructures, resulting in a chemical explanation.
+
+
+
+
+
+
+
+
 \section{Machine learning}
 
 The goal of machine learning is to construct a function $f$, based on parameters
@@ -20,7 +50,7 @@ parameters produces the best model with the given architecture.\cite{hastie2009e
 
 \begin{equation}
 	\label{eq:mse}
-    \text{MSE}\big(\pmb{y}, \pmb{X}\big) = \frac{1}{N}  \big[\pmb{y} - f(\mathbf{X})\big]^T[\pmb{y} - f(\mathbf{X})\big]
+	\text{MSE}\big(\pmb{y}, \pmb{X}\big) = \frac{1}{N}  \big[\pmb{y} - f(\mathbf{X})\big]^T[\pmb{y} - f(\mathbf{X})\big]
 \end{equation}
 
 
@@ -41,22 +71,22 @@ they pay a price in terms of interpretability.\cite{fan2021interpretability}
 Neural networks are a class of machine learning algorithms which are able to
 approximate complicated non-linear function.\cite{cybenko1989approximation} Initially, they where developed as
 a simple mathematical model of the human brain.\cite{rosenblatt1962principles} Although this is a strong
-simplification, the concept of neuron signal transit is used as a basic building 
+simplification, the concept of neuron signal transit is used as a basic building
 block for a neural network.\cite{wang2017origin} This signal transmission
 takes place between units in a neural network. Then, different architectures
 can be used to connect different units. The multi layer perceptron (MLP) is a basic
 architecture that is frequently utilized in other, more complicated neural networks.\cite{almeida2020multilayer}
 In an MLP (\cref{fig:mlp_structure}) three parts can be distinguished: an input layer,
-one or more hidden layers and an output layer. 
+one or more hidden layers and an output layer.
 
 
 \begin{figure}[h]
-    \centering
-    \includegraphics[scale=1.5]{mlp.png}
-    \caption{General structure of a multi layer perceptron (MLP) consisting of an input layer,
-        one or multiple hidden layers and an output layer. The symbol separating two layers denote that 
-    all neurons between these two layers are connected.}
-    \label{fig:mlp_structure}
+	\centering
+	\includegraphics[scale=1.5]{mlp.png}
+	\caption{General structure of a multi layer perceptron (MLP) consisting of an input layer,
+		one or multiple hidden layers and an output layer. The symbol separating two layers denote that
+		all neurons between these two layers are connected.}
+	\label{fig:mlp_structure}
 \end{figure}
 
 
@@ -64,18 +94,18 @@ The values of the input layer are equal to the given feature matrix
 $\pmb{X}$. Let $n^{(1)}$ denote the number of units in the first hidden layer.
 Then taking $n^{(1)}$ different linear combinations of the input layer followed by
 a non-linear activation function $\sigma$ results in the values of this first hidden
-layer. Generally, the values $\pmb{A}^{(l)} \in \mathbb{R}^{N \times n^{(l)}}$ of layer
+layer. Generally, the values $\pmb{H}^{(l)} \in \mathbb{R}^{N \times n^{(l)}}$ of layer
 $l$ are given by
 
 
 \begin{equation}
-	\pmb{A}^{(l)} =  \sigma^{(l)} \left(\pmb{A}^{(l-1)}\pmb{\Theta}^{(l-1)} \right),
+	\pmb{H}^{(l)} =  \sigma^{(l)} \left(\pmb{H}^{(l-1)}\pmb{\Theta}^{(l-1)} \right),
 \end{equation}
 
 
 where $\pmb{\Theta}^{(l-1)} \in \mathbb{R}^{n^{(l-1)} \times n^{(l)}}$ is the weights matrix
 of layer $l - 1$, with $n^{(l-1)}$ and $n^{(l)}$ the number of units in layers
-$l-1$ and $l$ respectively and $\pmb{A}^{(0)} = \pmb{X}$. Popular activation
+$l-1$ and $l$ respectively and $\pmb{H}^{(0)} = \pmb{X}$. Popular activation
 functions are listed in \cref{tab:activation_functions}.
 
 \begin{table}[h]
@@ -123,33 +153,157 @@ are gradient descent and Adam.
 \subsection{Gradient descent}
 
 
-A popular optimization algorithm to optimize the weights of a neural network is 
-gradient descent.\cite{ruder2016overview} As the name implies, this algorithm 
-uses the gradient of the loss function $\mathcal{L}$ to step in the direction of the 
+A popular optimization algorithm to optimize the weights $\pmb{\Theta}$ of a neural network is
+gradient descent.\cite{ruder2016overview} As the name implies, this algorithm
+uses the gradient of the loss function $\mathcal{L}$ to step in the direction of the
 steepest decline. The size of this step is determined by the learning rate $\alpha$.
 
 \begin{equation}
-    \pmb{\Theta}_{t+1} = \pmb{\Theta}_{t} - \alpha \nabla_{\pmb{\Theta}} \mathcal{L}
+	\pmb{\Theta}_{t+1} = \pmb{\Theta}_{t} - \alpha \nabla_{\pmb{\Theta}} \mathcal{L}
 \end{equation}
 
-Computation of the gradient can be achieved using the back propagation algorithm, which 
+Computation of the gradient can be achieved using the back propagation algorithm, which
 propagates the gradient layer by layer through the network starting at the output.
-\cite{lecun1988theoretical} A limitation of gradient descent is the fixed learning 
-rate which must carefully be chosen. One limitation of gradient descent is the 
-fixed learning rate that has to be chosen thoughtfully at the start of training. 
-If the learning rate is too large, the step can pass beyond the minimum. Otherwise, 
-if the learning rate is too small it can take a very long time until convergence. 
-A possible solution is to stop after a few iterations, adjust learning rate and 
-continue training. However, this is not really efficient. A better algorithm, 
-which is nowadays the standard optimization algorithm in deep learning, is Adam.
+\cite{lecun1988theoretical} A limitation of gradient descent is the fixed learning
+rate which must carefully be chosen. One limitation of gradient descent is the
+fixed learning rate that has to be chosen thoughtfully at the start of training.
+If the learning rate is too large, the step can pass beyond the minimum. Otherwise,
+if the learning rate is too small it can take a very long time until convergence.
+A possible solution is to stop after a few iterations, adjust learning rate and
+continue training. However, this is not really efficient. A better algorithm,
+which is nowadays the standard optimization algorithm in deep learning, is Adam.\cite{kingma2014adam}
 
 
 \subsection{Adam}
 
+Adam uses exponential moving averages to estimate the first $m$ and second $v$
+moments of the gradient, where the exponential decay is controlled by the hyperparameters
+$\beta_1$ and $\beta_2$. However, these moments have a bias towards zero due to a
+zero initialization. Therefore, bias correction is used to obtain unbiased estimates
+of the moments $\hat{m}$ and $\hat{v}$.\cite{kingma2014adam}
 
+
+\begin{subequations}
+	\begin{equation}
+		m_{t+1} = \beta_1 m_t + (1 - \beta_1) \nabla_{\pmb{\Theta}} f
+	\end{equation}
+	\begin{equation}
+		v_{t+1} = \beta_2 v_t + (1 - \beta_2) \left( \nabla_{\pmb{\Theta}} f \right)^2
+	\end{equation}
+	\begin{equation}
+		\hat{m}_{t+1} = \frac{m_t}{1 - \beta^t_1}
+	\end{equation}
+	\begin{equation}
+		\hat{v}_{t+1} = \frac{v_t}{1 - \beta^t_2}
+	\end{equation}
+\end{subequations}
+
+
+Subsequently, the gradients can be updated via
+
+
+\begin{equation}
+	\pmb{\Theta}_{t+1} = \pmb{\Theta}_t - \alpha \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}
+\end{equation}
+
+
+Typical values for the hyperparameters are $\beta_1 = 0.9, \beta_2 = 0.999, \epsilon = 10^{-8}$
+and $\alpha = 0.001$.
 
 
 \section{Graph neural networks}
+
+
+A graph $\mathcal{G}$ is defined as a pair $\left<\mathcal{V}, \mathcal{E}\right>$
+consisting of a set of nodes $\mathcal{V}$ and a set of edges $\mathcal{E}$.
+The node feature matrix $\pmb{X}^{(\mathcal{V})} \in \mathbb{R}^{|\mathcal{V}| \times d}$
+contains for every node $v \in \mathcal{V}$ a feature vector $\pmb{x}_v \in \mathbb{R}^d$.
+Also the edges of a graph can have feature vectors. Let $\{i,j\} \in \mathcal{E}$ be
+the edge between nodes $i$ and $j$, then its feature vector is denoted by
+$\pmb{e}_{ij} \in \mathbb{R}^c$.\cite{wu2020comprehensive}
+Since an MLP can only handle one feature vector per sample as input, it
+cannot directly used on graph structured data. A possible solution to this
+is the aggregation of the neighbors $\mathcal{N}(i) \coloneqq \{j \in \mathcal{V} | e_{ij} \in \mathcal{E}\}$ of node $i$,
+after which the resulting feature vector can be given to an arbitrary vector function
+such as an MLP. This is the concept of message passing neural networks (MPNN), which
+are generally written as\cite{gilmer2017neural}
+
+
+\begin{equation}
+	\label{eq:mpnn}
+	\pmb{h}^{(l + 1)}_i = U\left(\pmb{h}^{(l)}_i, AGG_{j \in \mathcal{N}(i)} M\left(\pmb{h}^{(l)}_i, \pmb{h}^{(l)}_j, \pmb{e}_{ij}\right)\right),
+\end{equation}
+
+with $\pmb{h}^{(0)}_i = \pmb{x}_i$, $AGG()$ is an arbitrary aggregation function
+for example sum or mean, $M()$ is a message function and $U()$ is the node update function.
+
+Graph neural networks are used to make predictions on three different levels:
+nodes, edges and graph. On the node level common tasks are to classify nodes.
+For example in a graph where each node represents a financial transaction, predict
+whether the transaction was fraudulent or not. Link prediction is an edge level
+task that tries to predict to existence of a relation between two nodes. At last
+graph level task can perform classification or regression on the whole graph, for
+example the prediction of water solubility of small molecules.\cite{wu2020comprehensive}
+This requires a representation of the whole graph, which is achieved by a node
+aggregation function\cite{gilmer2017neural}
+
+\begin{equation}
+	\hat{\pmb{y}} = R(\{\pmb{h}^{(L)}_v | v \in \mathcal{V}\}),
+\end{equation}
+
+
+where $\pmb{h}^{(L)}_v$ is the feature vector of the last MPNN layer.
+
+
+\subsection{MPNN by Duvenaud et. al.}
+
+Duvenaud et. al. used the message passing framework to generate learned molecule
+fingerprints.\cite{duvenaud2015convolutional} In their framework, the message function
+$M\left(\pmb{h}^{(l)}_i, \pmb{h}^{(l)}_j, \pmb{e}_{ij}\right) = \pmb{h}_j \mathbin\Vert \pmb{e}_{ij}$
+concatenates a neighbor with its corresponding edge. Subsequently the messages are
+aggregated by a sum, weighted by a learnable weight matrix $\pmb{\Theta}^{(l, deg(i))}$
+one for each layer and node degree. Next, a sigmoid function is applied to provide
+the updated node feature vectors. Using the general formula of \cref{eq:mpnn}, this
+can be summarized as
+
+\begin{equation}
+	\pmb{h}^{(l + 1)}_i = \sigma\left( \pmb{\Theta}^{(l, deg(i))} \sum_{j \in \mathcal{N}(i)}
+	\pmb{h}^{(l)}_j \mathbin\Vert \pmb{e}_{ij}\right),
+\end{equation}
+
+
+After $L$ layers the graph prediction is obtained using an MLP and skip connections
+to all hidden node feature vectors
+
+
+\begin{equation}
+	\hat{\pmb{y}} = MLP\left(\sum^{|\mathcal{V}|}_i \sum^L_{l=0} softmax\left(\tilde{\pmb{\Theta}}^{(l)} \pmb{h}^{(l)}_i\right)\right)
+\end{equation}
+
+
+A limitation of this architecture is the separate summation over nodes and edges
+resulting in the failure to identify correlations between edges and nodes.\cite{wu2020comprehensive}
+
+
+\subsection{Relational graph neural networks}
+
+
+Relational graph neural networks (RGCN) use a different approach to combine node
+and edge features. Here, edge features are used to give a relation type $\mathcal{R}$
+to edges. Then, instead of summing over the whole neighborhood with only one
+weight matrix, each relation type $r \in \mathcal{R}$ has its own weight matrix
+$\pmb{\Theta}^{(l)}_r$. Then, \cref{eq:mpnn} becomes\cite{schlichtkrull2018modeling}
+
+
+\begin{equation}
+	\pmb{h}^{(l+1)}_i = \sigma \left( \sum_{r \in \mathcal{R}} \sum_{j \in \mathcal{N}(i, r)} \pmb{\Theta}^{(l)}_r \pmb{h}^{(l)}_j
+	+ \pmb{\Theta}^{(l)}_0 \pmb{h}^{(l)}_i \right),
+\end{equation}
+
+
+where $\mathcal{N}(i, r)$ are the neighbors of node $i$ with relation type $r$.
+A self loop with a weight matrix $\pmb{\Theta}_0$ of special relation
+is used preserve information of previous layers.
 
 
 \section{Explainable machine learning}
