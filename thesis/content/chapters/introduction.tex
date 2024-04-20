@@ -1,34 +1,51 @@
 \chapter{Introduction}
 
 
-Prediction of molecule properties is an important task in materials design and
-drug discovery. This is because when a data set of molecules can be filtered
-before starting experimental test, both time and money are saved, leading to
-a faster development of novel drugs and materials. However, the use of ab initio
-quantum chemical algorithms are currently intractable due to their high
-computational cost. Since the chemical space of drugable molecules is estimated
-to be $10^{60}$, more efficient algorithms are necessary. One approach is the
-use of machine learning (ML) algorithms, as these algorithms are able to find complicated
-patterns in large data sets. The problem with ML algorithms is that the best
-performing are commonly black boxes, which limits the creation of novel scientific
-knowledge. This also results in trust issues in performance critical and highly regulated
-environments.
+Prediction of molecular properties allows the filtering of molecular data sets, 
+resulting in fewer wet lab experiments and a reduced development time of novel 
+drugs and materials.\cite{adelusi2022molecular} However, ab initio quantum chemical algorithms are currently 
+intractable due to their high computational cost.\cite{szabo2012modern} Therefore, more efficient 
+algorithms are necessary, considering that the chemical space of drugable molecules 
+is estimated to be $10^{60}$. One approach is machine learning (ML) algorithms, as these 
+algorithms can find complicated patterns in large data sets.\cite{gorgulla2022emerging} The problem with ML 
+algorithms is their black-box nature, which limits the creation of novel scientific 
+knowledge and can result in trust issues in performance-critical and highly regulated 
+environments.\cite{carvalho2019machine}
 
 
-Explainable artificial intelligence (XAI) uses various techniques to explain the prediction
-of black box machine learning algorithms. These methods, however, need to take domain knowledge
-into account. For example, chemical molecules can be represented as graphs using the Lewis
-structure. When existing XAI methods for graph try to explain the most important nodes
-or subgraph of a molecule, the result is not very chemically meaningful. This comes from the
-fact that chemist do not think in terms of individual atoms, but in substructures such as
-functional groups. Recently, Wu et. al. developed substructure graph exploration, where a
-molecule is partitioned into different substructures, resulting in a chemical explanation.
+Explainable artificial intelligence (XAI) tries to get insight into black-box 
+ML models.\cite{carvalho2019machine, yuan2022explainability} 
+Current XAI methods focus on the ML model and often neglect domain 
+knowledge of the studied problem. For example, when molecules are represented 
+as graphs using the Lewis structure\cite{ahmad1992drawing}, common XAI techniques will search for the 
+most important nodes or subgraphs to explain molecular property prediction.\cite{wu2023chemistry} The 
+resulting explanation, however, is not chemically relevant as chemists are used 
+to think in terms of substructures such as functional groups. Recently, Wu et. 
+al. developed an attribution based XAI method that first partitions the molecular graph into 
+chemically meaningful substructures. Therefore, their method, substructure graph 
+exploration (SME), can produce chemically intuitive explanations.\cite{wu2023chemistry}
 
 
+SME takes the difference between the model prediction of the molecular graph and 
+the prediction of the molecular graph in which a substructure is masked. Yet, 
+this approach does not consider the interaction between molecular substructures.
+A commonly used attribution method in machine learning that does consider 
+interactions between features is the Shapley value. Here, the Shapley value\cite{shapley1953value} will 
+be used to compute the attributions of molecular graphs using a similar approach 
+of Wu et. al. Since the Shapley value does not adhere to graphical structures, 
+the Hamiache-Navarro value\cite{hamiache_value_1999} is also considered to investigate whether to inclusion 
+of the graphical structure can significantly improve the explanation. Comparison 
+of the different attribution methods is done using Spearman rank correlation and 
+the fidelity\cite{carvalho2019machine}, which measures how faithful the explanation is to the model. Spearman 
+rank correlation is also used to compare the ranked attributions to a manual ranks
+obtained using chemical intuition. 
 
 
-
-
+The explanation methods are applied to a machine learning model that predicts the 
+estimated water solubility in logS (with S the solubility in $mol/L$). Water 
+solubility is chosen as the relative water solubility of a compound can be estimated 
+from its molecular structure. Also, the prediction of water solubility is used 
+in drugs discovery as this influences the drug blood concentration.\cite{hill2010getting}
 
 
 \section{Machine learning}
