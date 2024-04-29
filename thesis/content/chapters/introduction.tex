@@ -20,7 +20,7 @@ knowledge of the studied problem. For example, when molecules are represented
 as graphs using the Lewis structure\cite{ahmad1992drawing}, common XAI techniques will search for the 
 most important nodes or subgraphs to explain molecular property prediction.\cite{wu2023chemistry} The 
 resulting explanation, however, is not chemically relevant as chemists are used 
-to think in terms of substructures such as functional groups. Recently, Wu et. 
+to thinking in terms of substructures such as functional groups. Recently, Wu et. 
 al. developed an attribution based XAI method that first partitions the molecular graph into 
 chemically meaningful substructures. Therefore, their method, substructure graph 
 exploration (SME), can produce chemically intuitive explanations.\cite{wu2023chemistry}
@@ -32,13 +32,15 @@ this approach does not consider the interaction between molecular substructures.
 A commonly used attribution method in machine learning that does consider 
 interactions between features is the Shapley value. Here, the Shapley value\cite{shapley1953value} will 
 be used to compute the attributions of molecular graphs using a similar approach 
-of Wu et. al. Since the Shapley value does not adhere to graphical structures, 
-the Hamiache-Navarro value\cite{hamiache_value_1999} is also considered to investigate whether to inclusion 
-of the graphical structure can significantly improve the explanation. Comparison 
-of the different attribution methods is done using Spearman rank correlation and 
-the fidelity\cite{carvalho2019machine}, which measures how faithful the explanation is to the model. Spearman 
-rank correlation is also used to compare the ranked attributions to a manual ranks
-obtained using chemical intuition. 
+of Wu et. al. Since the Shapley value does not take the graphical structure of 
+the input into account, the Hamiache-Navarro value\cite{hamiache_value_1999} 
+is also considered to investigate whether the inclusion of the graphical structure 
+can significantly improve the explanation. Comparison of the different attribution 
+methods is done using pairwise Spearman rank correlation between attributions of 
+different methods. The fidelity\cite{carvalho2019machine} is used to measure 
+how faithful the explanation is to the model. Spearman rank correlation is also 
+used to compare the ranked attributions to a manual ranks obtained using chemical 
+intuition. 
 
 
 The explanation methods are applied to a machine learning model that predicts the 
@@ -50,13 +52,16 @@ in drugs discovery as this influences the drug blood concentration.\cite{hill201
 
 \section{Machine learning}
 
-The goal of machine learning is to construct a function $f$, based on parameters
-$\pmb{\theta}$, that can accurately predict the outcome variable of the training
-data and can generalize to new data.\cite{hastie2009elements} It is common to represent the function input
-values (also known as features) as a matrix $\mathbf{X} \in \mathbb{R}^{N \times p}$ where
-each row is one sample. Evaluation of the learning function $f$ using the feature matrix
-results in the predicted values $\mathbf{\hat{Y}} = f(\mathbf{X}; \pmb{\theta})$. After
-obtaining the predicted values, they are compared to the true values (also called labels)
+
+Machine learning algorithms require a feature matrix $\mathbf{X} \in \mathbb{R}^{N \times p}$
+where each row represents a sample and each column relates to an attribute. 
+Supervised ML additionally requires a target vector $\pmb{y} \in \mathbb{R}^N$
+representing another feature with a value for each sample. Then, the goal of an ML method is 
+to construct a function $f$, based on parameters $\pmb{\theta}$, that can accurately 
+predict the outcome variable $\pmb{y}$ of the training data $\pmb{X}$ and can 
+generalize to new data.\cite{hastie2009elements} After obtaining the predicted 
+values $\hat{\pmb{Y}} = f\left(\pmb{X}; \pmb{\theta}\right)$, they are compared 
+to the true values $\pmb{y}$ (also called labels)
 in order to determine how good the model is, which introduces the concept of loss functions $\mathcal{L}$.
 Different loss functions exists for different kind of problems.\cite{wang2020comprehensive}
 A commonly used loss function is the mean squared error (MSE) (\cref{eq:mse})
@@ -85,14 +90,19 @@ they pay a price in terms of interpretability.\cite{fan2021interpretability}
 \section{Neural networks}
 
 
-Neural networks are a class of machine learning algorithms which are able to
-approximate complicated non-linear function.\cite{cybenko1989approximation} Initially, they where developed as
-a simple mathematical model of the human brain.\cite{rosenblatt1962principles} Although this is a strong
-simplification, the concept of neuron signal transit is used as a basic building
-block for a neural network.\cite{wang2017origin} This signal transmission
+Neural networks (NN) are a class of machine learning algorithms which are able to
+approximate complicated non-linear function, inspired by the human brain.
+\cite{cybenko1989approximation, rosenblatt1962principles} Although a NN is a strong
+simplification of the human brain, the concept of neuron signal transit is used 
+as a basic building block.\cite{wang2017origin} This signal transmission
 takes place between units in a neural network. Then, different architectures
-can be used to connect different units. The multi layer perceptron (MLP) is a basic
-architecture that is frequently utilized in other, more complicated neural networks.\cite{almeida2020multilayer}
+can be used to connect different units. Rosenblatt proposed a weighted sum 
+of the inputs followed by a non-linear activation function.\cite{rosenblatt1962principles}
+This neural network is, however, still a linear function due to its inability 
+to learn non-linear functions. A solution to this limitation is stacking multiple 
+perceptrons after each other, resulting in a multi layer perceptron (MLP).
+The multi layer perceptron (MLP) is a basic architecture that is frequently 
+utilized in other, more complicated neural networks.\cite{almeida2020multilayer}
 In an MLP (\cref{fig:mlp_structure}) three parts can be distinguished: an input layer,
 one or more hidden layers and an output layer.
 
@@ -179,13 +189,12 @@ steepest decline. The size of this step is determined by the learning rate $\alp
 	\pmb{\Theta}_{t+1} = \pmb{\Theta}_{t} - \alpha \nabla_{\pmb{\Theta}} \mathcal{L}
 \end{equation}
 
-Computation of the gradient can be achieved using the back propagation algorithm, which
+Computation of the gradient can be achieved using the backpropagation algorithm, which
 propagates the gradient layer by layer through the network starting at the output.
-\cite{lecun1988theoretical} A limitation of gradient descent is the fixed learning
-rate which must carefully be chosen. One limitation of gradient descent is the
+\cite{lecun1988theoretical} One limitation of gradient descent is the
 fixed learning rate that has to be chosen thoughtfully at the start of training.
 If the learning rate is too large, the step can pass beyond the minimum. Otherwise,
-if the learning rate is too small it can take a very long time until convergence.
+if the learning rate is too small the algorithm can take a very long time to converge.
 A possible solution is to stop after a few iterations, adjust learning rate and
 continue training. However, this is not really efficient. A better algorithm,
 which is nowadays the standard optimization algorithm in deep learning, is Adam.\cite{kingma2014adam}
@@ -193,11 +202,11 @@ which is nowadays the standard optimization algorithm in deep learning, is Adam.
 
 \subsection{Adam}
 
-Adam uses exponential moving averages to estimate the first $m$ and second $v$
-moments of the gradient, where the exponential decay is controlled by the hyperparameters
-$\beta_1$ and $\beta_2$. However, these moments have a bias towards zero due to a
-zero initialization. Therefore, bias correction is used to obtain unbiased estimates
-of the moments $\hat{m}$ and $\hat{v}$.\cite{kingma2014adam}
+Adam uses exponential moving averages to estimate the first moment $m$ and 
+second moment $v$ of the gradient, where the exponential decay is controlled 
+by the hyperparameters $\beta_1$ and $\beta_2$. However, these moments have 
+a bias towards zero due to a zero initialization. Therefore, bias correction 
+is used to obtain unbiased estimates of the moments $\hat{m}$ and $\hat{v}$.\cite{kingma2014adam}
 
 
 \begin{subequations}
@@ -231,7 +240,18 @@ and $\alpha = 0.001$.
 \section{Graph neural networks}
 
 
-A graph $\mathcal{G}$ is defined as a pair $\left<\mathcal{V}, \mathcal{E}\right>$
+Graph neural networks are used to make predictions on three different levels:
+nodes, edges and graphs. On the node level common tasks are to classify nodes.
+For example in a graph where each node represents a financial transaction, predict
+whether the transaction was fraudulent or not. Link prediction is an edge level
+task that tries to predict to existence of a relation between two nodes. At last
+graph level task can perform classification or regression on the whole graph, for
+example the prediction of water solubility of small molecules.\cite{wu2020comprehensive}
+This requires a representation of the whole graph, which can be achieved by 
+aggregating the nodes.\cite{gilmer2017neural}
+
+
+Formally, a graph $\mathcal{G}$ is defined as a pair $\left<\mathcal{V}, \mathcal{E}\right>$
 consisting of a set of nodes $\mathcal{V}$ and a set of edges $\mathcal{E}$.
 The node feature matrix $\pmb{X}^{(\mathcal{V})} \in \mathbb{R}^{|\mathcal{V}| \times d}$
 contains for every node $v \in \mathcal{V}$ a feature vector $\pmb{x}_v \in \mathbb{R}^d$.
@@ -239,8 +259,8 @@ Also the edges of a graph can have feature vectors. Let $\{i,j\} \in \mathcal{E}
 the edge between nodes $i$ and $j$, then its feature vector is denoted by
 $\pmb{e}_{ij} \in \mathbb{R}^c$.\cite{wu2020comprehensive}
 Since an MLP can only handle one feature vector per sample as input, it
-cannot directly used on graph structured data. A possible solution to this
-is the aggregation of the neighbors $\mathcal{N}(i) \coloneqq \{j \in \mathcal{V} | e_{ij} \in \mathcal{E}\}$ of node $i$,
+cannot be used directly on graph structured data. A possible solution for node 
+level tasks is the aggregation of the neighbors $\mathcal{N}(i) \coloneqq \{j \in \mathcal{V} | e_{ij} \in \mathcal{E}\}$ of node $i$,
 after which the resulting feature vector can be given to an arbitrary vector function
 such as an MLP. This is the concept of message passing neural networks (MPNN), which
 are generally written as\cite{gilmer2017neural}
@@ -253,16 +273,10 @@ are generally written as\cite{gilmer2017neural}
 
 with $\pmb{h}^{(0)}_i = \pmb{x}_i$, $AGG()$ is an arbitrary aggregation function
 for example sum or mean, $M()$ is a message function and $U()$ is the node update function.
+A graph level task requires a representation of the full graph as a feature vector,
+which may then be utilized, for instance, in an MLP. This can be achieved by using 
+a node aggregation function\cite{gilmer2017neural}
 
-Graph neural networks are used to make predictions on three different levels:
-nodes, edges and graph. On the node level common tasks are to classify nodes.
-For example in a graph where each node represents a financial transaction, predict
-whether the transaction was fraudulent or not. Link prediction is an edge level
-task that tries to predict to existence of a relation between two nodes. At last
-graph level task can perform classification or regression on the whole graph, for
-example the prediction of water solubility of small molecules.\cite{wu2020comprehensive}
-This requires a representation of the whole graph, which is achieved by a node
-aggregation function\cite{gilmer2017neural}
 
 \begin{equation}
 	\hat{\pmb{y}} = R(\{\pmb{h}^{(L)}_v | v \in \mathcal{V}\}),
@@ -289,9 +303,11 @@ can be summarized as
 \end{equation}
 
 
-After $L$ layers the graph prediction is obtained using an MLP and skip connections
+After $L$ layers the graph prediction is obtained using an MLP 
 to all hidden node feature vectors
-
+After L layers, the graph prediction is obtained by first aggregating all hidden 
+nodes by a weighted sum followed by a softmax. Then, the resulting vector can be 
+used as input into an MLP.
 
 \begin{equation}
 	\hat{\pmb{y}} = MLP\left(\sum^{|\mathcal{V}|}_i \sum^L_{l=0} softmax\left(\tilde{\pmb{\Theta}}^{(l)} \pmb{h}^{(l)}_i\right)\right)
@@ -305,7 +321,7 @@ resulting in the failure to identify correlations between edges and nodes.\cite{
 \subsection{Relational graph neural networks}
 
 
-Relational graph neural networks (RGCN) use a different approach to combine node
+Relational graph convolutional networks (RGCN) use a different approach to combine node
 and edge features. Here, edge features are used to give a relation type $\mathcal{R}$
 to edges. Then, instead of summing over the whole neighborhood with only one
 weight matrix, each relation type $r \in \mathcal{R}$ has its own weight matrix
