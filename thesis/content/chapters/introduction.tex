@@ -286,46 +286,47 @@ a node aggregation function\cite{gilmer2017neural}
 where $\pmb{h}^{(L)}_v$ is the feature vector of the last MPNN layer.
 
 
-\subsection{MPNN by Duvenaud et. al.}
-
-Duvenaud et. al. used the message passing framework to generate learned molecule
-fingerprints.\cite{duvenaud2015convolutional} In their framework, the message function
-$M\left(\pmb{h}^{(l)}_i, \pmb{h}^{(l)}_j, \pmb{e}_{ij}\right) = \pmb{h}_j \mathbin\Vert \pmb{e}_{ij}$
-concatenates a neighbor with its corresponding edge. Subsequently the messages are
-aggregated by a sum, weighted by a learnable weight matrix $\pmb{\Theta}^{(l, deg(i))}$
-one for each layer and node degree. Next, a sigmoid function is applied to provide
-the updated node feature vectors. Using the general formula of \cref{eq:mpnn}, this
-can be summarized as
-
-\begin{equation}
-	\pmb{h}^{(l + 1)}_i = \sigma\left( \pmb{\Theta}^{(l, deg(i))} \sum_{j \in \mathcal{N}(i)}
-	\pmb{h}^{(l)}_j \mathbin\Vert \pmb{e}_{ij}\right),
-\end{equation}
-
-
-After $L$ layers the graph prediction is obtained using an MLP 
-to all hidden node feature vectors
-After L layers, the graph prediction is obtained by first aggregating all hidden 
-nodes by a weighted sum followed by a softmax. Then, the resulting vector can be 
-used as input into an MLP.
-
-\begin{equation}
-	\hat{\pmb{y}} = MLP\left(\sum^{|\mathcal{V}|}_i \sum^L_{l=0} softmax\left(\tilde{\pmb{\Theta}}^{(l)} \pmb{h}^{(l)}_i\right)\right)
-\end{equation}
-
-
-A limitation of this architecture is the separate summation over nodes and edges
-resulting in the failure to identify correlations between edges and nodes.\cite{wu2020comprehensive}
+% \subsection{MPNN by Duvenaud et. al.}
+% 
+% Duvenaud et. al. used the message passing framework to generate learned molecule
+% fingerprints.\cite{duvenaud2015convolutional} In their framework, the message function
+% $M\left(\pmb{h}^{(l)}_i, \pmb{h}^{(l)}_j, \pmb{e}_{ij}\right) = \pmb{h}_j \mathbin\Vert \pmb{e}_{ij}$
+% concatenates a neighbor with its corresponding edge. Subsequently the messages are
+% aggregated by a sum, weighted by a learnable weight matrix $\pmb{\Theta}^{(l, deg(i))}$
+% one for each layer and node degree. Next, a sigmoid function is applied to provide
+% the updated node feature vectors. Using the general formula of \cref{eq:mpnn}, this
+% can be summarized as
+% 
+% \begin{equation}
+% 	\pmb{h}^{(l + 1)}_i = \sigma\left( \pmb{\Theta}^{(l, deg(i))} \sum_{j \in \mathcal{N}(i)}
+% 	\pmb{h}^{(l)}_j \mathbin\Vert \pmb{e}_{ij}\right),
+% \end{equation}
+% 
+% 
+% After $L$ layers the graph prediction is obtained using an MLP 
+% to all hidden node feature vectors
+% After L layers, the graph prediction is obtained by first aggregating all hidden 
+% nodes by a weighted sum followed by a softmax. Then, the resulting vector can be 
+% used as input into an MLP.
+% 
+% \begin{equation}
+% 	\hat{\pmb{y}} = MLP\left(\sum^{|\mathcal{V}|}_i \sum^L_{l=0} softmax\left(\tilde{\pmb{\Theta}}^{(l)} \pmb{h}^{(l)}_i\right)\right)
+% \end{equation}
+% 
+% 
+% A limitation of this architecture is the separate summation over nodes and edges
+% resulting in the failure to identify correlations between edges and nodes.\cite{wu2020comprehensive}
 
 
 \subsection{Relational graph neural networks}
 
 
-Relational graph convolutional networks (RGCN) use a different approach to combine node
-and edge features. Here, edge features are used to give a relation type $\mathcal{R}$
-to edges. Then, instead of summing over the whole neighborhood with only one
-weight matrix, each relation type $r \in \mathcal{R}$ has its own weight matrix
-$\pmb{\Theta}^{(l)}_r$. Then, \cref{eq:mpnn} becomes\cite{schlichtkrull2018modeling}
+A relational graph convolutional networks (RGCN) (\cref{fig:rgcn}) is one 
+example of the MPNN framework. Here, edge features are used to 
+give a relation type $\mathcal{R}$ to edges. Then, instead of summing over 
+the whole neighborhood with only one weight matrix, each relation type 
+$r \in \mathcal{R}$ has its own weight matrix $\pmb{\Theta}^{(l)}_r$. 
+Then, \cref{eq:mpnn} becomes\cite{schlichtkrull2018modeling}
 
 
 \begin{equation}
@@ -337,6 +338,15 @@ $\pmb{\Theta}^{(l)}_r$. Then, \cref{eq:mpnn} becomes\cite{schlichtkrull2018model
 where $\mathcal{N}(i, r)$ are the neighbors of node $i$ with relation type $r$.
 A self loop with a weight matrix $\pmb{\Theta}_0$ of special relation
 is used preserve information of previous layers.
+
+\begin{figure}[h]
+    \centering 
+    \includegraphics{"rgcn.png"}
+    \caption{A relational graph neural network sends messages based on the edge 
+    types. Subsequently, the messages are aggregated using a sum. Next, another 
+    message passing step can be performed, which is again followed by a node update.}
+    \label{fig:rgcn}
+\end{figure}
 
 
 \section{Explainable machine learning}
@@ -367,7 +377,7 @@ also called a value, can be used to provide the attributions of each feature.
 
 
 A popular value used in machine learning is the Shapley value, which distributes
-the total payoff among the players in a mathematical fair manner by satisfying the
+the total payoff among the players in a mathematically fair manner by satisfying the
 following axioms:\cite{merrick2020explanation, shapley1953value}
 
 
@@ -395,20 +405,20 @@ The Shapley value $\phi_i$ of player $i$ is given by the expected marginal contr
 \end{equation}
 
 
-over all possible coalitions
+over all possible player permutations
 
 
 \begin{equation}
 	\begin{aligned}
 		\label{eq:Shapley}
-		\phi_i(N, v) & = \frac{1}{|N|} \sum_{k=0}^{|N|-1} \frac{\left(|N| - 1 - k\right)k!}{\left(|N| - 1\right)!} \sum_{S \subseteq N \setminus \{i\}, |S| = k} m(i) \\
-		             & = \sum_{k=0}^{|N| - 1} \sum_{S \subseteq N \setminus \{i\}, |S| = k} \frac{\left(|N| - 1 - |S|\right)|S|!}{|N|!} m(i)                          \\
-		             & = \sum_{S \subseteq N \setminus \{i\}} \frac{\left(|N| - 1 - |S|\right)|S|!}{|N|!} m(i)
+		\phi_i(N, v) & = \frac{1}{|N|} \sum_{k=0}^{|N|-1} \frac{\left(|N| - 1 - k\right)! k!}{\left(|N| - 1\right)!} \sum_{S \subseteq N \setminus \{i\}, |S| = k} m(i) \\
+		             & = \sum_{k=0}^{|N| - 1} \sum_{S \subseteq N \setminus \{i\}, |S| = k} \frac{\left(|N| - 1 - |S|\right)!|S|!}{|N|!} m(i)                          \\
+		             & = \sum_{S \subseteq N \setminus \{i\}} \frac{\left(|N| - 1 - |S|\right)!|S|!}{|N|!} m(i)
 	\end{aligned}
 \end{equation}
 
 
-assuming that every coalition is equally probable. This last assumption can be questioned whether it should
+assuming that every permutation is equally probable. This last assumption can be questioned whether it should
 always hold. For instance, define an unanimity game as a game $(N, u_R)$ with characteristic function
 
 
@@ -432,23 +442,45 @@ value that does include a communication structure is the Hamiache-Navarro value.
 \subsection{Hamiache-Navarro value}
 
 
-Before discussing the Hamiache-Navarro value, some notation is defined. Let a game $(N, v)$ with a
-communication structure be a triple $(N, v, g)$, where $g \subseteq g_N \coloneqq \{ \{i, j \} | i, j \in N \}$
-is a set of adjacent nodes. The graph $\left< N, g \right>$ specifies the
-communication structure, where players $i$ and $j$ can only communicate if they are adjacent
-(i.e. $\{i, j \} \in g$). A path is a sequence $i = i_1, i_2, \dots , i_k = j$ of nodes from player
-$i$ to player $j$ such that $\{i_q, i_{q+1} \} \in g$ for $1 \le q \le k - 1$. If such a path exists
-between two players, then they are connected by the graph $\left<N, g\right>$ which is denoted by
-$i \underset{\left< N, g \right>}{\rightarrow} j$. This allows to define a partition
-$N/g \coloneqq \{\{ i | i \in N \land i \underset{\left<N, g \right>}{\rightarrow} j\} \cup \{j\} | j \in N \}$
-of the set of nodes $N$ over the graph $<N, g>$ as the set of all connected nodes.\cite{hamiache_value_1999}
+The Hamiache-Navarro value is introduced using one of the simplest examples
+(\cref{fig:shapley_hn_example}): 
+a three-player game $(N, v, g)$ with $N = \{1, 2, 3\}$ and a graphical structure 
+$g = \{\{1, 2\}, \{2, 3\}\}$ defined as a set of adjacent players. Communication 
+between players is possible only if these players are connected by the graph 
+$\left<N, g\right>$. Players $i$ and $j$ are connected, represented by $i \leftarrow j$, 
+if they are adjacent (i.e. $\{i, j\} \in g$) or if there exists a sequence 
+$i = i_1, i_2, \dots, i_k = j$ of players such that $\{i_q, i_{q+1}\} \in g$ 
+for $1 \le q \le k - 1$. For example, players one and two are adjacent, and 
+players one and three are connected by the sequence 1, 2, 3.\cite{hamiache_value_1999, hamiache_associated_2020} 
 
-A coalition $S \subseteq N$ can only directly interact with its connected neighbors. Let
-$S^* \coloneqq \{ i \in N | \exists j \in S \text{ such that } \{i, j\} \in g \}$ be the set of players
-which are adjacent to at least one player in the coalition $S$. The interconnection of the neighbors of
-$S$ is of no importance as the coalition $S$ cannot see them. Therefore, the coalition $S$ can value its
-own payoff $v^*(S)$ as its payoff $v(S)$ in the original game and a fraction $\tau$ of the net payoff obtained
-by cooperating with each of its connected neighbors separately\cite{hamiache2001associated}
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=1.7]{shapley_hn_example.png}
+    \caption{Shapley values and HN values for an example game with communication structure 
+    given by the shown graph.}
+    \label{fig:shapley_hn_example}
+\end{figure}
+
+
+A coalition $S \subseteq N$ can only directly interact with its connected neighbors 
+$\mathcal{N}(S) \coloneqq \{ j \in N \setminus S | \exists i \in S \text{ such that } \{i, j\} \in g \}$. 
+Player one can only interact directly with player two and not with player three
+in the example game.
+The interconnection of the neighbors of $S$ is of no importance as the coalition 
+$S$ cannot see them. Therefore, the coalition $S$ can value its
+own payoff $v^*(S)$ as its payoff $v(S)$ in the original game and a fraction 
+$\tau$ of the net payoff obtained by cooperating with each of its connected 
+neighbors separately \cref{eq:associated_game}.\cite{hamiache2001associated}
+This results in a series of associated games $(N, v^*, g), (N, v^{**}, g), \dots$, 
+that eventually converges to a limit game $(N, \tilde{v}, g)$. The Hamiache-Navarro 
+(HN) value is then given by the payoff $\tilde{v}$ of the limit game. Note that for 
+the example game, the associated payoff of player one is only directly influenced 
+by player two because player one and three cannot directly communicate 
+with each other. This means that the coalition $\{1, 3\}$ has a weight of zero for the 
+value of player one. However, the Shapley value would consider the coalition 
+$\{1, 3\}$ for a weight of
+$\frac{|S|! ( |N| - |S| - 1)!}{|N|!} = \frac{2! (3 - 2 - 1)!}{3!} = \frac{1}{3}$ (see \cref{eq:Shapley}).
 
 
 \begin{equation}
@@ -456,22 +488,22 @@ by cooperating with each of its connected neighbors separately\cite{hamiache2001
 	v^*(S) =
 	\begin{cases}
 		\displaystyle
-		v(S) + \tau \sum_{j \in S^* \setminus S} \left[ v(S \cup \{j\}) - v(S) - v(\{j\}) \right] & \text{if } |S/g| = 1 \\
+        v(S) + \tau \sum_{j \in \mathcal{N}(S)} \left[ v(S \cup \{j\}) - v(S) - v(\{j\}) \right] & \text{if } |S/g| = 1 \\
 		\displaystyle
 		\sum_{R \in S/g} v^*(R)                                                                   & \text{otherwise}
 	\end{cases}
 	.
 \end{equation}
 
-When the coalition $S$ is not connected (i.e. $|S/g| \ne 1$), then its own payoff is the sum of the self
-evaluated payoffs of the components $R \in S/g$ of the coalition $S$.
-This introduces a series of associated games $(N, v^*, g)$, $(N, v^{**}, g)$, \dots which converges
-to the limit game $(N, \tilde{v}, g)$. An associated game is consistent if its solution is the same
-as the solution of the original game. When the graph is complete (i.e. all players are connected to
-each other), then the solution of the associated game converges to the Shapley value.\cite{hamiache2001associated}
+
+If a coalition $S$ contains isolated subgraphs, the associated payoff $v^*(S)$ 
+is calculated as the sum of the associated payoffs of each component $R$ in the 
+coalition $S$. One component is a subgraph that does not have any isolated players. 
+The set of all components $S/g \coloneqq \{\{ i \in S| i \rightarrow j\} | j \in S\}$ 
+is a partition of the coalition.
 
 
-In what follows, the concept of associated games are converted into a matrix approach.
+The algorithm for calculating the HN value can be implemented using a matrix approach.
 To be consistent, an order of the matrix columns and rows are defined. Therefore a lexicographic order is defined
 for coalitions of the same size. Suppose $A$ and $B$ are coalitions of the same size where the elements are ordered
 from small to large (i.e. $a_1 < a_2 < \dots < a_k, \quad a_i \in A$). The coalition $A$ comes lexicographic
@@ -512,13 +544,14 @@ Provided that $\tau$ is small enough ($\tau < \frac{2}{|N|}$ for complete graphs
 the power series $\left(P_g M_c P_g\right)^k v$ converges as $k$ tends to infinity.\footnote{A proof can be found in \cite{hamiache_associated_2020}}
 The convergence produces a limit game $(N, \tilde{v}, g)$, where the solution $\phi_i$ of player $i$ equals the
 payoff $\tilde{v}(\{i\})$ of player $i$.\cite{zhang2022gstarx, hamiache_associated_2020}
+Matrices for the example game are given in \cref{app:HN_example}.
 
 
-\textbf{Numerical example}
-
-In order to compare the Hamiache-Navarro value and the Shapley value the same example as in \cref{subsec:shapley_value}
-is used. To recap, define an unanimity game with communication structure $(\{1, 2, 3\}, u_{\{1, 2, 3\}}, \{\{1, 2\}, \{2, 3\}\})$
-where $u_{\{1, 2, 3\}}(S)$ is one if $\{1, 2, 3\} \in S$ and zero otherwise with $S \subseteq \{1, 2, 3\}$. As discussed
-in \cref{subsec:shapley_value}, the Shapley value is equal to $1/3$ for all players. However, the HN-value is not equal
-for all players. Players one and three have an HN-value of $1/4$ and the HN-value for player two is $1/2$
-(see \cref{app:HN_example}).\cite{hamiache_associated_2020}
+% \textbf{Numerical example}
+% 
+% In order to compare the Hamiache-Navarro value and the Shapley value the same example as in \cref{subsec:shapley_value}
+% is used. To recap, define an unanimity game with communication structure $(\{1, 2, 3\}, u_{\{1, 2, 3\}}, \{\{1, 2\}, \{2, 3\}\})$
+% where $u_{\{1, 2, 3\}}(S)$ is one if $\{1, 2, 3\} \in S$ and zero otherwise with $S \subseteq \{1, 2, 3\}$. As discussed
+% in \cref{subsec:shapley_value}, the Shapley value is equal to $1/3$ for all players. However, the HN-value is not equal
+% for all players. Players one and three have an HN-value of $1/4$ and the HN-value for player two is $1/2$
+% (see \cref{app:HN_example}).\cite{hamiache_associated_2020}
