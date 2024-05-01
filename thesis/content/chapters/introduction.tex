@@ -442,30 +442,31 @@ value that does include a communication structure is the Hamiache-Navarro value.
 \subsection{Hamiache-Navarro value}
 
 
-The Hamiache-Navarro value is introduced using one of the simplest examples
-(\cref{fig:shapley_hn_example}): 
-a three-player game $(N, v, g)$ with $N = \{1, 2, 3\}$ and a graphical structure 
-$g = \{\{1, 2\}, \{2, 3\}\}$ defined as a set of adjacent players. Communication 
+During the discussion of the HN value, an example will be used to illustrate 
+the concepts of the HN value and to make a comparison with the Shapley value. 
+The example game is an unanimity game $(N, v_N, g)$ (\cref{fig:shapley_hn_example}) 
+with three players $N = \{1, 2, 3\}$ and a communication structure $g = \{\{1, 2\}, \{2, 3\}\}$ 
+defined as a set of adjacent players.\cite{hamiache_associated_2020} Communication 
 between players is possible only if these players are connected by the graph 
-$\left<N, g\right>$. Players $i$ and $j$ are connected, represented by $i \leftarrow j$, 
-if they are adjacent (i.e. $\{i, j\} \in g$) or if there exists a sequence 
-$i = i_1, i_2, \dots, i_k = j$ of players such that $\{i_q, i_{q+1}\} \in g$ 
-for $1 \le q \le k - 1$. For example, players one and two are adjacent, and 
-players one and three are connected by the sequence 1, 2, 3.\cite{hamiache_value_1999, hamiache_associated_2020} 
+$\left<N, g\right>$. Players $i$ and $j$ are connected by a path, represented by $i \rightarrow j$, 
+if there exists a sequence $i = i_1, i_2, \dots, i_k = j$ of players such 
+that $\{i_q, i_{q+1}\} \in g$ for $1 \le q \le k - 1$. For example, 
+players one and two are adjacent and thus connected via the path $1, 2$. 
+Players one and three are connected by the sequence 1, 2, 3.\cite{hamiache_value_1999, hamiache_associated_2020} 
 
 
 \begin{figure}[h]
     \centering
     \includegraphics[scale=1.7]{shapley_hn_example.png}
-    \caption{Shapley values and HN values for an example game with communication structure 
-    given by the shown graph.}
+    \caption{Shapley values and HN values for the unanimity game $(\{1, 2, 3\}, v_{\{1, 2, 3\}}, \{\{1, 2\}, \{2, 3\}\})$ 
+            with communication structure given by the shown graph.}
     \label{fig:shapley_hn_example}
 \end{figure}
 
 
 A coalition $S \subseteq N$ can only directly interact with its connected neighbors 
 $\mathcal{N}(S) \coloneqq \{ j \in N \setminus S | \exists i \in S \text{ such that } \{i, j\} \in g \}$. 
-Player one can only interact directly with player two and not with player three
+Therefore, player one can only interact directly with player two and not with player three
 in the example game.
 The interconnection of the neighbors of $S$ is of no importance as the coalition 
 $S$ cannot see them. Therefore, the coalition $S$ can value its
@@ -478,7 +479,7 @@ that eventually converges to a limit game $(N, \tilde{v}, g)$. The Hamiache-Nava
 the example game, the associated payoff of player one is only directly influenced 
 by player two because player one and three cannot directly communicate 
 with each other. This means that the coalition $\{1, 3\}$ has a weight of zero for the 
-value of player one. However, the Shapley value would consider the coalition 
+HN value of player one. However, the Shapley value would consider the coalition 
 $\{1, 3\}$ for a weight of
 $\frac{|S|! ( |N| - |S| - 1)!}{|N|!} = \frac{2! (3 - 2 - 1)!}{3!} = \frac{1}{3}$ (see \cref{eq:Shapley}).
 
@@ -508,8 +509,26 @@ To be consistent, an order of the matrix columns and rows are defined. Therefore
 for coalitions of the same size. Suppose $A$ and $B$ are coalitions of the same size where the elements are ordered
 from small to large (i.e. $a_1 < a_2 < \dots < a_k, \quad a_i \in A$). The coalition $A$ comes lexicographic
 before coalition $B$ ($A \prec B$) if and only if $a_1 < b_1$ or $\exists \gamma \in \mathbb{N}, 1 \le i < \gamma: a_i = b_i \land a_\gamma < b_\gamma$.
-For two arbitrary coalitions $S$ and $T$, $S < T$ if $|S| < |T|$ or $S \prec T$. Using this ordering, the characteristic
-function $v$ of the game $(N, v, g)$ can be represented as a vector in $\mathbb{R}^{2^N - 1}$. The associated game
+For two arbitrary coalitions $S$ and $T$, $S < T$ if $|S| < |T|$ or $S \prec T$. 
+Using this ordering, the characteristic function $v$ of the game $(N, v, g)$ 
+can be represented as a vector in $\mathbb{R}^{2^N - 1}$, where the first $|N|$ elements 
+correspond to the values of coalitions of size one, the next $\frac{|N|!}{2!(|N| - 2)!}$, etc . 
+For the running example, this results in the following characteristic vector:
+
+
+\begin{equation}
+    \begin{aligned}
+        v &= \begin{pmatrix}
+        v(\{1\}) & v(\{2\}) & v(\{3\}) & v(\{1, 2\}) & v(\{1, 3\}) & v(\{2, 3\})& v(\{1, 2, 3\})
+    \end{pmatrix}^T \\
+    &= \begin{pmatrix}
+      0 & 0 & 0 & 0 & 0 & 0 & 1
+    \end{pmatrix}^T 
+    \end{aligned}
+\end{equation}
+
+
+The associated game
 \cref{eq:associated_game} $v^*_\tau = P_g M_c P_g v$ can then be written as a linear transformation of the characteristic vector
 , where the square matrix $M_c$ for two arbitrary coalitions $\emptyset \ne S \subseteq N$
 and $\emptyset \ne T \subseteq N$ is given by\cite{hamiache_associated_2020,hamiache2010matrix}
