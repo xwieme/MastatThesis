@@ -48,6 +48,14 @@
 \usepackage{mathptmx}
 \usepackage{cleveref}
 
+\newcommand*{\citen}[1]{%
+  \begingroup
+    \romannumeral-`\x % remove space at the beginning of \setcitestyle
+    \setcitestyle{numbers}%
+    \cite{#1}%
+  \endgroup   
+}
+
 % ---- ADDITIONAL SETTINGS
 \graphicspath{{Fig/}} % path to the figure directory
 % \setcitestyle{numbers}
