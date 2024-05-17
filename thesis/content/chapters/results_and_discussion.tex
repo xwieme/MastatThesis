@@ -3,6 +3,17 @@
 \section{RGCN is able to accurately predict expected water solubility}
 
 
+The resulting ten RGCN models, each with a different seed, have comparable results 
+(\cref{fig:training_history}). 
+Performance of the training data is relatively good, yielding an average $R^2$ 
+of $0.96$ and an average mean squared error (MSE) of $0.074$. The model has a 
+similar $R^2$ for the validation data ($0.92$), however, bigger errors are made 
+(MSE is $0.340$). The same holds for the test data set, which has an $R^2$ of 
+$0.91$ and an MSE of $0.32$. Considering that most experimental data have an MSE 
+between $0.36$ and $0.49$ log(mol/L),\cite{palmer2014experimental} 
+it can be concluded that the resulting model can predict water solubility of small 
+molecules with decent performance.
+
 % \begin{figure}[h]
 %     \centering
 %     \includegraphics[scale=0.20]{rgcn_r2.png}
@@ -20,7 +31,26 @@
     \caption{Average $R^2$ (left) and mean squared error (right) of train (orange) and validation 
     (blue) data during model training over the ten RGCN models, each trained using a different 
     seed. Both metrics show a good model performance and no overfitting. }
+    \label{fig:training_history}
 \end{figure}
+
+
+Currently, it is questionable whether the ML model effectively learns chemistry and 
+if wrong predictions may be explained by chemically incorrect reasoning of the model. 
+To address this, different attribution methods (SME, Shapley value and HN value) are 
+compared to each other and with chemical theory. It should be noted that these attribution 
+methods can reveal insights into the chemical reasoning of the model, but are not necessarily 
+causal. This means that if the attributions show inconsistency with chemical theory, other 
+factors could also influence the wrong prediction.
+
+
+\section{Different attribution methods can result in different explanations}
+
+
+
+
+
+
 
 \section{The absolute prediction error is not associated with the Spearman rank correlation between different attribution methods}
 
