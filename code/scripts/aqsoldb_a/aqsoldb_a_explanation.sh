@@ -14,3 +14,4 @@ apptainer exec --nv $VSC_SCRATCH/xai_chemistry_lab.sif \
     ../explanation.py \
     "../../../data/aqsoldb_A" \
     $PBS_ARRAYID
+    -3.267161
