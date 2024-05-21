@@ -41,19 +41,32 @@ def createBoxPlots(data):
         .apply(lambda group: group if len(group) > 5 else None)
     )
 
+    selected_groups = [
+        "ROH",
+        "R-C(=O)OCH3",
+        "R-OMe",
+        "R-OEt",
+        "R-tBu",
+    ]
+
     box_plots = px.box(
-        data_long,
-        x="attribution",
-        y="substruct_smiles",
+        data_long.query("substruct_smiles in @selected_groups"),
+        x="substruct_smiles",
+        y="attribution",
         color="method",
         color_discrete_sequence=px.colors.qualitative.G10,
+        category_orders={"substruct_smiles": selected_groups},
     )
 
     box_plots.update_layout(
         margin={"b": 5, "l": 2, "r": 2, "t": 35},
     )
     box_plots.update_layout(
-        xaxis={"tickfont": {"size": 12}}, autosize=False, width=500, height=1200
+        autosize=False,
+        width=900,
+        height=500,
+        font={"size": 20, "family": "Times New Roman"},
+        xaxis={"title": ""},
     )
 
     # box_plots.update_traces(
