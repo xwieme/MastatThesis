@@ -6,10 +6,10 @@
 The resulting ten RGCN models, each with a different seed, have comparable results 
 (\cref{fig:training_history}). 
 Performance of the training data is relatively good, yielding an average $R^2$ 
-of $0.96$ and an average mean squared error (MSE) of $0.074$. The model has a 
-similar $R^2$ for the validation data ($0.92$), however, larger errors are made 
-(MSE is $0.340$). The same holds for the test data set, which has an $R^2$ of 
-$0.91$ and an MSE of $0.32$. Considering that most experimental data have an RMSE 
+of $0.9630$ and an average mean squared error (MSE) of $0.0744$ (\cref{tab:model_performance}). 
+The model has a similar $R^2$ for the validation data, however, larger errors are made. 
+Model performance on the test data is similar as the validation performance, showing that the 
+model is able to generalize well to unseen data. Considering that most experimental data have an RMSE 
 between $0.6$ and $0.7$ log(mol/L),\cite{palmer2014experimental} 
 it can be concluded that the resulting model can predict water solubility of small 
 molecules with decent performance.
@@ -33,6 +33,23 @@ molecules with decent performance.
     seed. Both metrics show a good model performance and no overfitting. }
     \label{fig:training_history}
 \end{figure}
+
+
+\begin{table}[h]
+    \centering
+    \caption{Average $R^2$ and MSE for train, validation and test data sets with standard deviation between brackets.}
+    \label{tab:model_performance}
+    \begin{tabular}{ccc}
+        \toprule 
+       & $\pmb{R^2}$ & \textbf{MSE $\pmb{\left(\left[log(mol/L)\right]^2\right)}$} \\
+        \midrule
+        \textbf{Train} & $0.9630 (\pm 0.0001)$ & $0.0744 (\pm 0.0031)$ \\
+        \textbf{Validation} & $0.9225 (\pm 0.0076)$ & $0.3354 (\pm 0.0120)$ \\
+        \textbf{Test} & $0.9079 (\pm 0.0050)$ & $0.3193 (\pm 0.0047)$ \\
+        \bottomrule 
+    \end{tabular}
+\end{table}
+
 
 
 Currently, it is questionable whether the ML model effectively learns chemistry and 
@@ -72,8 +89,9 @@ that hydroxyl groups can decrease the solubility of small molecules. One of thos
 molecules is erythritol (\cref{fig:erythritol_explanation}), which has a predicted solubility of 0.432 log(mol/L) 
 and an experimental solubility of 0.700 log(mol/L). Since the absolute prediction 
 error is within acceptable limits, it would be possible that the model achieved 
-this in a chemically incorrect way (i.e. clever Hans effect\cite{lapuschkin2019unmasking}). The clever Hans 
-effect is supported by the wrong Shapley value explanation as it gives the 
+this in a chemically incorrect way (i.e. clever Hans effect\cite{lapuschkin2019unmasking}). 
+Clever Hans effect is a correct model prediction, however, due to the wrong reason. 
+The clever Hans effect is supported by the wrong Shapley value explanation as it gives the 
 apolar carbon chain a higher attribution than the hydroxyl groups. However, 
 the explanation of the HN values is chemically correct, which makes it difficult 
 to judge whether there is a clever Hans effect. 
@@ -102,20 +120,28 @@ attribution methods and the relation with absolute prediction error, a ranked ba
 \section{The absolute prediction error is not associated with the Spearman rank correlation between different attribution methods}
 
 
-% To get more insight into how much the different attribution method agree/disagree 
-% with each other and wheter disagreement can be explained by the absolute prediction 
-% error, a ranked based approach is used. All substructures are ranked from low attributions 
-% (i.e. most hydrophobic) towards high attributions (i.e. most hydrophylic). Subsequently,
-% the Pearson correlation is computed between the ranks of two attribution methods. 
+To get more insight into how much the different attribution method agree/disagree 
+with each other and whether disagreement can be explained by the absolute prediction 
+error, a ranked based approach is used. All substructures are ranked from low attributions 
+(i.e. most hydrophobic) towards high attributions (i.e. most hydrophylic). Subsequently,
+the Pearson correlation is computed between the ranks of two attribution methods. 
 
+
+SME and Shapley value attribution ranking agree most often with each other as $78.07\%$
+of the molecules have a Spearman rank correlation of one. No trend is visible 
+in relation with the absolute prediction error. This lack of association shows 
+that both methods provide a similar explanation regardless of the prediction error. 
+
+ 
 
 \begin{figure}[h]
     \centering
-    \includegraphics[scale=0.35]{../data/images/esol_rank_vs_AE_SME_Shapley_combined.png}
-    \includegraphics[scale=0.35]{../data/images/esol_rank_vs_AE_Shapley_HN_combined.png}
+    % \includegraphics[scale=0.35]{../data/images/esol_rank_vs_AE_SME_Shapley_combined.png}
+    % \includegraphics[scale=0.35]{../data/images/esol_rank_vs_AE_Shapley_HN_combined.png}
+    \includegraphics[scale=0.75]{rmse_vs_rank_corr_attributions.png}
     \caption{Absolute error of model prediction in function of Spearman rank correlation between 
-        attributions from SME and Shapley (top) and between Shapley and HN (bottom) using the full 
-        data set containing 1110 molecules.
+        attributions from SME and Shapley (left) and between Shapley and HN (right) using the full 
+        data set containing 1110 molecules. The red line shows experimental error of 0.6 log(mol/L).
     }
 \end{figure}
 

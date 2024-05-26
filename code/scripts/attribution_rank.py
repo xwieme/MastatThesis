@@ -36,6 +36,7 @@ def correlationPlot(
         filter_df.to_frame("N_sub")
         .query("N_sub > 1")  # Remove molecules that cannot be split into substructures
         .join(data.set_index("molecule_smiles"))
+        .round(6)
         .groupby("molecule_smiles")[
             [method_1, method_2]
         ]  # compute the correlation for each molecule
@@ -48,7 +49,15 @@ def correlationPlot(
         .join(filter_df.to_frame("N_substructures"))  # Add the number of substructures
     )
 
-    # print(rmse_df.head())
+    print("#" * 50)
+    print(
+        f"{method_1} vs {method_2} ({len(corr_df.query('corr == 1')) / len(corr_df) * 100:.2f}% agreement)"
+    )
+    print("#" * 50)
+
+    print(corr_df.query("corr < 1.0").join(rmse_df.set_index("smiles")[["RMSE"]]))
+
+    # corr_df["N_substructures"] = np.log(corr_df.N_substructures)
 
     fig = px.scatter(
         corr_df.join(rmse_df.set_index("smiles")[["RMSE"]]),
@@ -58,7 +67,18 @@ def correlationPlot(
         color_continuous_scale="inferno",
         title=title,
     )
-    fig.update_layout(autosize=False, width=800, height=500, template="plotly_white")
+
+    fig.add_hline(0.6, line_width=3, line_dash="dash", line_color="red")
+    fig.update_yaxes(title="Absolute error log(mol/L)")
+    fig.update_xaxes(title="Spearman rank correlation")
+
+    fig.update_layout(
+        autosize=False,
+        width=800,
+        height=500,
+        template="plotly_white",
+        font=dict(family="times new roman", size=22),
+    )
 
     return fig
 
@@ -103,6 +123,7 @@ if __name__ == "__main__":
     # Setup argparse to get the subdirectory name of interest in the data directory
     parser = argparse.ArgumentParser()
     parser.add_argument("data_subdir_name")
+    parser.add_argument("--suffix", type=str, dest="suffix", default="")
     args = parser.parse_args()
 
     ###############
@@ -115,13 +136,17 @@ if __name__ == "__main__":
     attributions_functional_groups = pd.DataFrame(
         pd.read_json(
             os.path.join(
-                DATA_DIR, args.data_subdir_name, "attribution_functional_groups.json"
+                DATA_DIR,
+                args.data_subdir_name,
+                f"attribution_functional_groups{args.suffix}.json",
             )
         )
     )
     attributions_brics = pd.DataFrame(
         pd.read_json(
-            os.path.join(DATA_DIR, args.data_subdir_name, "attribution_brics.json")
+            os.path.join(
+                DATA_DIR, args.data_subdir_name, f"attribution_brics{args.suffix}.json"
+            )
         )
     )
 
@@ -197,19 +222,28 @@ if __name__ == "__main__":
     # metrics for each molecule that can be split into substructures
     correlation_figures = defaultdict(list)
     attributions_dfs = {
-        "functional groups": attributions_functional_groups,
-        "brics": attributions_brics,
+        #  "functional groups": attributions_functional_groups,
+        #  "brics": attributions_brics,
         "combined": attributions_combined,
     }
+
+    # print(attributions_functional_groups.N_substructures.value_counts())
+    # print(attributions_brics.N_substructures.value_counts())
+    # print(attributions_combined.N_substructures.value_counts())
 
     # Plot for each substructure method the Spearman rank correlation between
     # two different attribution techniques per molecule in function of the prediction
     # rmse
     for substruct_method, attribution_df in attributions_dfs.items():
         for method1, method2 in combinations(["SME", "Shapley_value", "HN_value"], 2):
+            print()
+            print("-" * 50)
+            print(f"{substruct_method:>25}")
+            print("-" * 50)
+            print()
             correlation_figures[substruct_method].append(
                 correlationPlot(
-                    attributions_functional_groups,
+                    attribution_df,
                     dataset,
                     method1,
                     method2,
@@ -257,4 +291,4 @@ if __name__ == "__main__":
         ]
     )
 
-    app.run(host="0.0.0.0", port="8888")
+    app.run(host="0.0.0.0", port="8073")

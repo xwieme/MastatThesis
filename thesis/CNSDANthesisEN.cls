@@ -103,7 +103,7 @@
   { } %after code
 
 % Change the spacing above the chapter. THis is left - above - below
-\titlespacing*{\chapter}{0pt}{0pt}{40pt}
+\titlespacing*{\chapter}{0pt}{0pt}{10pt}
 
 % --- Setup the document
 
