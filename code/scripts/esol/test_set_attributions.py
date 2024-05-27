@@ -1,6 +1,7 @@
 # Create a DataFrame containing the test set molecules with there corresponding
 # attributions using the substructure method which produces the most substructures
 import os
+import argparse
 
 import numpy as np
 import pandas as pd
@@ -9,11 +10,16 @@ DATA_DIR = "../../../data/ESOL"
 
 
 if __name__ == "__main__":
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--suffix", type=str, default="", dest="suffix")
+    args = parser.parse_args()
+    
     data = pd.read_csv(os.path.join(DATA_DIR, "ESOL_test.csv"))[["smiles", "ESOL"]]
     attributions_fg = pd.read_json(
-        os.path.join(DATA_DIR, "attribution_functional_groups.json")
+        os.path.join(DATA_DIR, f"attribution_functional_groups{args.suffix}.json")
     )
-    attributions_brics = pd.read_json(os.path.join(DATA_DIR, "attribution_brics.json"))
+    attributions_brics = pd.read_json(os.path.join(DATA_DIR, f"attribution_brics{args.suffix}.json"))
 
     # Compute for each molecule the number of substructures obtained from functional
     # groups and BRICS and create column 'group' indicating which method create the
@@ -70,5 +76,5 @@ if __name__ == "__main__":
 
     data["absolute_error"] = np.abs(data["prediction"] - data["ESOL"])
 
-    data.to_json(os.path.join(DATA_DIR, "test_absolute_error.json"))
-    test_attributions.to_json(os.path.join(DATA_DIR, "test_attributions.json"))
+    data.to_json(os.path.join(DATA_DIR, f"test_absolute_error{args.suffix}.json"))
+    test_attributions.to_json(os.path.join(DATA_DIR, f"test_attributions{args.suffix}.json"))

@@ -1,3 +1,4 @@
+import argparse
 import os
 import re
 from ast import literal_eval
@@ -10,6 +11,10 @@ import pandas as pd
 DATA_DIR = "../../../data/ESOL"
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--suffix", type=str, default="", dest="suffix")
+    args = parser.parse_args()
+
     #############################
     # Manual rank preprocessing #
     #############################
@@ -52,8 +57,26 @@ if __name__ == "__main__":
     ######################
     # Read test set data #
     ######################
-    data = pd.read_json(os.path.join(DATA_DIR, "test_absolute_error.json"))
-    test_attributions = pd.read_json(os.path.join(DATA_DIR, "test_attributions.json"))
+    data = pd.read_json(
+        os.path.join(DATA_DIR, f"test_absolute_error{args.suffix}.json")
+    )
+    test_attributions = pd.read_json(
+        os.path.join(DATA_DIR, f"test_attributions{args.suffix}.json")
+    )
+
+    # print(data.info())
+    # print("molecules", len(test_attributions.molecule_smiles.unique()))
+
+    # print(
+    #     test_attributions.query(
+    #         "molecule_smiles == 'CCC(C)n1c(=O)[nH]c(C)c(Br)c1=O'"
+    #     ).atom_ids
+    # )
+    # print(
+    #     manual_ranks.query(
+    #         "molecule_smiles == 'CCC(C)n1c(=O)[nH]c(C)c(Br)c1=O'"
+    #     ).atom_ids
+    # )
 
     #############################
     # Spearman rank correlation #
@@ -91,6 +114,11 @@ if __name__ == "__main__":
         )
     )
 
+    print(attribution_rank_correlation.info())
+    print(
+        attribution_rank_correlation[attribution_rank_correlation.SME_rank_corr.isna()]
+    )
+
     data["absolute_error_class"] = data.absolute_error.apply(
         lambda value: "< 0.6" if value < 0.6 else ">= 0.6"
     )
@@ -109,5 +137,7 @@ if __name__ == "__main__":
     )
 
     rank_df.to_csv(
-        os.path.join(DATA_DIR, "manual_vs_attribution_rank_correlations.csv")
+        os.path.join(
+            DATA_DIR, f"manual_vs_attribution_rank_correlations{args.suffix}.csv"
+        )
     )

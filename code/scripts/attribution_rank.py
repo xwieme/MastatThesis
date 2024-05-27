@@ -51,11 +51,18 @@ def correlationPlot(
 
     print("#" * 50)
     print(
-        f"{method_1} vs {method_2} ({len(corr_df.query('corr == 1')) / len(corr_df) * 100:.2f}% agreement)"
+        f"{method_1} vs {method_2} ({len(corr_df.query('corr == 1')) / len(corr_df) * 100:.2f}% agreement) mean: {corr_df['corr'].mean():.4f} median: {corr_df['corr'].median():.4f}"
     )
     print("#" * 50)
 
-    print(corr_df.query("corr < 1.0").join(rmse_df.set_index("smiles")[["RMSE"]]))
+    print(
+        corr_df.query("molecule_smiles == 'OCC(O)C(O)CO'").join(
+            rmse_df.set_index("smiles")[["RMSE"]]
+        )
+    )
+    print(
+        corr_df.query("-0.5 < corr <= 0.5").join(rmse_df.set_index("smiles")[["RMSE"]])
+    )
 
     # corr_df["N_substructures"] = np.log(corr_df.N_substructures)
 
@@ -66,6 +73,7 @@ def correlationPlot(
         color="N_substructures",
         color_continuous_scale="inferno",
         title=title,
+        trendline="ols",
     )
 
     fig.add_hline(0.6, line_width=3, line_dash="dash", line_color="red")
@@ -80,7 +88,9 @@ def correlationPlot(
         font=dict(family="times new roman", size=22),
     )
 
-    return fig
+    corr_df["methods"] = f"corr_{method_1}_{method_2}"
+
+    return fig, corr_df.join(rmse_df.set_index("smiles")[["RMSE"]])
 
 
 def inspectMolecules(df: pd.DataFrame):
@@ -234,6 +244,7 @@ if __name__ == "__main__":
     # Plot for each substructure method the Spearman rank correlation between
     # two different attribution techniques per molecule in function of the prediction
     # rmse
+    corr_dfs = []
     for substruct_method, attribution_df in attributions_dfs.items():
         for method1, method2 in combinations(["SME", "Shapley_value", "HN_value"], 2):
             print()
@@ -241,15 +252,35 @@ if __name__ == "__main__":
             print(f"{substruct_method:>25}")
             print("-" * 50)
             print()
-            correlation_figures[substruct_method].append(
-                correlationPlot(
-                    attribution_df,
-                    dataset,
-                    method1,
-                    method2,
-                    f"{method1} vs {method2}",
-                )
+
+            fig, corr_df = correlationPlot(
+                attribution_df,
+                dataset,
+                method1,
+                method2,
+                f"{method1} vs {method2}",
             )
+
+            correlation_figures[substruct_method].append(fig)
+            corr_dfs.append(corr_df.reset_index())
+
+    corr_df_long = pd.concat(corr_dfs, ignore_index=True)
+    corr_df_wide = corr_df_long.pivot(
+        index="molecule_smiles", columns="methods", values="corr"
+    )
+
+    corr_df_wide = pd.merge(
+        corr_df_wide,
+        corr_df_long[["molecule_smiles", "RMSE"]].drop_duplicates(),
+        how="left",
+        on="molecule_smiles",
+    )
+
+    print(
+        corr_df_wide.query(
+            "corr_SME_HN_value == corr_Shapley_value_HN_value == corr_SME_Shapley_value == 1 and RMSE > 0.6"
+        )
+    )
 
     app.layout = html.Div(
         [
