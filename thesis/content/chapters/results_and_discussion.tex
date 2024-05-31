@@ -62,6 +62,7 @@ factors could also influence the wrong prediction.
 
 
 \section{Different attribution methods can result in different explanations}
+\label{sec:results_different_explanations}
 
 
 The attribution values sign usually shows an agreement with expectations from 
@@ -120,14 +121,11 @@ attribution methods and the relation with absolute prediction error, a ranked ba
 \section{Absolute prediction error is not associated with the Spearman rank correlation between different attribution methods}
 
 
-To get more insight into how much the different attribution method agree/disagree 
-with each other and whether disagreement can be explained by the absolute prediction 
-error, a ranked based approach is used. All substructures are ranked from low attributions 
-(i.e. most hydrophobic) towards high attributions (i.e. most hydrophylic). Subsequently,
-the Pearson correlation is computed between the ranks of two attribution methods. A 
-a negative association between prediction error and Spearman rank correlation
-between two attribution methods would show that one of the attribution methods is not 
-able to identify these large prediction errors. 
+To get more insight into agreement or disagreement between attribution methods
+and whether disagreement can be explained by the absolute prediction 
+error, a ranked based approach is used. For each molecule, the substructures are ranked  
+from most negative (i.e. most hydrophobic) towards most positive (i.e. most hydrophylic). 
+Subsequently, the Pearson correlation is computed between the ranks of two attribution methods.
 
 
 SME and Shapley value attribution rankings agree most often with each other, $78.07\%$
@@ -135,6 +133,7 @@ of the molecules have a Spearman rank correlation of one. Two molecules have
 a complete opposite explanation, where the correct ranking is provided by the 
 Shapley value based ranking. Overall, no association is observed between Spearman 
 correlation and the absolute prediction error. 
+
 
 Perfect agreement between HN value and Shapley value ranks happens for 
 $74.26\%$ of the molecules. Again at low correlation $( \le -0.5)$, the ranking based on 
@@ -166,7 +165,7 @@ method does not systematically change the explanation.
 To analyze which attribution method provides the most accurate
 explanation, the Spearman rank correlation is computed between the
 substructures attributions and a chemically intuitive ranking of those
-substructures for $100$ molecule from the test data set. Also the influence of the absolute error between model
+substructures for $100$ molecules from the test data set. Also the influence of the absolute error between model
 prediction and experimental value will be examined by subdividing the
 molecules into two error groups based on experimental error $(<0.6 \text{ or } >=0.6)$. Since the distributions of
 the Spearman rank correlations are highly skewed to the left,

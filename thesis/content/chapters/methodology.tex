@@ -1,6 +1,11 @@
 \chapter{Methodology}
 
 
+In this section, the data set is described together with the used features. 
+Subsequently, the model architecture is discussed and the explanation methods 
+introduced in \cref{sec:xai} are framed in a chemical context.
+
+
 \section{Data set description}
 
 
@@ -114,7 +119,89 @@ pandas\cite{reback2020pandas} an plotly\cite{plotly}.
 
 \newpage
 
-\section{Chemical expectations}
+\section{Chemistry intuitive explanation}
+
+
+In correspondence with the method developed by Wu et. al., a chemistry intuitive 
+explantion is obtain by first splitting a molecule into substructures.\cite{wu2023chemistry}
+Two different substructure methods are used, functional groups and breaking retrosynthetically 
+interesting chemical substructures (BRICS). Functional groups are a collection of atoms 
+having characteristic properties. Identification of functional groups within a molecule 
+is achieved using SMILES arbitrary target specification (SMARTS), which is a regular 
+expression like framework to match substructures in molecules.\cite{smartsDaylight}
+Typically, a molecule is not just a combination of different functional groups. The 
+remaining structure where all functional groups are attached to referred to as the 
+scaffold of the molecule (\cref{fig:example_functional_groups}). \Cref{app:functional_groups_list} 
+lists the functional groups used in this study together with their corresponding SMARTS. 
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.5]{../../data/images/example_functional_groups.png}
+    \caption{An example of a molecule where the highlighted parts denote the different substructures. 
+    The central benzene ring can be seen as the scaffold and the remaining four substructures are 
+functional groups.}
+    \label{fig:example_functional_groups}
+\end{figure}
+
+
+Some molecules do not posses any of the specified functional groups or functional 
+groups are note the most intuitive substructures. Therefore, a BRICS\cite{degen2008art} 
+partitioning scheme is used. BRICS breaks a molecule into possible 
+chemical building blocks that could be used in a chemical reaction to synthesize the original 
+molecule (\cref{fig:example_brices}).
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[scale=0.5]{example_brics}
+    \caption{An example of a molecule where the highlighted parts are substructures obtained using BRICS.}
+    \label{fig:example_brices}
+\end{figure}
+
+When the substructures of a molecule are obtained, the Shapley values and the HN values are 
+computed. Within the game theoretical framework, a player represents a substructure and the 
+characteristic function $v(S)$ is given by the difference between the model prediction $f(S)$ and 
+the expected model prediction $\mathbb{E}[f(G)]$ over a random molecular graph $G$, which 
+is estimated by the sample mean of the training data predictions,
+
+
+\begin{equation}
+    v(S) = f(S) - \mathbb{E}[f(G)].
+\end{equation}
+
+
+A coalition $S$ of substructures is represented as a Boolean vector where a one indicates 
+that the corresponding atom is included in the coalition and zero means not included. This 
+vector is then used in the aggregation step to only pass the information about the atom feature 
+vectors $h_i^{(2)}$ that are present in the coalition to the MLP,
+
+\begin{equation}
+    h^{(3)} = \sum_{i=1} w_i h_i^{(2)} S_i.
+\end{equation}
+
+Since the different attributions are compared using Spearman rank correlation, it 
+is more meaningful when more than two substructures are present to obtain a non binary 
+outcome. Therefore, the substructure method used for a molecule is the one that results 
+in the most substructures. Only \cref{sec:results_different_explanations} makes exclusive 
+use of the functional groups. The full pipeline of the prediction and explanation 
+of water solubility is shown in \cref{fig:pipeline}.
+
+
+\begin{figure}
+    \centering 
+    \includegraphics[scale=0.85]{explanation_pipeline}
+    \caption{Pipeline to predict water solubility and explain the obtained prediction by means 
+        of different attribution values. From a SMILES string a molecular graph is created and 
+        the molecule is split into different substructures (BRICS also uses SMARTS pattern matching).
+        Subsequently, atom and bond feature matrices are constructed based on the molecular graph. The 
+        bond features then determine the edge types of the model input graph (denote by different colors).
+        Next, the model is evaluated on every combination between the different substructures by applying
+        a mask in the aggregation step. Finally, the different attribution values can be computed.
+    }
+    \label{fig:pipeline}
+\end{figure}
+
 
 
 Because water is a polar molecule, substructures that increase the overall polarity 
@@ -126,23 +213,5 @@ compounds reduce the effect of smaller polar groups, resulting in a reduced
 water solubility. Therefore, apolar substructures should have negative attributions. 
 
 
-\section{Substructures}
-
-
-To subdivide a molecule into its functional groups and main structure (referred to as scaffold),
-a list of commonly occurring functional groups in small molecules is created together with their 
-respective SMILES arbitrary target specification (SMARTS)\cite{smartsDaylight} to allow pattern 
-matching using RDKit (\cref{app:functional_groups_list}). Some molecules do not 
-have any of the specified functional groups or can 
-be more intuitively partitioned using breaking retrosynthetically interesting chemical substructures 
-(BRICS)\cite{degen2008art}. BRICS splits a molecule into substructures that could possibly used 
-in a chemical reaction that synthesizes the original molecule. 
-
-
-When ranking the molecules to compute the Spearman correlation coefficient, it is more 
-meaningful when more than two substructures are present; otherwise, the outcome is binary.
-Therefore, when Spearman rank correlation is used, it can be assumed that the substructure 
-method (functional groups or BRICS) that yields the most substructures is chosen to partition
-the molecule.
 
 
