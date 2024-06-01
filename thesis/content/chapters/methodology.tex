@@ -176,9 +176,11 @@ that the corresponding atom is included in the coalition and zero means not incl
 vector is then used in the aggregation step to only pass the information about the atom feature 
 vectors $h_i^{(2)}$ that are present in the coalition to the MLP,
 
+
 \begin{equation}
     h^{(3)} = \sum_{i=1} w_i h_i^{(2)} S_i.
 \end{equation}
+
 
 Since the different attributions are compared using Spearman rank correlation, it 
 is more meaningful when more than two substructures are present to obtain a non binary 
@@ -203,7 +205,6 @@ of water solubility is shown in \cref{fig:pipeline}.
 \end{figure}
 
 
-
 Because water is a polar molecule, substructures that increase the overall polarity 
 of a molecule, will also increase the water solubility and hence are expected to obtain 
 a positive attribution. Furthermore, when a substructure has the ability to form hydrogen 
@@ -213,5 +214,23 @@ compounds reduce the effect of smaller polar groups, resulting in a reduced
 water solubility. Therefore, apolar substructures should have negative attributions. 
 
 
+\section{Evaluation of attribution methods}
 
 
+Objective evaluation of an explanation method is not straightforward due to lack
+of the ground truth. While a rank-based approach can evaluate the relative performance of attribution methods among 
+themselves and relative agreement with chemical expectations, it provides no information on how faithful the 
+explanation method is to the model. Assessment of model faithfulness can be done using the 
+fidelity metric, which is a perturbation based evaluation technique.\cite{yuan2022explainability} 
+Fidelity assumes that removing an important feature (i.e. a feature with a high attribution) will 
+drastically change the model prediction. Similarly, features with an attribution around zero 
+would not have a major impact on the model prediction.
+
+
+Here, the removal of the most negative attribution (most hydrophobic) should result 
+in a higher prediction. Since the difference between the original prediction and 
+the perturbed prediction is expected to be negative, the removal of the most negative 
+attribution is referred to as negative-fidelity. On the other hand, removing the most 
+positive attribution (most hydrophilic) should result in a lower prediction, leading to a positive fidelity 
+value, hence referenced by positive-fidelity. The fidelity corresponding with the removal 
+of substructures that have an attribution around zero is referenced by absolute-negative-fidelity.

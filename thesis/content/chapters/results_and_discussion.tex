@@ -1,5 +1,15 @@
 \chapter{Results and discussion}
 
+
+This section first discusses the performance of the model, which is followed by
+the comparison of the distributions of functional groups attributions computed 
+using the different methods. Subsequently, agreement and disagreement between 
+the attribution methods are examined using pairwise Spearman rank correlation. 
+Next, agreement between attributions and chemical expectations is analyzed. 
+Finally, the faithfulness of the attribution methods to the model is assessed 
+using the fidelity metric.
+
+ 
 \section{RGCN is able to accurately predict expected water solubility}
 
 
@@ -166,15 +176,15 @@ To analyze which attribution method provides the most accurate
 explanation, the Spearman rank correlation is computed between the
 substructures attributions and a chemically intuitive ranking of those
 substructures for $100$ molecules from the test data set. Also the influence of the absolute error between model
-prediction and experimental value will be examined by subdividing the
+prediction and experimental value is examined by subdividing the
 molecules into two error groups based on experimental error $(<0.6 \text{ or } >=0.6)$. Since the distributions of
 the Spearman rank correlations are highly skewed to the left,
 non-parametric tests are used for the analysis (\cref{fig:spearman_corr_manual}). To test whether there is
 a significant difference of rank correlation between the attribution
-methods, two Friedman tests will be used (one for each absolute error
+methods, two Friedman tests are used (one for each absolute error
 category). For testing the presence of a significant difference between
-the absolute error (AE) groups three Wilcoxon--Mann--Whitney tests will be applied.
-Control for the multiple test will be done using Bonferonni correction, 
+the absolute error (AE) groups three Wilcoxon--Mann--Whitney tests are applied.
+Control for the multiple test is done using Bonferonni correction, 
 resulting in a significance level of $0.05/5 = 0.01$.
 
 
@@ -190,21 +200,19 @@ resulting in a significance level of $0.05/5 = 0.01$.
 \end{figure}
 
 
-\subsection{Friedman analysis shows no statistical significant difference in relative accuracy between the attribution methods}
-
-
 The presence of a statistical difference in Spearman rank correlation
 between attributions and chemically intuitive ranks for different
 attribution methods is tested using a Friedman test. The null-hypothesis
 assumes that there is no difference between the different attribution
 methods, which would result in similar rank sums of the different
-attribution methods. For both groups of absolute error, smaller than
-$(0.6)$ (p-value $0.0154$) and larger than or equal to $(0.6)$ (p-value
-$0.0148$), are not significant based on the bonferonni corrected nominal
-level of $(0.01)$ (\cref{fig:friedman_results}). Therefore, it is concluded that there is not enough
-evidence in the data to reject the null hypothesis and it is assumed the
-the method of computing the attribution values has not a significant
-impact in the accurateness of the resulting explanation. However, considering 
+attribution methods. When the absolute prediction error is below the 
+experimental error, then no statistical significant difference between 
+the different attribution methods is observed (p-value $0.0154$) based 
+on the Bonferonni corrected nominal level of $0.01$(\cref{fig:friedman_results}). 
+Also when the absolute prediction error is above the experimental error, no significant difference 
+is present between the different attribution methods (p-value $0.0148$). 
+Therefore, we conclude that there is not enough
+evidence in the data to reject the null hypothesis However, considering 
 that the current sample size equals $100$ and the p-values are close to the 
 nominal level, it is recommended to confirm these findings in a follow up 
 study with a larger sample size.
@@ -240,10 +248,8 @@ study with a larger sample size.
 \end{table}
 
 
-\subsection{Molecules with larger prediction error do not have lower relative accuracy}
 
-
-In all attribution methods there is no significance difference between the two different
+In all attribution methods there is no significant difference between the two different
 absolute error groups (p-values are $0.0214$, $0.1694$, $0.0789$ for SME, Shapley and
 HN respectively). Therefore, it is concluded that there is not enough evidence in the
 data to reject the null hypothesis of equal distributions. In other words, no attribution 
@@ -263,42 +269,26 @@ that an attribution method gives a chemically correct explanation but may not be
 representative of the model. 
 
 
-To check the faithfulness to the model of an attribution method, the substructure 
-with the highest attribution can be removed to calculate the fidelity measure. 
-Since,it is assumed that high attribution indicates an important substructure, 
-removing that substructure should change the explanation is faithful to the model. 
-For example, if the single hydroxyl group (ROH) is removed, the solubility will 
-drop dramatically. Since the model is trained to predict the water solubility of 
-small molecules without interaction with molecules other than water and itself, 
-the graphical structure of the molecule must be taken into account. Generally, 
-the scaffold (i.e. main skeleton of the molecule) will be the most hydrophobic 
-(most negative attribution), but if removed, not one but possibly several substructures 
-remain. As a result, the scaffold is disregarded to calculate fidelity.
+Overall, all attribution methods posses a rather poor fidelity (\cref{fig:fidelity} and \cref{fig:absolute_fidelity}). 
+The negative-fidelity has a median around $1.84 log[mol/L]$ for each attribution method when the absolute 
+prediction error is below the experimental error. However, the distribution is rather 
+broad and includes zero, meaning that sometimes removing the most negative attribution 
+does not have an impact on the prediction. When the absolute prediction error is above 
+the experimental error, the median negative-fidelity decreases to around $-2.40 log[mol/L]$, 
+however the distribution is also more spread out. 
 
 
-When the most hydrophilic sbustructure is removed (referred to as positive fidelity), 
-the it is expected that the predicted solubility decreases. Since the fidelity is 
-defined as the difference between normal prediction and the perturbed prediction, it
-is expected that the positive fidelity is a positive number. However, all attribution 
-methods have a positive fidelity distribution around zero (\cref{fig:fidelity}). Negative
-values of the positive fidelity are due to the presence of fully apolar molecules, where 
-water solubility can increase when an apolar substructure is removed. Similarly, the negative 
-fidelity (obtained by removing the most hydrophobic substructure) also has a distribution 
-around zero. Overall, all attribution methods and prediction error groups have a similar, 
-rather poor, fidelity.
-
-
-It is also possible to compute the fidelity when removing the least important 
-substructures, identified by an attribution close to zero (referenced by absolute 
-negative fidelity). Then it is expected that the model prediction does not change 
-much. This is also observed for all attribution methods, but the distribution has 
-long tails (\cref{fig:absolute_fidelity}). Again, the different prediction error 
-groups have a similar behavior.
+Similarly, the positive-fidelity is distributed around zero meaning that the removal of 
+the most hydrophilic substructure does not have a significant effect on the predicted 
+water solubility. A possible explanation for this is when multiple hydrophilic substructures 
+are present, then it is possible that when one functional group is removed the solubility 
+does only slightly decrease. As expected, the absolute-negative-fidelity is centered around zero for all attribution 
+methods, however, again with long tails. 
 
 
 \begin{figure}[h]
     \centering
-    \includegraphics[scale=0.5]{fidelity.png}
+    \includegraphics[scale=0.5]{fidelity_2.png}
     \caption{Distribution of fidelity obtained by removing the most positive 
         attribution (right side) or the most negative attribution (left side).
         Fidelity is computed for 100 molecules from the test data set.
@@ -309,7 +299,7 @@ groups have a similar behavior.
 
 \begin{figure}[h]
     \centering
-    \includegraphics[scale=0.5]{absolute_fidelity.png}
+    \includegraphics[scale=0.5]{absolute_fidelity_2}
     \caption{Distribution of fidelity obtained by removing the most positive 
         attribution in absolute values (right side) or the most negative 
         attribution in absolute values (left side).
