@@ -10,6 +10,7 @@ def predict(
     data: Data,
     models: List[torch.nn.Module],
     mask: torch.Tensor | None = None,
+    mask_method: str | None = None,
     device: torch.device | str = "cpu",
 ) -> torch.Tensor:
     # Disable gradient computation to save memory
@@ -23,7 +24,7 @@ def predict(
             data.to(device)
 
         for i, model in enumerate(models):
-            predictions[i] = model(data, mask)
+            predictions[i] = model(data, mask, mask_method)
 
     return torch.mean(predictions).to("cpu")
 

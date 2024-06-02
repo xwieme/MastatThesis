@@ -40,10 +40,12 @@ def fidelity(
     :param models: the graph neural network models which are explained.
     :param device: which device to use for model prediction either 'cpu' or 'gpu'
         (default is 'cpu')
-
     """
 
-    group = group.query("substruct_smiles != 'scaffold'")
+    # group = group.query("substruct_smiles != 'scaffold'")
+
+    if len(group) == 0:
+        return np.inf
 
     if mode == "abs_max":
         most_important_substructs = group.query(
@@ -78,10 +80,12 @@ def fidelity(
         )
 
     atom_ids = [id for ids in most_important_substructs["atom_ids"] for id in ids]
-    mask = XAIChem.createMask(rdmol, atom_ids)
+    mask = XAIChem.createMask(rdmol, atom_ids).to(device)
 
     molecule_graph = XAIChem.createDataObjectFromSmiles(smiles, np.nan)
-    masked_prediction = float(XAIChem.predict(molecule_graph, models, mask, device))
+    masked_prediction = float(
+        XAIChem.predict(molecule_graph, models, mask.view(-1, 1), "aggregation", device)
+    )
 
     return group.non_masked_prediction.iloc[0] - masked_prediction
 
@@ -108,6 +112,15 @@ if __name__ == "__main__":
         os.path.join(DATA_DIR, f"test_attributions{args.suffix}.json")
     )
 
+    # esol_df = pd.read_csv(os.path.join(DATA_DIR, "ESOL_test.csv"))
+    # attributions = pd.read_json(
+    #     os.path.join(DATA_DIR, f"attribution_functional_groups{args.suffix}.json")
+    # )
+
+    # test_attributions = pd.merge(
+    #     attributions, esol_df, left_on="molecule_smiles", right_on="smiles", how="right"
+    # ).dropna()
+
     print(test_attributions.head())
     print(test_attributions.info())
 
@@ -128,15 +141,15 @@ if __name__ == "__main__":
             device=torch_device,
         )
 
-        fidelities[
-            f"{attribution_method}_fidelity_positive_abs"
-        ] = test_attributions.groupby("molecule_smiles").apply(
-            fidelity,
-            attribution_method,
-            mode="abs_max",
-            models=rgcn_models,
-            device=torch_device,
-        )
+        # fidelities[
+        #     f"{attribution_method}_fidelity_positive_abs"
+        # ] = test_attributions.groupby("molecule_smiles").apply(
+        #     fidelity,
+        #     attribution_method,
+        #     mode="abs_max",
+        #     models=rgcn_models,
+        #     device=torch_device,
+        # )
 
         fidelities[
             f"{attribution_method}_fidelity_negative"
@@ -177,6 +190,7 @@ if __name__ == "__main__":
 
     print(fidelities_long.info())
     print(fidelities_long.query("fidelity_type == 'positive' and fidelity == 0"))
+    fidelities_long.to_json("../../../data/test_fidelities.json")
 
     # Plot distributions
     app = Dash()
@@ -242,31 +256,31 @@ if __name__ == "__main__":
                 legendgroup="absolute_negative",
                 scalegroup="negative",
                 name="absolute negative",
-                side="negative",
+                #     side="negative",
                 line_color="#d62728",
-                showlegend=i == 0,
+                #     showlegend=i == 0,
             ),
             row=i + 1,
             col=1,
         )
-        fig.add_trace(
-            go.Violin(
-                x=fidelities_long.query(
-                    f"fidelity_type == 'positive_abs' and absolute_error {ae_class}"
-                ).attribution_method,
-                y=fidelities_long.query(
-                    f"fidelity_type == 'positive_abs' and absolute_error {ae_class}"
-                ).fidelity,
-                legendgroup="absolute_positive",
-                scalegroup="positive",
-                name="absolute positive",
-                side="positive",
-                line_color="#2ca02c",
-                showlegend=i == 0,
-            ),
-            row=i + 1,
-            col=1,
-        )
+        # fig.add_trace(
+        #     go.Violin(
+        #         x=fidelities_long.query(
+        #             f"fidelity_type == 'positive_abs' and absolute_error {ae_class}"
+        #         ).attribution_method,
+        #         y=fidelities_long.query(
+        #             f"fidelity_type == 'positive_abs' and absolute_error {ae_class}"
+        #         ).fidelity,
+        #         legendgroup="absolute_positive",
+        #         scalegroup="positive",
+        #         name="absolute positive",
+        #         side="positive",
+        #         line_color="#2ca02c",
+        #         showlegend=i == 0,
+        #     ),
+        #     row=i + 1,
+        #     col=1,
+        # )
 
     for annotation in fig["layout"]["annotations"]:
         if annotation["textangle"] == 90:
