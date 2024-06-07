@@ -312,8 +312,20 @@ is used preserve information of previous layers.
 \label{sec:xai}
 
 
+Explainable machine learning tries to reveal insight into black-box ML algorithms.
+This study uses perturbation based explainable ML methods, which apply 
+a perturbation to the original input to assign an attribution to each feature. 
+In order to obtain mathematically fair attribution values an introduction to 
+cooperative game theory is given for the formulation of the 
+Shapley value\cite{shapley1953value}. Afterwards, the Myerson value\cite{hamiache_value_1999} 
+is presented as the Shapley value for graph structured data, together with its problems. At last, cooperative 
+game theory with incomplete communication is discussed to define the Hamiache-Navarro\cite{hamiache2010matrix}
+value as an extension of the Shapley value to graphs.
+
+
 \subsection{Shapley value}
 \label{subsec:shapley_value}
+
 
 Feature attribution methods in XAI assign a number to each feature implying how
 much that feature contributed to the model prediction.\cite{merrick2020explanation}

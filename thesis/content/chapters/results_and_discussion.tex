@@ -140,14 +140,14 @@ Subsequently, the Pearson correlation is computed between the ranks of two attri
 
 SME and Shapley value attribution rankings agree most often with each other, $78.07\%$
 of the molecules have a Spearman rank correlation of one. Two molecules have 
-a complete opposite explanation, where the correct ranking is provided by the 
+a complete opposite explanation, where the chemically correct ranking is provided by the 
 Shapley value based ranking. Overall, no association is observed between Spearman 
 correlation and the absolute prediction error. 
 
 
 Perfect agreement between HN value and Shapley value ranks happens for 
 $74.26\%$ of the molecules. Again at low correlation $( \le -0.5)$, the ranking based on 
-the Shapley value is most often correct. Also no association between prediction error 
+the Shapley value is most often chemically correct. Also no association between prediction error 
 is observed, showing that the addition of graphical structure in the explanation 
 method does not systematically change the explanation.
 
@@ -200,7 +200,7 @@ resulting in a significance level of $0.05/5 = 0.01$.
 \end{figure}
 
 
-The presence of a statistical significant difference in Spearman rank correlation
+The presence of a statistically significant difference in Spearman rank correlation
 between attributions and chemically intuitive ranks for different
 attribution methods is tested using a Friedman test. The null-hypothesis
 assumes that there is no difference between the different attribution
@@ -286,9 +286,7 @@ water solubility. A possible explanation for this is when multiple hydrophilic s
 are present, then it is possible that when one functional group is removed the solubility 
 does only slightly decrease. 
 
-
-Removing the lowest substructure with the lowest absolute attribution results in a 
-smaller change of the model prediction when the attribution is closer to zero, as expected (\cref{fig:absolute_fidelity}).
+The low-absolute-fidelity is smaller when the attribution is closer to zero, as expected (\cref{fig:absolute_fidelity}).
 However, major changes in the predicted water solubility are observed even at low absolute 
 attribution values. This shows that the attribution methods are not always faithful to the model. 
 

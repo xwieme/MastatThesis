@@ -77,7 +77,7 @@ The type of an edge is determined by a bond feature vector consisting of the fol
 
 
 Prediction of water solubility is achieved using the same RGCN model as Wu et. al. (\cref{fig:ml_model}),
-with the hyper parameters listed in \cref{tab:hyperparameters}. To obtain more 
+with the hyperparameters listed in \cref{tab:hyperparameters}. To obtain more 
 robust predictions, ten models are trained, each with a different seed 
 $(2023 + 10i, \text{ with } i \in \{1, 2, \dots, 10\})$, where the final 
 prediction is then obtained by the average prediction over all models.\cite{wu2023chemistry} 
@@ -101,7 +101,7 @@ pandas\cite{reback2020pandas} an plotly\cite{plotly}.
 
 
 \begin{table}[h]
-    \caption{ Hyper parameters from \protect\citen{wu2023chemistry} of an RGCN model to predict water solubility.}
+    \caption{ Hyperparameters from \protect\citen{wu2023chemistry} of an RGCN model to predict water solubility.}
     \label{tab:hyperparameters}
     \begin{center}
         \begin{tabular}{cc}
@@ -123,25 +123,26 @@ pandas\cite{reback2020pandas} an plotly\cite{plotly}.
 
 \newpage
 
-\section{Chemistry intuitive explanation}
+\section{Chemically intuitive explanation}
 
 
-In correspondence with the method developed by Wu et. al., a chemistry intuitive 
-explantion is obtain by first splitting a molecule into substructures.\cite{wu2023chemistry}
-Two different substructure methods are used, functional groups and breaking retrosynthetically 
-interesting chemical substructures (BRICS). Functional groups are a collection of atoms 
+In correspondence with the method developed by Wu et. al., a chemically intuitive 
+explanation is obtain by first splitting a molecule into substructures.\cite{wu2023chemistry}
+Two different substructure methods are used: functional groups and Breaking Retrosynthetically 
+Interesting Chemical Substructures (BRICS). Functional groups are a collection of atoms 
 having characteristic properties. Identification of functional groups within a molecule 
-is achieved using SMILES arbitrary target specification (SMARTS), which is a regular 
-expression like framework to match substructures in molecules.\cite{smartsDaylight}
+is achieved using SMILES Arbitrary Target Specification (SMARTS), which is a regular 
+expression-like framework to match substructures in molecules.\cite{smartsDaylight}
 Typically, a molecule is not just a combination of different functional groups. The 
-remaining structure where all functional groups are attached to referred to as the 
+remaining structure where all functional groups are attached to is referred to as the 
 scaffold of the molecule (\cref{fig:example_functional_groups}). \Cref{app:functional_groups_list} 
-lists the functional groups used in this study together with their corresponding SMARTS. 
+lists the functional groups used in this study together with their corresponding SMARTS
+representation. 
 
 
-\begin{figure}[h]
+\begin{figure}[ht]
     \centering
-    \includegraphics[scale=0.5]{../../data/images/example_functional_groups.png}
+    \includegraphics[scale=0.45]{../../data/images/example_functional_groups.png}
     \caption{An example of a molecule where the highlighted parts denote the different substructures. 
     The central benzene ring can be seen as the scaffold and the remaining four substructures are 
 functional groups.}
@@ -149,16 +150,15 @@ functional groups.}
 \end{figure}
 
 
-Some molecules do not posses any of the specified functional groups or functional 
-groups are note the most intuitive substructures. Therefore, a BRICS\cite{degen2008art} 
-partitioning scheme is used. BRICS breaks a molecule into possible 
+Some molecules do not posses any of the functional groups listed in \cref{app:functional_groups_list}. 
+To explain these molecules, a BRICS\cite{degen2008art} partitioning scheme is used. BRICS breaks a molecule into possible 
 chemical building blocks that could be used in a chemical reaction to synthesize the original 
 molecule (\cref{fig:example_brices}).
 
 
 \begin{figure}[h]
     \centering
-    \includegraphics[scale=0.5]{example_brics}
+    \includegraphics[scale=0.45]{example_brics}
     \caption{An example of a molecule where the highlighted parts are substructures obtained using BRICS.}
     \label{fig:example_brices}
 \end{figure}
@@ -175,22 +175,23 @@ is estimated by the sample mean of the training data predictions,
 \end{equation}
 
 
-A coalition $S$ of substructures is represented as a Boolean vector where a one indicates 
-that the corresponding atom is included in the coalition and zero means not included. This 
-vector is then used in the aggregation step to only pass the information about the atom feature 
+Since a substructure is a collection of atoms, a coalition of substructures is represented 
+as a Boolean vector where a one indicates that the corresponding atom is part of a substructure 
+included in the coalition and zero means that the atom is not included. This vector 
+is then used in the aggregation step to only pass the information about the atom feature 
 vectors $h_i^{(2)}$ that are present in the coalition to the MLP,
 
 
 \begin{equation}
-    h^{(3)} = \sum_{i=1} w_i h_i^{(2)} S_i.
+    h^{(3)} = \sum_{i=1}^N w_i h_i^{(2)} S_i,
 \end{equation}
 
-
-Since the different attributions are compared using Spearman rank correlation, it 
-is more meaningful when more than two substructures are present to obtain a non binary 
+where $N$ is the number of atoms in the molecule.
+Since the different attributions are compared using Spearman rank correlation, the
+results are more meaningful when more than two substructures are present to obtain a non binary 
 outcome. Therefore, the substructure method used for a molecule is the one that results 
-in the most substructures. Only \cref{sec:results_different_explanations} makes exclusive 
-use of the functional groups. The full pipeline of the prediction and explanation 
+in the most substructures. Only in \cref{sec:results_different_explanations} will we exclusive 
+use functional groups. The full pipeline of the prediction and explanation 
 of water solubility is shown in \cref{fig:pipeline}.
 
 
@@ -201,7 +202,7 @@ of water solubility is shown in \cref{fig:pipeline}.
         of different attribution values. From a SMILES string a molecular graph is created and 
         the molecule is split into different substructures (BRICS also uses SMARTS pattern matching).
         Subsequently, atom and bond feature matrices are constructed based on the molecular graph. The 
-        bond features then determine the edge types of the model input graph (denote by different colors).
+        bond features then determine the edge types of the model input graph (denoted by different colors).
         Next, the model is evaluated on every combination between the different substructures by applying
         a mask in the aggregation step. Finally, the different attribution values can be computed.
     }
@@ -225,9 +226,9 @@ Objective evaluation of an explanation method is not straightforward due to lack
 of the ground truth. While a rank-based approach can evaluate the relative performance of attribution methods among 
 themselves and relative agreement with chemical expectations, it provides no information on how faithful the 
 explanation method is to the model. Assessment of model faithfulness can be done using the 
-fidelity metric, which is a perturbation based evaluation technique.\cite{yuan2022explainability} 
-Fidelity assumes that removing an important feature (i.e. a feature with a high attribution) will 
-drastically change the model prediction. Similarly, features with an attribution around zero 
+fidelity metric, which is a perturbation-based evaluation technique.\cite{yuan2022explainability} 
+Fidelity assumes that removing an important feature (i.e. a feature with a high absolute attribution) will 
+drastically change the model prediction. In contrast, features with an attribution around zero 
 would not have a major impact on the model prediction.
 
 
@@ -236,5 +237,5 @@ in a higher prediction. Since the difference between the original prediction and
 the perturbed prediction is expected to be negative, the removal of the most negative 
 attribution is referred to as negative-fidelity. On the other hand, removing the most 
 positive attribution (most hydrophilic) should result in a lower prediction, leading to a positive fidelity 
-value, hence referenced by positive-fidelity. The fidelity corresponding with the removal 
-of substructures that have an attribution around zero is referenced by absolute-negative-fidelity.
+value, hence referred to as positive-fidelity. The fidelity corresponding with the removal 
+of substructures that have an attribution around zero is referred to as low-absolute-fidelity.
