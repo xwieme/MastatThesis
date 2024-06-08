@@ -7,7 +7,7 @@ introduced in \cref{sec:xai} are framed in a chemical context. At last,
 the fidelity metric is introduced. The computational resources (Stevin Supercomputer 
 Infrastructure) and services used in this work were provided by the VSC (Flemish 
 Supercomputer Center), funded by Ghent University, FWO and the Flemish Government 
-- department EWI.
+- department EWI. All code used for this study is available on github\cite{gitrepo}.
 
 
 \section{Data set description}
@@ -227,7 +227,7 @@ of the ground truth. While a rank-based approach can evaluate the relative perfo
 themselves and relative agreement with chemical expectations, it provides no information on how faithful the 
 explanation method is to the model. Assessment of model faithfulness can be done using the 
 fidelity metric, which is a perturbation-based evaluation technique.\cite{yuan2022explainability} 
-Fidelity assumes that removing an important feature (i.e. a feature with a high absolute attribution) will 
+Fidelity assumes that removing an important feature (i.e. a feature with a large absolute attribution) will 
 drastically change the model prediction. In contrast, features with an attribution around zero 
 would not have a major impact on the model prediction.
 
