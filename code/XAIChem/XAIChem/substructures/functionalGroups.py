@@ -14,6 +14,7 @@ def functionalGroupMasks(
     smiles: str,
     functional_groups_dict: Dict[str, str] | None = None,
     inverse: bool = False,
+    multiplier: int = 1,
 ) -> pd.DataFrame:
     """
     Get all functional groups of the given molecule in smiles represenation and
@@ -29,14 +30,14 @@ def functionalGroupMasks(
     """
 
     if functional_groups_dict is None:
-        # functional_groups_dict = FUNCTIONAL_GROUPS_DICT
+        functional_groups_dict = FUNCTIONAL_GROUPS_DICT
         # Get path to list of functional groups from RDKit and extract their molecule objects
-        fname = os.path.join(RDConfig.RDDataDir, "FunctionalGroups.txt")
-        fparams = FragmentCatalog.FragCatParams(1, 6, fname)
-        functional_groups_dict = {
-            fparams.GetFuncGroup(i).GetProp("_Name"): fparams.GetFuncGroup(i)
-            for i in range(fparams.GetNumFuncGroups())
-        }
+        # fname = os.path.join(RDConfig.RDDataDir, "FunctionalGroups.txt")
+        # fparams = FragmentCatalog.FragCatParams(1, 6, fname)
+        # functional_groups_dict = {
+        #     fparams.GetFuncGroup(i).GetProp("_Name"): fparams.GetFuncGroup(i)
+        #     for i in range(fparams.GetNumFuncGroups())
+        # }
 
     molecule = MolFromSmiles(smiles)
 
@@ -50,7 +51,7 @@ def functionalGroupMasks(
     masks = defaultdict(list)
 
     for functional_group, smarts in functional_groups_dict.items():
-        for matched_atom_ids in molecule.GetSubstructMatches(smarts):
+        for matched_atom_ids in molecule.GetSubstructMatches(MolFromSmarts(smarts)):
             # Remove connection Carbon atom
             matched_atom_ids = matched_atom_ids[1:]
 
@@ -71,14 +72,14 @@ def functionalGroupMasks(
 
             masks["molecule_smiles"].append(smiles)
             masks["atom_ids"].append(matched_atom_ids)
-            masks["functional_group"].append(functional_group)
-            masks["mask"].append(mask ^ 1 if inverse else mask)
+            masks["substruct_smiles"].append(functional_group)
+            masks["mask"].append((mask ^ 1 if inverse else mask) * multiplier)
 
     # Add the scaffold mask if necessairy
     if len(not_masked_atom_ids) > 0:
         masks["molecule_smiles"].append(smiles)
         masks["atom_ids"].append(tuple(not_masked_atom_ids))
-        masks["functional_group"].append("scaffold")
+        masks["substruct_smiles"].append("scaffold")
         masks["mask"].append(scaffold_mask if inverse else scaffold_mask ^ 1)
 
     return pd.DataFrame.from_dict(masks)

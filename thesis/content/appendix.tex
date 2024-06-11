@@ -1,0 +1,92 @@
+\chapter{Hamiache-Navarro value example}
+\label{app:HN_example}
+
+For the unanimity $(\{1, 2, 3\}, u_{\{1, 2, 3\}}, \{\{1, 2\}, \{2, 3\}\})$, the matrices $M_c$ and $P_g$ are 
+given by\cite{hamiache_associated_2020}
+
+
+\begin{equation}
+	M_c = \begin{pmatrix}
+		1 - 2\tau & -\tau     & -\tau     & \tau     & \tau     & 0        & 0    \\
+		-\tau     & 1 - 2\tau & -\tau     & \tau     & 0        & \tau     & 0    \\
+		-\tau     & -\tau     & 1 - 2\tau & 0i       & \tau     & \tau     & 0    \\
+		0         & 0         & -\tau     & 1 - \tau & 0        & 0        & \tau \\
+		0         & -\tau     & 0         & 0        & 1 - \tau & 0        & \tau \\
+		-\tau     & 0         & 0         & 0        & 0        & 1 - \tau & \tau \\
+		0         & 0         & 0         & 0        & 0        & 0        & 1    \\
+	\end{pmatrix},
+\end{equation}
+
+
+\begin{equation}
+	\renewcommand{\arraystretch}{0.7}
+	P_g = \begin{pmatrix}
+		1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+		0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+		0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+		0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+		1 & 0 & 1 & 0 & 0 & 0 & 0 \\
+		0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+		0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+	\end{pmatrix}.
+\end{equation}
+
+
+The vector representation of the characteristic function is $u_{\{1, 2, 3\}} = \left(\begin{smallmatrix} 0 & 0 & 0 & 0 & 0 & 0 & 1 \end{smallmatrix}\right)^T$.
+Then the limit game $\tilde{v} = (P_g M_c P_g)^k u_{\{1, 2, 3\}}$ equals 
+$\left(\begin{smallmatrix} 1/4 & 1/2 & 1/4 & 3/4 & 1/2 & 3/4 & 1\end{smallmatrix}\right)^T$. Since the solution  of the 
+original game equals the payoff of the limit game, the values of players one, two and three are $1/4, 1/2$ and $1/4$ respectively.
+
+
+\chapter{Functional groups}
+\label{app:functional_groups_list}
+
+
+\begin{table}[ht]
+   \centering
+   \caption{SMARTS of functional groups used to partition a molecule}
+   \begin{tabular}{cc}
+        \toprule
+        \textbf{Functional group} & \textbf{SMARTS} \\
+       \midrule
+    R-tBu & [C,c]-C([C;H3])([C;H3])[C;H3]\\
+    R-CF3 & [C,c]-C(F)(F)F\\
+    R-N=NH & [C,c]-N=[N;H]\\
+    R-N=C=S & [C,c]-N=C=S\\
+    R-N=C=O & [C,c]-N=C=O\\
+    R-CN & [C,c]-C\#N\\
+    R-C=NH & [C,c]-C=[N;H]\\
+    R-C=N-CH3 & [C,c]-C=N-[C;H3]\\
+    R-C=N-OH & [C,c]-C=N-[O;H]\\
+    R-C\#CH & [C,c]-C\#[C;H]\\
+    R-NO2 & [C,c]-N(=O)O\\
+    R-NHSO2CH3 & [C,c]-[N;H]-S(=O)(=O)-[C;H3]\\
+    R-SO2NH2 & [C,c]-S(=O)(=O)[N;H2]\\
+    R-SO2CH3 & [C,c]-S(=O)(=O)[C;H3]\\
+    R-SO2Cl & [C,c]-S(=O)(=O)Cl\\
+    R-SO2OCH3 & [C,c]-OS(=O)(=O)[C;H3]\\
+    R-SO3H & [C,c]-S(=O)(=O)[O;H]\\
+    R-S(=O)CH3 & [C,c]-S(=O)[C;H3]\\
+    R-C(=O)OCH3 & [C,c]-C(=O)O[C;H3]\\
+    R-C(=O)OEt & [C,c]-C(=O)O[C;H2][C;H3]\\
+    R-OEt & [C,c]-O[C;H2][C;H3]\\
+    R-OMe & [C,c]-O[C;H3]\\
+    R-SCH3 & [C,c]-S[C;H3]\\
+    R-N-C(=O)CH3 & [C,c]-N-C(=O)[C;H3]\\
+    R-C(=O)NH2 & [C,c]-C(=O)[N;H2]\\
+    R-C(=O)OH & [C,c]-C(=O)[C;H3]\\
+    R-C(=O)CH3 & [C,c]-C(=O)[C;H3]\\
+    R-N=O & [C,c]-N=O\\
+    R=O & C(=O)\\
+    R=S & C(=S)\\
+    R-NH2 & [C,c]-[N;H2]\\
+    RX & [C,c]-[F,Cl,Br,I]\\
+    ROH & [C,c]-[O;H]\\
+    RSH & [C,c]-[S;H]\\
+%    Phenyl & [C,N]-c1[c;h1][c;h1][c;h1][c;h1][c;h1]1\\
+\bottomrule
+\end{tabular}
+\end{table}
+
+
+

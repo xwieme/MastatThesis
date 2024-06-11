@@ -37,6 +37,14 @@ app.layout = html.Div(
                     "value": "../../data/ESOL/attribution_brics.json::ESOL",
                 },
                 {
+                    "label": "Expected solubility around mean",
+                    "value": "../../data/ESOL/attribution_functional_groups_around_mean.json::ESOL",
+                },
+                {
+                    "label": "Expected solubility BRICS around mean",
+                    "value": "../../data/ESOL/attribution_brics_around_mean.json::ESOL",
+                },
+                {
                     "label": "Expected solubility BRICS aqsoldb A",
                     "value": "../../data/aqsoldb_A/attribution_brics.json::aqsoldb_A",
                 },
@@ -92,4 +100,4 @@ def loadData(value):
 
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port="8888", debug=True)
+    app.run(host="0.0.0.0", debug=True)

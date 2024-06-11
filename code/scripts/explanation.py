@@ -19,13 +19,16 @@ if __name__ == "__main__":
     )
     parser.add_argument("DATA_DIR")
     parser.add_argument("sample_id")
+    parser.add_argument("mean", type=float)
 
     args = parser.parse_args()
     # Assume that the data file has the same name as the directory and is in csv format
     DATA_FILENAME = f"{args.DATA_DIR.split('/')[-1]}.csv"
     SAMPLE_ID = int(args.sample_id)
-    OUT_DIR_FUNC_GROUP = os.path.join(args.DATA_DIR, "attributions_functional_groups")
-    OUT_DIR_BRICS = os.path.join(args.DATA_DIR, "attributions_brics")
+    OUT_DIR_FUNC_GROUP = os.path.join(
+        args.DATA_DIR, "attributions_functional_groups_attention"
+    )
+    OUT_DIR_BRICS = os.path.join(args.DATA_DIR, "attributions_brics_attention")
 
     if not Path(OUT_DIR_FUNC_GROUP).exists():
         Path(OUT_DIR_FUNC_GROUP).mkdir(parents=True)
@@ -53,7 +56,7 @@ if __name__ == "__main__":
     try:
         # Explain using functional group substructures
         masks_functional_groups = XAIChem.substructures.functionalGroupMasks(
-            molecule_smiles, inverse=True
+            molecule_smiles, inverse=True, multiplier=1
         )
 
         attributions_functional_groups = (
@@ -66,15 +69,32 @@ if __name__ == "__main__":
             raise Exception("Too many substructures")
 
         attributions_functional_groups = XAIChem.attribution.hamiacheNavarroValue(
-            models, attributions_functional_groups, 0, shapley=True, device=device
+            models,
+            attributions_functional_groups,
+            args.mean,
+            shapley=True,
+            device=device,
         )
 
         attributions_functional_groups.drop("mask", axis=1).to_json(
             os.path.join(OUT_DIR_FUNC_GROUP, f"attribution_{SAMPLE_ID}.json")
         )
 
+        print(
+            attributions_functional_groups[
+                [
+                    "molecule_smiles",
+                    "functional_group",
+                    "atom_ids",
+                    "SME",
+                    "HN_value",
+                    "Shapley_value",
+                ]
+            ]
+        )
+
         # Explain prediction by breaking the molecule in parts using BRICS bonds
-        explanation_df = XAIChem.substructures.BRICSMasks(molecule_smiles)
+        explanation_df = XAIChem.substructures.BRICSMasks(molecule_smiles, multiplier=1)
 
         explanation_df = XAIChem.attribution.substructureMaskExploration(
             models, explanation_df, device
@@ -84,15 +104,28 @@ if __name__ == "__main__":
             raise Exception("Too many substructures")
 
         explanation_df = XAIChem.attribution.hamiacheNavarroValue(
-            models, explanation_df, 0, device=device, shapley=True
+            models, explanation_df, args.mean, device=device, shapley=True
         )
 
         explanation_df.drop("mask", axis=1).to_json(
             os.path.join(OUT_DIR_BRICS, f"attribution_{SAMPLE_ID}.json")
         )
 
+        print(
+            explanation_df[
+                [
+                    "molecule_smiles",
+                    "substruct_smiles",
+                    "SME",
+                    "HN_value",
+                    "Shapley_value",
+                ]
+            ]
+        )
+
     # Write failures to log file
     except Exception as e:
+        raise e
         print(e)
         print(molecule_smiles)
         print("#" * 25)

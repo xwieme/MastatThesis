@@ -36,6 +36,7 @@ def correlationPlot(
         filter_df.to_frame("N_sub")
         .query("N_sub > 1")  # Remove molecules that cannot be split into substructures
         .join(data.set_index("molecule_smiles"))
+        .round(6)
         .groupby("molecule_smiles")[
             [method_1, method_2]
         ]  # compute the correlation for each molecule
@@ -48,7 +49,22 @@ def correlationPlot(
         .join(filter_df.to_frame("N_substructures"))  # Add the number of substructures
     )
 
-    # print(rmse_df.head())
+    print("#" * 50)
+    print(
+        f"{method_1} vs {method_2} ({len(corr_df.query('corr == 1')) / len(corr_df) * 100:.2f}% agreement) mean: {corr_df['corr'].mean():.4f} median: {corr_df['corr'].median():.4f}"
+    )
+    print("#" * 50)
+
+    print(
+        corr_df.query("molecule_smiles == 'OCC(O)C(O)CO'").join(
+            rmse_df.set_index("smiles")[["RMSE"]]
+        )
+    )
+    print(
+        corr_df.query("-0.5 < corr <= 0.5").join(rmse_df.set_index("smiles")[["RMSE"]])
+    )
+
+    # corr_df["N_substructures"] = np.log(corr_df.N_substructures)
 
     fig = px.scatter(
         corr_df.join(rmse_df.set_index("smiles")[["RMSE"]]),
@@ -57,10 +73,24 @@ def correlationPlot(
         color="N_substructures",
         color_continuous_scale="inferno",
         title=title,
+        trendline="ols",
     )
-    fig.update_layout(autosize=False, width=800, height=500, template="plotly_white")
 
-    return fig
+    fig.add_hline(0.6, line_width=3, line_dash="dash", line_color="red")
+    fig.update_yaxes(title="Absolute error log(mol/L)")
+    fig.update_xaxes(title="Spearman rank correlation")
+
+    fig.update_layout(
+        autosize=False,
+        width=800,
+        height=500,
+        template="plotly_white",
+        font=dict(family="times new roman", size=22),
+    )
+
+    corr_df["methods"] = f"corr_{method_1}_{method_2}"
+
+    return fig, corr_df.join(rmse_df.set_index("smiles")[["RMSE"]])
 
 
 def inspectMolecules(df: pd.DataFrame):
@@ -103,6 +133,7 @@ if __name__ == "__main__":
     # Setup argparse to get the subdirectory name of interest in the data directory
     parser = argparse.ArgumentParser()
     parser.add_argument("data_subdir_name")
+    parser.add_argument("--suffix", type=str, dest="suffix", default="")
     args = parser.parse_args()
 
     ###############
@@ -115,13 +146,17 @@ if __name__ == "__main__":
     attributions_functional_groups = pd.DataFrame(
         pd.read_json(
             os.path.join(
-                DATA_DIR, args.data_subdir_name, "attribution_functional_groups.json"
+                DATA_DIR,
+                args.data_subdir_name,
+                f"attribution_functional_groups{args.suffix}.json",
             )
         )
     )
     attributions_brics = pd.DataFrame(
         pd.read_json(
-            os.path.join(DATA_DIR, args.data_subdir_name, "attribution_brics.json")
+            os.path.join(
+                DATA_DIR, args.data_subdir_name, f"attribution_brics{args.suffix}.json"
+            )
         )
     )
 
@@ -197,25 +232,55 @@ if __name__ == "__main__":
     # metrics for each molecule that can be split into substructures
     correlation_figures = defaultdict(list)
     attributions_dfs = {
-        "functional groups": attributions_functional_groups,
-        "brics": attributions_brics,
+        #  "functional groups": attributions_functional_groups,
+        #  "brics": attributions_brics,
         "combined": attributions_combined,
     }
+
+    # print(attributions_functional_groups.N_substructures.value_counts())
+    # print(attributions_brics.N_substructures.value_counts())
+    # print(attributions_combined.N_substructures.value_counts())
 
     # Plot for each substructure method the Spearman rank correlation between
     # two different attribution techniques per molecule in function of the prediction
     # rmse
+    corr_dfs = []
     for substruct_method, attribution_df in attributions_dfs.items():
         for method1, method2 in combinations(["SME", "Shapley_value", "HN_value"], 2):
-            correlation_figures[substruct_method].append(
-                correlationPlot(
-                    attributions_functional_groups,
-                    dataset,
-                    method1,
-                    method2,
-                    f"{method1} vs {method2}",
-                )
+            print()
+            print("-" * 50)
+            print(f"{substruct_method:>25}")
+            print("-" * 50)
+            print()
+
+            fig, corr_df = correlationPlot(
+                attribution_df,
+                dataset,
+                method1,
+                method2,
+                f"{method1} vs {method2}",
             )
+
+            correlation_figures[substruct_method].append(fig)
+            corr_dfs.append(corr_df.reset_index())
+
+    corr_df_long = pd.concat(corr_dfs, ignore_index=True)
+    corr_df_wide = corr_df_long.pivot(
+        index="molecule_smiles", columns="methods", values="corr"
+    )
+
+    corr_df_wide = pd.merge(
+        corr_df_wide,
+        corr_df_long[["molecule_smiles", "RMSE"]].drop_duplicates(),
+        how="left",
+        on="molecule_smiles",
+    )
+
+    print(
+        corr_df_wide.query(
+            "corr_SME_HN_value == corr_Shapley_value_HN_value == corr_SME_Shapley_value == 1 and RMSE > 0.6"
+        )
+    )
 
     app.layout = html.Div(
         [
@@ -257,4 +322,4 @@ if __name__ == "__main__":
         ]
     )
 
-    app.run(host="0.0.0.0", port="8888")
+    app.run(host="0.0.0.0", port="8073")

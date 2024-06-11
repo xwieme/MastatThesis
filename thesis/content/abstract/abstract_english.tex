@@ -1,7 +1,65 @@
 \chapter{Abstract}
 
-% This document should contain your abstract. 
 
-insert english abstract here...
+Prediction of molecular properties is a crucial task in Compute-Aided 
+Drug discovery (CADD), since it allows for the screening of substantial 
+data sets to select only promising compounds. Therefore, fewer wet lab experiments are necessary, 
+resulting in a reduction of both time and cost of the drug discovery process.\cite{adelusi2022molecular} 
+Due to the availability of experimental data sets, machine learning 
+algorithms (ML) are commonly used to predict molecular properties.\cite{wu2018moleculenet, gorgulla2022emerging, tropsha2024integrating} 
+However, the black-box nature of ML algorithms 
+results in a limitation on the creation of novel scientific knowledge. Also, 
+the opaqueness of ML models could lead to trust issues, especially 
+in performance-critical and highly regulated environments.\cite{carvalho2019machine}
 
 
+% Prediction of molecular properties allows the filtering of molecular data sets, 
+% resulting in fewer wet lab experiments and a reduced development time of novel 
+% drugs. Quantitative Structure-Activity Relationships (QSAR)
+% correlate the molecular structure with physical properties or biological activity. 
+% \cite{} QSAR models can then predict molecular properties 
+% based on their structural information of various molecular structures 
+% can then filter out promising molecules using QSAR models.
+% 
+% The growing availability of experimental data sets allows the utilization of machine learning (ML)
+% in QSAR modeling.  
+% However, ML algorithms are black-boxes, which limits the creation of novel scientific 
+% knowledge and can result in trust issues in performance-critical and highly regulated 
+% environments.
+
+
+Explainable artificial intelligence (XAI) tries to get insight into black-box 
+ML models.\cite{carvalho2019machine, yuan2022explainability} 
+Current XAI methods focus on the ML model and often neglect domain 
+knowledge of the studied problem. For example, when molecules are represented 
+as graphs using the Lewis structure\cite{ahmad1992drawing}, common XAI techniques will search for the 
+most important nodes or subgraphs to explain molecular property prediction.\cite{wu2023chemistry} The 
+resulting explanation, however, is not chemically relevant as chemists are used 
+to thinking in terms of substructures such as functional groups. Recently, Wu et. 
+al. developed an attribution based XAI method that first partitions the molecular graph into 
+chemically meaningful substructures. Therefore, their method, substructure graph 
+exploration (SME), can produce chemically intuitive explanations.\cite{wu2023chemistry}
+
+
+SME takes the difference between the model prediction of the molecular graph and 
+the prediction of the molecular graph in which a substructure is masked. Yet, 
+this approach does not consider the interaction between molecular substructures.
+A commonly used attribution method in machine learning that does consider 
+interactions between features is the Shapley value. Here, the Shapley value\cite{shapley1953value} will 
+be used to compute the attributions of molecular graphs using a similar approach 
+of Wu et. al. Since the Shapley value does not take the graphical structure of 
+the input into account, the Hamiache-Navarro value\cite{hamiache_value_1999} 
+is also considered to investigate whether the inclusion of the graphical structure 
+can significantly improve the explanation. Comparison of the different attribution 
+methods is done using pairwise Spearman rank correlation between attributions of 
+different methods. The fidelity\cite{carvalho2019machine} is used to measure 
+how faithful the explanation is to the model. Spearman rank correlation is also 
+used to compare the ranked attributions to a manual ranks obtained using chemical 
+intuition. 
+
+
+The explanation methods are applied to a machine learning model that predicts the 
+estimated water solubility in logS (with S the solubility in $mol/L$). Water 
+solubility is chosen as the relative water solubility of a compound can be estimated 
+from its molecular structure. Also, the prediction of water solubility is used 
+in drugs discovery as this influences the drug blood concentration.\cite{hill2010getting}

@@ -10,7 +10,7 @@ from rdkit.Chem import BRICS
 from ..masks import createMask
 
 
-def BRICSMasks(smiles: str):
+def BRICSMasks(smiles: str, multiplier: int = 1):
     """
     Given a list of atom ids which are are part of a substructure, return a set
     of the bond ids between those atoms.
@@ -43,7 +43,9 @@ def BRICSMasks(smiles: str):
         masks["molecule_smiles"].append(smiles)
         masks["substruct_smiles"].append(substruct_smiles)
         masks["atom_ids"].append(substruct_atom_ids)
-        masks["mask"].append(createMask(molecule, substruct_atom_ids) ^ 1)
+        masks["mask"].append(
+            (createMask(molecule, substruct_atom_ids) ^ 1) * multiplier
+        )
 
     return pd.DataFrame.from_dict(masks)
 

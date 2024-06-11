@@ -20,7 +20,7 @@ library("knitr")
 
 ```{r, include = FALSE}
 rank_correlations <- read_csv(
-  file="../../data/ESOL/manual_vs_attribution_rank_correlations.csv"
+  file="../../data/ESOL/manual_vs_attribution_rank_correlations_around_mean.csv"
 ) %>% rename(id = ...1)
 ```
 

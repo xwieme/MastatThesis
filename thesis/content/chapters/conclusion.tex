@@ -1,0 +1,34 @@
+\chapter{Conclusion}
+
+
+In this study, different attribution methods are compared within a chemical context. 
+Based on the method developed by Wu et. al., a molecule is first split into chemically 
+meaningful substructures. Subsequently the difference in model prediction and perturbed 
+model prediction results in the importance of the removed substructure. Interactions between 
+substructures are included by means of the Shapley value. Furthermore, the graphical structure 
+is also incorporated in the explanation using the HN value. 
+
+
+The HN value results in more narrow attribution distributions with respect to SME and Shapley values.
+Also, the expected relation between functional groups is correctly captured by the HN value. However, 
+all attribution methods provide chemically wrong explanations even when the prediction error is below 
+the experimental error hinting at possible Clever Hans effect. 
+
+
+Sometimes, the attribution methods do not provide the same explanation, even contradicting one another. 
+SME and Shapley values provide for $78.07\%$ of the molecules the exact same substructure ranking, while 
+Shapley and HN values agree for $74.26\%$ of the molecules. Deviation from a perfect Spearman rank correlation 
+between the substructures is not associated with the prediction error. 
+
+
+Agreement between attribution based substructure ranking and a chemically based ranking was explored.
+A Friedman analysis revealed no statistically significant difference between the average Spearman 
+rank correlcation of the three attribution methods. However, given that the p-values are near the 
+nominal level and the current sample size is 100, a bigger sample size should be used in a follow up 
+study to confirm these findings. Also a Wilcoxon-Mann-Whitney test between the different 
+error groups is not statistically significant.
+
+
+At last, the faithfulness of the explanation methods towards the model is quantified using different 
+fidelity measures. Generally, all attribution are equally faithful to the model regardless of the prediction 
+error with a rather poor fidelity.
