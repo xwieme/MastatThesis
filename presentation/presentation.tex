@@ -80,7 +80,7 @@
 
     \begin{figure}[h]
         \centering 
-        \includegraphics[scale=0.50]{./img/SME.png}
+        \includegraphics[scale=0.40]{./img/SME.png}
     \end{figure}
     
 \end{frame}
@@ -89,12 +89,10 @@
 \begin{frame}{XAI: Shapley value\footnote[frame]{\fullcite{merrick2020explanation}}}
 
 
-    \begin{itemize}
+    \begin{itemize}[<+->]
         \item A cooperative game with transferable utility is
         a pair $(N, v)$ consisting of a set of players $N$ 
         and a characteristic function $v(S) = f(S) - \mathbb{E}[f(G)]$.
-
-        % which satisfies $v: 2^N \rightarrow \mathbb{R}, \quad v\left(\emptyset\right) = 0$.
 
         \item Marginal contribution \begin{equation}
             m(i, S) = v\left(S \cup \{i\}\right) - v\left(S\right), \; \text{with } S \subseteq N \setminus \{i\}.
@@ -110,6 +108,16 @@
        
 \end{frame}
 
+
+\begin{frame}{XAI: Hamiache-Navarro (HN) value}
+
+        \begin{figure}[h]
+            \centering
+            \includegraphics[scale=0.6]{./img/why_HN_value.png}
+        \end{figure}
+
+\end{frame}
+
  
 \begin{frame}{Message Passing Neural Networks (MPNN)}
 
@@ -123,28 +131,25 @@
 
 \begin{frame}{XAI: Hamiache-Navarro (HN) value}
 
-    \begin{itemize}
+    \begin{itemize}[<+->]
         \item A cooperative game with incomplete communication is a tuple 
         $(N, v, g)$, where the communication structure is given by 
         the graph $g$.
 
         \item Associated game using message passing 
-        \begin{equation}
-            \label{eq:associated_game}
-            v^*(S) =
-            \begin{cases}
-                \displaystyle
-                v(S) + \tau \sum_{j \in \mathcal{N}(S)} \left[ v(S \cup \{j\}) - v(S) - v(\{j\}) \right] & \text{if } |S/g| = 1 \\
-                \displaystyle
-                \sum_{R \in S/g} v^*(R)                                                                   & \text{otherwise}
-            \end{cases}
-        \end{equation}
+            \begin{equation}
+                \label{eq:associated_game}
+                v^*(S) =
+                \begin{cases}
+                    \displaystyle
+                    v(S) + \tau \sum_{j \in \mathcal{N}(S)} \left[ v(S \cup \{j\}) - v(S) - v(\{j\}) \right] & \text{if } |S/g| = 1 \\
+                    \displaystyle
+                    \sum_{R \in S/g} v^*(R)                                                                   & \text{otherwise}
+                \end{cases}
+            \end{equation}
 
         \item HN value $\phi_i = \tilde{v}(i)$
-
     \end{itemize}
-
-
 
 \end{frame}
 
@@ -173,8 +178,7 @@
 
     \begin{figure}[h]
         \centering
-        \includegraphics[scale=0.19]{../thesis/Fig/rgcn_r2_zoomed.png}
-        \includegraphics[scale=0.19]{../thesis/Fig/rgcn_mse_zoomed.png}
+        \includegraphics[scale=0.45]{./img/rgcn_performance.png}
     \end{figure}
    
 \end{frame}
@@ -194,7 +198,7 @@
 
     \begin{figure}[h]
         \centering
-        \includegraphics[scale=0.70]{../thesis/Fig/erythritol_explanations.png}
+        \includegraphics[scale=0.70]{../thesis/Fig/erythritol_explanations_2.png}
     \end{figure}
   
 \end{frame}
